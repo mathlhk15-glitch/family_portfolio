@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트폴리오 편집기 v3 — 이현규 가족</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg:#060a12; --s1:#0d1421; --s2:#111d2e; --s3:#0a1628; --border:#1c2d42;
+  --blue:#3b82f6; --cyan:#06b6d4; --green:#10b981; --red:#ef4444;
+  --yellow:#f59e0b; --purple:#8b5cf6; --orange:#f97316; --pink:#ec4899;
+  --text:#e2e8f0; --muted:#475569; --dim:#94a3b8;
+  --cat-core:#3b82f6; --cat-bigtech:#8b5cf6; --cat-ai:#ef4444;
+  --cat-semi:#f59e0b; --cat-defense:#10b981;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── App Header ── */
+.app-header{
+  background:linear-gradient(135deg,#0d1421,#111d2e);
+  border-bottom:1px solid var(--border);
+  padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;gap:10px;
+}
+.app-header-left h1{
+  font-size:14px;font-weight:900;
+  background:linear-gradient(135deg,#e2e8f0,#3b82f6,#06b6d4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.app-header-left .sub{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.header-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.btn{border:none;border-radius:9px;padding:7px 14px;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;box-shadow:0 3px 12px rgba(59,130,246,.4);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(59,130,246,.5);}
+.btn-secondary{background:var(--s2);color:var(--dim);border:1px solid var(--border);}
+.btn-secondary:hover{color:var(--text);border-color:var(--blue);}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.btn-danger:hover{background:rgba(239,68,68,.2);}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px;}
+
+/* ── Layout ── */
+.app-body{display:grid;grid-template-columns:1fr 420px;height:calc(100vh - 53px);}
+.editor-pane{overflow-y:auto;padding:18px 20px;}
+.analysis-pane{border-left:1px solid var(--border);background:var(--s3);display:flex;flex-direction:column;overflow:hidden;}
+.analysis-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.analysis-header .title{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;}
+.analysis-body{flex:1;overflow-y:auto;padding:12px 14px;}
+
+/* ── Validation Panel ── */
+.validation-panel{
+  background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  margin-bottom:12px;overflow:hidden;
+}
+.vp-header{
+  padding:8px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+}
+.vp-header h4{font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.vp-body{padding:8px 12px;border-top:1px solid var(--border);display:none;}
+.vp-body.open{display:block;}
+.vp-item{font-size:11px;padding:4px 0;display:flex;align-items:flex-start;gap:6px;border-bottom:1px solid rgba(28,45,66,.4);}
+.vp-item:last-child{border-bottom:none;}
+.vp-item .vi-icon{font-size:12px;flex-shrink:0;margin-top:1px;}
+.vp-item.error .vi-icon{color:var(--red);}
+.vp-item.warning .vi-icon{color:var(--yellow);}
+
+/* ── Target Sum Badge ── */
+.target-sum-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;border:1px solid;
+}
+.tsb-ok{background:rgba(16,185,129,.12);color:var(--green);border-color:rgba(16,185,129,.3);}
+.tsb-low{background:rgba(245,158,11,.12);color:var(--yellow);border-color:rgba(245,158,11,.3);}
+.tsb-high{background:rgba(239,68,68,.12);color:var(--red);border-color:rgba(239,68,68,.3);}
+
+/* ── Section dividers ── */
+.sec-divider{margin:18px 0 10px;}
+.sec-divider h3{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:8px;}
+.sec-divider h3::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── Cards ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.card-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.card-head h4{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px;}
+.card-body{padding:12px 14px;}
+
+/* ── Meta inputs ── */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.meta-item{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.meta-item label{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+input[type="text"],input[type="number"],select{
+  background:var(--s2);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:5px 8px;width:100%;transition:border-color .15s;
+}
+input:focus,select:focus{outline:none;border-color:var(--blue);}
+input.input-error{border-color:var(--red)!important;background:rgba(239,68,68,.05)!important;}
+input.input-warn{border-color:var(--yellow)!important;}
+select{cursor:pointer;}
+
+/* ── Member sections ── */
+.member-card{background:var(--s1);border:1px solid var(--border);border-radius:13px;margin-bottom:14px;overflow:hidden;}
+.member-head{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;transition:background .15s;
+}
+.member-head:hover{background:rgba(255,255,255,.02);}
+.member-head-left{display:flex;align-items:center;gap:10px;}
+.member-head-left .icon{font-size:16px;}
+.member-name-role h2{font-size:13px;font-weight:700;}
+.member-name-role .role{font-size:10px;color:var(--muted);margin-top:1px;}
+.member-head-right{display:flex;align-items:center;gap:10px;}
+.member-total-display{
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  color:var(--cyan);background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;padding:4px 10px;min-width:110px;text-align:right;
+}
+.collapse-icon{font-size:11px;color:var(--dim);transition:transform .2s;}
+.member-card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.member-card.collapsed .member-body{display:none;}
+.member-body{padding:12px 14px;}
+.member-config{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.member-config input{font-size:11px;}
+
+/* ── Holdings table ── */
+.holdings-wrap{overflow-x:auto;}
+.holdings-table{width:100%;border-collapse:collapse;min-width:720px;}
+.holdings-table th{
+  background:var(--s2);font-size:9px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;padding:7px 6px;text-align:left;
+  white-space:nowrap;
+}
+.holdings-table td{padding:3px 4px;vertical-align:middle;}
+.holdings-table tbody tr:hover td{background:rgba(255,255,255,.015);}
+.holdings-table tr.row-error td{background:rgba(239,68,68,.04)!important;}
+.holdings-table tr.row-warn td{background:rgba(245,158,11,.03)!important;}
+
+/* entry type indicator */
+.entry-type-badge{
+  display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;
+  border-radius:4px;vertical-align:middle;margin-left:3px;
+}
+.etb-single{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
+.etb-basket{background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.25);}
+.etb-cash{background:rgba(6,182,212,.12);color:var(--cyan);border:1px solid rgba(6,182,212,.25);}
+
+/* category tag */
+.cat-tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;}
+.cat-core{background:rgba(59,130,246,.15);color:var(--cat-core);border:1px solid rgba(59,130,246,.3);}
+.cat-bigtech{background:rgba(139,92,246,.15);color:var(--cat-bigtech);border:1px solid rgba(139,92,246,.3);}
+.cat-ai{background:rgba(239,68,68,.15);color:var(--cat-ai);border:1px solid rgba(239,68,68,.3);}
+.cat-semi{background:rgba(245,158,11,.15);color:var(--cat-semi);border:1px solid rgba(245,158,11,.3);}
+.cat-defense{background:rgba(16,185,129,.15);color:var(--cat-defense);border:1px solid rgba(16,185,129,.3);}
+.cat-other{background:rgba(100,116,139,.1);color:var(--dim);border:1px solid rgba(100,116,139,.2);}
+
+.btn-add-row{
+  background:rgba(59,130,246,.08);border:1px dashed rgba(59,130,246,.35);
+  border-radius:8px;color:var(--blue);font-size:11px;font-weight:700;
+  padding:7px;width:100%;cursor:pointer;transition:all .15s;margin-top:6px;
+}
+.btn-add-row:hover{background:rgba(59,130,246,.18);}
+.btn-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 5px;border-radius:4px;transition:color .15s;}
+.btn-del:hover{color:var(--red);}
+.btn-dup{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:4px;transition:color .15s;}
+.btn-dup:hover{color:var(--cyan);}
+
+/* ── Analysis panel ── */
+.total-banner{
+  background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(6,182,212,.08));
+  border:1px solid rgba(59,130,246,.25);border-radius:11px;
+  padding:14px 16px;margin-bottom:12px;text-align:center;
+}
+.total-banner .label{font-size:10px;color:var(--muted);margin-bottom:4px;}
+.total-banner .amount{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:900;color:var(--cyan);}
+.total-banner .sub{font-size:9px;color:var(--muted);margin-top:3px;}
+
+/* Category bars */
+.cat-bar-section{margin-bottom:12px;}
+.cat-bar-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.cat-bar-item{margin-bottom:10px;}
+.cat-bar-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.cat-bar-name{font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.cat-bar-nums{display:flex;align-items:center;gap:6px;}
+.cat-bar-pct{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;}
+.cat-bar-amt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.cat-bar-track{background:var(--s2);border-radius:4px;height:8px;position:relative;overflow:hidden;}
+.cat-bar-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.cat-bar-target{position:absolute;top:0;height:100%;border-right:2px dashed rgba(255,255,255,.3);}
+.cat-diff{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;}
+.diff-over{background:rgba(239,68,68,.15);color:var(--red);}
+.diff-under{background:rgba(245,158,11,.15);color:var(--yellow);}
+.diff-ok{background:rgba(16,185,129,.15);color:var(--green);}
+
+/* Rebalancing */
+.rebal-section{margin-bottom:12px;}
+.rebal-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.rebal-item{
+  background:var(--s2);border-radius:8px;padding:9px 11px;margin-bottom:6px;
+  border-left:3px solid transparent;
+}
+.rebal-item.rebal-urgent{border-left-color:var(--red);}
+.rebal-item.rebal-warn{border-left-color:var(--yellow);}
+.rebal-item.rebal-info{border-left-color:var(--blue);}
+.rebal-item-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.rebal-icon{font-size:13px;flex-shrink:0;}
+.rebal-title-text{font-size:11px;font-weight:700;}
+.rebal-actions{margin-top:5px;}
+.rebal-action-tag{
+  display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;
+  margin-right:4px;margin-bottom:3px;border:1px solid;
+}
+.rat-stop-buy{background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.3);}
+.rat-sell{background:rgba(239,68,68,.15);color:var(--red);border-color:rgba(239,68,68,.4);}
+.rat-new-fund{background:rgba(16,185,129,.1);color:var(--green);border-color:rgba(16,185,129,.3);}
+.rat-split-buy{background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.3);}
+.rat-hold{background:rgba(100,116,139,.1);color:var(--dim);border-color:rgba(100,116,139,.2);}
+
+/* Concentration risk */
+.concentration-section{margin-bottom:12px;}
+.conc-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 10px;background:var(--s2);border-radius:7px;margin-bottom:4px;
+  font-size:10px;
+}
+.conc-label{color:var(--dim);}
+.conc-val{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.conc-risk{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;}
+.conc-high{background:rgba(239,68,68,.12);color:var(--red);}
+.conc-mid{background:rgba(245,158,11,.12);color:var(--yellow);}
+.conc-low{background:rgba(16,185,129,.12);color:var(--green);}
+
+/* Member breakdown */
+.member-breakdown{margin-bottom:12px;}
+.mb-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.mb-item{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.mb-name{font-size:11px;width:70px;flex-shrink:0;}
+.mb-track{flex:1;background:var(--s2);border-radius:3px;height:6px;}
+.mb-fill{height:100%;border-radius:3px;}
+.mb-amt{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--cyan);width:70px;text-align:right;flex-shrink:0;}
+.mb-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);width:32px;text-align:right;flex-shrink:0;}
+
+/* Ticker aggregation */
+.ticker-agg{margin-bottom:12px;}
+.ta-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.ta-item{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(28,45,66,.5);}
+.ta-item:last-child{border-bottom:none;}
+.ta-rank{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);width:16px;text-align:right;flex-shrink:0;}
+.ta-ticker{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--cyan);width:78px;flex-shrink:0;}
+.ta-conc-warn{font-size:9px;font-weight:700;color:var(--red);}
+.ta-holders{font-size:9px;color:var(--muted);flex:1;}
+.ta-amt{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--text);width:68px;text-align:right;flex-shrink:0;}
+.ta-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);width:36px;text-align:right;flex-shrink:0;}
+
+/* Version compare */
+.ver-compare{margin-bottom:12px;}
+.vc-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.vc-row{display:flex;align-items:center;justify-content:space-between;font-size:10px;padding:4px 0;border-bottom:1px solid rgba(28,45,66,.4);}
+.vc-row:last-child{border-bottom:none;}
+.vc-label{color:var(--dim);}
+.vc-val{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.vc-up{color:var(--green);}
+.vc-dn{color:var(--red);}
+.vc-neutral{color:var(--cyan);}
+.vc-new-ticker{display:inline-block;font-size:9px;font-weight:700;background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:1px 5px;margin:1px;}
+.vc-del-ticker{display:inline-block;font-size:9px;font-weight:700;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:4px;padding:1px 5px;margin:1px;}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--green);color:white;padding:9px 20px;border-radius:50px;
+  font-size:12px;font-weight:700;transition:transform .3s;z-index:999;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* Save/load bar */
+.storage-bar{
+  background:var(--s2);border-top:1px solid var(--border);
+  padding:7px 16px;display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--muted);flex-shrink:0;
+}
+.storage-bar span{flex:1;}
+.auto-save-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* Rebal disabled overlay */
+.rebal-disabled{
+  background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.3);
+  border-radius:9px;padding:10px 12px;text-align:center;
+  font-size:11px;color:var(--red);font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+
+select.cat-select option[value="core"]{color:#3b82f6;}
+select.cat-select option[value="bigtech"]{color:#8b5cf6;}
+select.cat-select option[value="ai"]{color:#ef4444;}
+select.cat-select option[value="semi"]{color:#f59e0b;}
+select.cat-select option[value="defense"]{color:#10b981;}
+
+@media(max-width:900px){
+  .app-body{grid-template-columns:1fr;}
+  .analysis-pane{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="app-header">
+  <div class="app-header-left">
+    <h1>📊 포트폴리오 편집기 v3</h1>
+    <div class="sub">이현규 가족 · 데이터 검증 + 행동 제안 엔진</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary btn-sm" onclick="saveSnapshot()">📸 스냅샷 저장</button>
+    <button class="btn btn-secondary btn-sm" onclick="saveJSON()">💾 JSON 저장</button>
+    <label class="btn btn-secondary btn-sm" style="cursor:pointer">
+      📂 불러오기 <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
+    </label>
+    <button class="btn btn-primary" onclick="generateHTML()">⬇️ 보고서 HTML 생성</button>
+  </div>
+</header>
+
+<!-- ── Body ── -->
+<div class="app-body">
+
+  <!-- ════ Editor Pane ════ -->
+  <div class="editor-pane" id="editorPane">
+
+    <!-- Meta -->
+    <div class="sec-divider"><h3>기본 정보</h3></div>
+    <div class="meta-grid">
+      <div class="meta-item"><label>기준일</label><input type="text" id="meta-date" value="2026.04.21" oninput="recalc()"></div>
+      <div class="meta-item"><label>버전</label><input type="text" id="meta-ver" value="v7" oninput="recalc()"></div>
+      <div class="meta-item"><label>메모</label><input type="text" id="meta-memo" value="v3 업그레이드" oninput="recalc()"></div>
+    </div>
+
+    <!-- Category targets -->
+    <div class="sec-divider"><h3>자산군 목표 비중 설정</h3></div>
+    <div class="card">
+      <div class="card-head">
+        <h4>🎯 목표 비중 (%)</h4>
+        <div id="targetSumBadge"></div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;" id="catTargetGrid"></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;">
+          합계가 정확히 100%여야 리밸런싱 계산이 활성화됩니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation panel -->
+    <div id="validationPanel"></div>
+
+    <!-- Members -->
+    <div class="sec-divider"><h3>가족 구성원 보유 현황</h3></div>
+    <div id="membersContainer"></div>
+    <button class="btn btn-secondary" onclick="addMember()" style="margin-bottom:20px;width:100%">+ 구성원 추가</button>
+
+  </div><!-- /editor-pane -->
+
+  <!-- ════ Analysis Pane ════ -->
+  <div class="analysis-pane">
+    <div class="analysis-header">
+      <span class="title">📈 자동 분석 · v3</span>
+      <span id="analysisDate" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);"></span>
+    </div>
+    <div class="analysis-body" id="analysisBody">
+      <div style="color:var(--muted);font-size:11px;text-align:center;padding:40px 0;">데이터를 입력하면 자동 분석됩니다</div>
+    </div>
+    <div class="storage-bar">
+      <span><span class="auto-save-dot"></span>자동 저장 중</span>
+      <span id="lastSavedLabel" style="font-size:10px;font-family:'JetBrains Mono',monospace;"></span>
+    </div>
+  </div>
+
+</div><!-- /app-body -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  CONSTANTS
+// ════════════════════════════════════════════════════════
+const CATEGORIES = [
+  { id:'core',    label:'코어 ETF',   color:'#3b82f6', colorAlpha:'rgba(59,130,246,' },
+  { id:'bigtech', label:'빅테크',     color:'#8b5cf6', colorAlpha:'rgba(139,92,246,' },
+  { id:'ai',      label:'AI/반도체',  color:'#ef4444', colorAlpha:'rgba(239,68,68,' },
+  { id:'semi',    label:'반도체 ETF', color:'#f59e0b', colorAlpha:'rgba(245,158,11,' },
+  { id:'defense', label:'방어자산',   color:'#10b981', colorAlpha:'rgba(16,185,129,' },
+  { id:'other',   label:'기타',       color:'#94a3b8', colorAlpha:'rgba(148,163,184,' },
+];
+const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
+
+const BADGE_OPTIONS = [
+  {v:'',l:'배지없음'},{v:'신규',l:'신규'},{v:'5월판단',l:'5월판단'},
+  {v:'5월실적후판단',l:'5월실적후'},{v:'매도검토',l:'매도검토'},{v:'보유',l:'보유'},
+];
+
+// Entry types
+const ENTRY_TYPES = [
+  {v:'single', l:'단일종목'},
+  {v:'basket', l:'묶음/ETF'},
+  {v:'cash',   l:'현금/예치'},
+];
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let state = {
+  meta: { date:'2026.04.21', ver:'v7', memo:'v3 업그레이드' },
+  catTargets: { core:35, bigtech:22, ai:21, semi:10, defense:10, other:2 },
+  members: [
+    {
+      id:'hyunkyu', name:'이현규', icon:'⚡', role:'전술·현금·기회포착', color:'#3b82f6',
+      holdings:[
+        {account:'일반',ticker:'VRT',     entryType:'single',qty:'7주',  pnl:'+50.4%', amount:780,  cat:'ai',      badge:'',      note:''},
+        {account:'일반',ticker:'ONTO',    entryType:'single',qty:'7주',  pnl:'+36.1%', amount:620,  cat:'semi',    badge:'',      note:''},
+        {account:'일반',ticker:'MRVL',    entryType:'single',qty:'13주', pnl:'+0.1%',  amount:850,  cat:'ai',      badge:'신규',  note:''},
+        {account:'일반',ticker:'OII',     entryType:'single',qty:'21주', pnl:'+11.8%', amount:520,  cat:'other',   badge:'',      note:''},
+        {account:'일반',ticker:'BWXT',    entryType:'single',qty:'6주',  pnl:'+15.0%', amount:390,  cat:'other',   badge:'',      note:''},
+        {account:'일반',ticker:'TEM',     entryType:'single',qty:'12주', pnl:'+0.6%',  amount:280,  cat:'other',   badge:'',      note:''},
+        {account:'일반',ticker:'ALAB',    entryType:'single',qty:'4주',  pnl:'+7.1%',  amount:190,  cat:'ai',      badge:'',      note:''},
+        {account:'일반',ticker:'TechnipFMC',entryType:'single',qty:'5주',pnl:'+17.0%', amount:210,  cat:'other',   badge:'',      note:''},
+        {account:'ISA', ticker:'KODEX 나스닥100 외',entryType:'basket',qty:'4종',pnl:'+15.71%',amount:1200,cat:'core',badge:'',note:'나스닥100·반도체·S&P500·테크TOP10'},
+        {account:'연금', ticker:'TIGER S&P500 외',entryType:'basket',qty:'2종',pnl:'+24.30%',amount:800,cat:'core',badge:'',note:'TIGER S&P500·KODEX 나스닥100'},
+        {account:'토스', ticker:'소수점 포트폴리오',entryType:'basket',qty:'8종',pnl:'복수',amount:450,cat:'other',badge:'',note:'LRCX·ONTO·VRT 등'},
+        {account:'현금', ticker:'폭락 대기 현금',entryType:'cash',qty:'-',pnl:'-',amount:690,cat:'defense',badge:'',note:'절대 건드리지 말 것'},
+      ]
+    },
+    {
+      id:'insuk', name:'임인숙', icon:'🛡', role:'코어 장기복리·은퇴축', color:'#8b5cf6',
+      holdings:[
+        {account:'토스',ticker:'MSFT·GOOGL·NVDA·QQQ',entryType:'basket',qty:'복수',pnl:'+7.7%',amount:1800,cat:'bigtech',badge:'',note:''},
+        {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+7.6%',amount:380,cat:'other',badge:'',note:''},
+        {account:'종합',ticker:'AVGO',entryType:'single',qty:'3주',pnl:'-0.17%',amount:420,cat:'ai',badge:'5월판단',note:''},
+        {account:'종합',ticker:'META',entryType:'single',qty:'3주',pnl:'-0.59%',amount:400,cat:'bigtech',badge:'5월판단',note:''},
+        {account:'종합',ticker:'GRID',entryType:'single',qty:'6주',pnl:'+9.46%',amount:180,cat:'other',badge:'',note:''},
+        {account:'ISA',ticker:'TIGER S&P500 외',entryType:'basket',qty:'4종',pnl:'+8.98%',amount:980,cat:'core',badge:'',note:'TIGER S&P500·나스닥100·테크TOP10·반도체'},
+        {account:'연금',ticker:'TIGER S&P500 외',entryType:'basket',qty:'2종',pnl:'+14.85%',amount:634,cat:'core',badge:'',note:''},
+      ]
+    },
+    {
+      id:'jaehyun', name:'이재현', icon:'🚀', role:'공격 성장 엔진', color:'#10b981',
+      holdings:[
+        {account:'',ticker:'GOOGL',entryType:'single',qty:'26주',pnl:'+45.34%',amount:1200,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MRVL', entryType:'single',qty:'52주',pnl:'+50.93%',amount:1950,cat:'ai',    badge:'',note:'구글협력 논의 중'},
+        {account:'',ticker:'NVDA', entryType:'single',qty:'24주',pnl:'+64.73%',amount:1580,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MSFT', entryType:'single',qty:'11주',pnl:'+1.81%', amount:520, cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'TSM',  entryType:'single',qty:'12주',pnl:'+4.49%', amount:680, cat:'semi',  badge:'',note:''},
+        {account:'',ticker:'MU',   entryType:'single',qty:'5주', pnl:'-1.06%', amount:290, cat:'ai',    badge:'신규',note:''},
+        {account:'',ticker:'AVGO', entryType:'single',qty:'5.89주',pnl:'복수', amount:870, cat:'ai',    badge:'5월판단',note:'5월실적 시나리오표 적용'},
+        {account:'',ticker:'TIGER 필라델피아 외',entryType:'basket',qty:'49주',pnl:'+16%·+13%',amount:890,cat:'semi',badge:'',note:'TIGER 필라델피아·KODEX AI테크'},
+      ]
+    },
+    {
+      id:'jaeyeon', name:'이재연', icon:'✨', role:'성장 + 구조개선', color:'#f97316',
+      holdings:[
+        {account:'',ticker:'GOOGL',entryType:'single',qty:'25주',pnl:'+43.17%',amount:1150,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'NVDA', entryType:'single',qty:'23주',pnl:'+64.86%',amount:1510,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MRVL', entryType:'single',qty:'26주',pnl:'+56.80%',amount:980, cat:'ai',    badge:'',note:''},
+        {account:'',ticker:'TSM',  entryType:'single',qty:'12주',pnl:'+4.21%', amount:670, cat:'semi',  badge:'',note:''},
+        {account:'',ticker:'MSFT', entryType:'single',qty:'8주', pnl:'-12.77%',amount:375, cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MU',   entryType:'single',qty:'7주', pnl:'+0.07%', amount:410, cat:'ai',    badge:'신규',note:''},
+        {account:'',ticker:'AVGO', entryType:'single',qty:'2주', pnl:'-1.09%', amount:290, cat:'ai',    badge:'5월판단',note:''},
+        {account:'',ticker:'TSLA', entryType:'single',qty:'2주', pnl:'+3.43%', amount:60,  cat:'other', badge:'',note:'비중 0.3% — 모니터링 불필요'},
+        {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.95%',amount:235,cat:'other',badge:'',note:''},
+      ]
+    }
+  ]
+};
+
+// Snapshot for version comparison
+let snapshot = null;
+
+// ════════════════════════════════════════════════════════
+//  VALIDATION ENGINE
+// ════════════════════════════════════════════════════════
+function validateState() {
+  const errors = [];
+  const warnings = [];
+
+  // 1. Target sum check
+  const targetSum = Object.values(state.catTargets).reduce((a,b)=>a+b,0);
+  if (Math.abs(targetSum - 100) > 0.01) {
+    errors.push({
+      type:'error',
+      msg:`목표 비중 합계 = ${targetSum.toFixed(1)}% (100%여야 함)`
+    });
+  }
+
+  // 2. Ticker/amount checks per member
+  const allTickers = {}; // ticker -> [{mi, hi}]
+  state.members.forEach((m, mi) => {
+    m.holdings.forEach((h, hi) => {
+      const ticker = normalizeTicker(h.ticker);
+      const amount = parseFloat(h.amount) || 0;
+
+      // No ticker but has amount
+      if (!ticker && amount > 0) {
+        errors.push({type:'error', msg:`${m.name} ${hi+1}행: 종목명 없이 금액 입력됨 (${amount}만원)`});
+      }
+      // Zero or negative amount (with ticker)
+      if (ticker && amount <= 0) {
+        warnings.push({type:'warning', msg:`${m.name} / ${ticker}: 금액 0 또는 음수`});
+      }
+      // NaN
+      if (ticker && isNaN(parseFloat(h.amount))) {
+        errors.push({type:'error', msg:`${m.name} / ${h.ticker}: 금액이 숫자가 아님`});
+      }
+      // Track for duplicate check (only single type)
+      if (ticker && h.entryType === 'single') {
+        if (!allTickers[ticker]) allTickers[ticker] = [];
+        allTickers[ticker].push({mi, hi, memberName: m.name});
+      }
+    });
+    // Empty holdings row
+    const emptyRows = m.holdings.filter(h => !h.ticker && !(parseFloat(h.amount)>0));
+    if (emptyRows.length > 0) {
+      warnings.push({type:'warning', msg:`${m.name}: 빈 행 ${emptyRows.length}개 존재`});
+    }
+  });
+
+  // 3. Duplicate ticker check across members (same ticker held by same person more than once)
+  Object.entries(allTickers).forEach(([ticker, entries]) => {
+    const memberCounts = {};
+    entries.forEach(e => {
+      memberCounts[e.memberName] = (memberCounts[e.memberName]||0) + 1;
+    });
+    Object.entries(memberCounts).forEach(([name, cnt]) => {
+      if (cnt > 1) {
+        warnings.push({type:'warning', msg:`${name}: ${ticker} 중복 입력 (${cnt}행) — 합산 처리됨`});
+      }
+    });
+  });
+
+  return {errors, warnings};
+}
+
+function normalizeTicker(t) {
+  if (!t) return '';
+  return t.trim().toUpperCase();
+}
+
+// ════════════════════════════════════════════════════════
+//  RENDER: Category Targets
+// ════════════════════════════════════════════════════════
+function renderCatTargets() {
+  const grid = document.getElementById('catTargetGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(c => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;';
+    div.innerHTML = `
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+        <span class="cat-tag cat-${c.id}" style="font-size:8px">${c.label}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input type="number" min="0" max="100" step="1" value="${state.catTargets[c.id]}"
+          style="width:52px;font-size:13px;font-weight:700;color:${c.color};text-align:center"
+          id="cat-target-${c.id}"
+          oninput="state.catTargets['${c.id}']=parseFloat(this.value)||0;recalc()">
+        <span style="font-size:11px;color:var(--muted)">%</span>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function updateTargetSumBadge() {
+  const sum = Object.values(state.catTargets).reduce((a,b)=>a+b,0);
+  const badge = document.getElementById('targetSumBadge');
+  if (!badge) return;
+  let cls, label;
+  if (Math.abs(sum-100) < 0.01) {
+    cls='tsb-ok'; label=`✓ 합계 100%`;
+  } else if (sum < 100) {
+    cls='tsb-low'; label=`⚠ 합계 ${sum.toFixed(1)}% (부족 ${(100-sum).toFixed(1)}%p)`;
+  } else {
+    cls='tsb-high'; label=`✗ 합계 ${sum.toFixed(1)}% (초과 ${(sum-100).toFixed(1)}%p)`;
+  }
+  badge.innerHTML = `<span class="target-sum-badge ${cls}">${label}</span>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  RENDER: Validation Panel
+// ════════════════════════════════════════════════════════
+function renderValidationPanel(validation) {
+  const panel = document.getElementById('validationPanel');
+  const {errors, warnings} = validation;
+  const total = errors.length + warnings.length;
+  if (total === 0) {
+    panel.innerHTML = '';
+    return;
+  }
+  const errColor = errors.length > 0 ? 'var(--red)' : 'var(--yellow)';
+  const items = [
+    ...errors.map(e => `<div class="vp-item error"><span class="vi-icon">✕</span><span>${e.msg}</span></div>`),
+    ...warnings.map(w => `<div class="vp-item warning"><span class="vi-icon">⚠</span><span>${w.msg}</span></div>`)
+  ].join('');
+
+  panel.innerHTML = `
+  <div class="validation-panel" style="border-color:${errColor}40">
+    <div class="vp-header" onclick="this.nextElementSibling.classList.toggle('open')">
+      <h4 style="color:${errColor}">
+        ${errors.length > 0 ? '✕' : '⚠'} 
+        ${errors.length > 0 ? `오류 ${errors.length}개` : ''}
+        ${warnings.length > 0 ? `경고 ${warnings.length}개` : ''}
+        &nbsp;<span style="font-size:9px;color:var(--muted);font-weight:400">클릭해서 펼치기</span>
+      </h4>
+      <span style="font-size:10px;color:var(--muted)">▾</span>
+    </div>
+    <div class="vp-body">${items}</div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════
+//  RENDER: Members
+// ════════════════════════════════════════════════════════
+function renderMembers() {
+  const container = document.getElementById('membersContainer');
+  container.innerHTML = '';
+  state.members.forEach((m, mi) => renderMember(m, mi, container));
+}
+
+function renderMember(m, mi, container) {
+  const card = document.createElement('div');
+  card.className = 'member-card';
+  card.id = `mc-${mi}`;
+
+  const headHTML = `
+    <div class="member-head" onclick="toggleMember(${mi})">
+      <div class="member-head-left">
+        <span class="icon">${m.icon}</span>
+        <div class="member-name-role">
+          <h2 style="color:${m.color}">${m.name}</h2>
+          <div class="role">${m.role}</div>
+        </div>
+      </div>
+      <div class="member-head-right">
+        <div class="member-total-display" id="total-${mi}">계산 중...</div>
+        <span class="collapse-icon">▼</span>
+      </div>
+    </div>`;
+
+  const configHTML = `
+    <div class="member-config">
+      <input type="text" value="${m.icon}" placeholder="아이콘" style="width:44px;text-align:center"
+        oninput="state.members[${mi}].icon=this.value;refreshMemberHead(${mi})">
+      <input type="text" value="${m.name}" placeholder="이름" style="width:80px"
+        oninput="state.members[${mi}].name=this.value;refreshMemberHead(${mi})">
+      <input type="text" value="${m.role}" placeholder="역할" style="flex:1"
+        oninput="state.members[${mi}].role=this.value;refreshMemberHead(${mi})">
+      <input type="text" value="${m.color}" placeholder="색상" style="width:90px"
+        oninput="state.members[${mi}].color=this.value;refreshMemberHead(${mi})">
+      <button class="btn btn-danger btn-sm"
+        onclick="if(confirm('${m.name} 계좌를 삭제할까요?')){state.members.splice(${mi},1);renderMembers();recalc();}">삭제</button>
+    </div>`;
+
+  const rowsHTML = m.holdings.map((h, hi) => buildHoldingRow(mi, hi, h)).join('');
+  const tableHTML = `
+    <div class="holdings-wrap">
+    <table class="holdings-table">
+      <thead><tr>
+        <th style="width:60px">계좌</th>
+        <th style="min-width:120px">종목</th>
+        <th style="width:78px">유형</th>
+        <th style="width:60px">수량</th>
+        <th style="width:68px">손익</th>
+        <th style="width:88px">금액(만원)</th>
+        <th style="width:88px">자산 분류</th>
+        <th style="width:70px">배지</th>
+        <th style="min-width:80px">메모</th>
+        <th style="width:50px"></th>
+      </tr></thead>
+      <tbody id="tbody-${mi}">${rowsHTML}</tbody>
+    </table>
+    </div>
+    <button class="btn-add-row" onclick="addHoldingRow(${mi})">+ 종목 추가</button>`;
+
+  card.innerHTML = headHTML + `<div class="member-body">${configHTML}${tableHTML}</div>`;
+  container.appendChild(card);
+}
+
+function buildHoldingRow(mi, hi, h) {
+  const catOptions = CATEGORIES.map(c =>
+    `<option value="${c.id}" ${h.cat===c.id?'selected':''}>${c.label}</option>`
+  ).join('');
+  const badgeOptions = BADGE_OPTIONS.map(b =>
+    `<option value="${b.v}" ${h.badge===b.v?'selected':''}>${b.l}</option>`
+  ).join('');
+  const typeOptions = ENTRY_TYPES.map(t =>
+    `<option value="${t.v}" ${(h.entryType||'single')===t.v?'selected':''}>${t.l}</option>`
+  ).join('');
+
+  const amount = parseFloat(h.amount)||0;
+  const ticker = (h.ticker||'').trim();
+  const hasError = (!ticker && amount > 0) || isNaN(parseFloat(h.amount) || 0);
+  const hasWarn = ticker && amount <= 0;
+  const rowClass = hasError ? 'row-error' : hasWarn ? 'row-warn' : '';
+
+  return `<tr id="row-${mi}-${hi}" class="${rowClass}">
+    <td><input type="text" value="${h.account||''}" placeholder="계좌"
+      oninput="updateHolding(${mi},${hi},'account',this.value)"></td>
+    <td><input type="text" value="${h.ticker||''}" placeholder="종목명"
+      oninput="updateHolding(${mi},${hi},'ticker',this.value.trim().toUpperCase());this.value=this.value.trim().toUpperCase();recalc()"
+      style="${!ticker&&amount>0?'border-color:var(--red)':''}"
+      ></td>
+    <td><select onchange="updateHolding(${mi},${hi},'entryType',this.value)">${typeOptions}</select></td>
+    <td><input type="text" value="${h.qty||''}" placeholder="수량"
+      oninput="updateHolding(${mi},${hi},'qty',this.value)"></td>
+    <td><input type="text" value="${h.pnl||''}" placeholder="손익"
+      style="color:${(h.pnl||'').startsWith('-')?'var(--red)':'var(--green)'}"
+      oninput="this.style.color=this.value.startsWith('-')?'var(--red)':'var(--green)';updateHolding(${mi},${hi},'pnl',this.value)"></td>
+    <td><input type="number" min="0" step="1" value="${h.amount||''}" placeholder="0"
+      style="color:var(--cyan);text-align:right${ticker&&amount<=0?';border-color:var(--yellow)':''}"
+      oninput="updateHolding(${mi},${hi},'amount',parseFloat(this.value)||0);recalc()"></td>
+    <td><select class="cat-select" onchange="updateHolding(${mi},${hi},'cat',this.value);recalc()">${catOptions}</select></td>
+    <td><select onchange="updateHolding(${mi},${hi},'badge',this.value)">${badgeOptions}</select></td>
+    <td><input type="text" value="${h.note||''}" placeholder="메모"
+      oninput="updateHolding(${mi},${hi},'note',this.value)"></td>
+    <td style="white-space:nowrap">
+      <button class="btn-dup" title="행 복사" onclick="dupHolding(${mi},${hi})">⧉</button>
+      <button class="btn-del" onclick="delHolding(${mi},${hi})">×</button>
+    </td>
+  </tr>`;
+}
+
+function updateHolding(mi, hi, key, val) {
+  state.members[mi].holdings[hi][key] = val;
+  autoSave();
+}
+
+function addHoldingRow(mi) {
+  state.members[mi].holdings.push({account:'',ticker:'',entryType:'single',qty:'',pnl:'',amount:0,cat:'other',badge:'',note:''});
+  const tbody = document.getElementById(`tbody-${mi}`);
+  const hi = state.members[mi].holdings.length - 1;
+  tbody.insertAdjacentHTML('beforeend', buildHoldingRow(mi, hi, state.members[mi].holdings[hi]));
+  recalc();
+}
+
+function dupHolding(mi, hi) {
+  const clone = {...state.members[mi].holdings[hi]};
+  state.members[mi].holdings.splice(hi+1, 0, clone);
+  document.getElementById(`tbody-${mi}`).innerHTML =
+    state.members[mi].holdings.map((h,i) => buildHoldingRow(mi,i,h)).join('');
+  recalc();
+}
+
+function delHolding(mi, hi) {
+  state.members[mi].holdings.splice(hi, 1);
+  document.getElementById(`tbody-${mi}`).innerHTML =
+    state.members[mi].holdings.map((h,i) => buildHoldingRow(mi,i,h)).join('');
+  recalc();
+}
+
+function toggleMember(mi) {
+  document.getElementById(`mc-${mi}`).classList.toggle('collapsed');
+}
+
+function addMember() {
+  state.members.push({
+    id:'m'+Date.now(), name:'새 구성원', icon:'👤', role:'역할',
+    color:'#06b6d4', holdings:[]
+  });
+  renderMembers(); recalc();
+}
+
+function refreshMemberHead(mi) {
+  const m = state.members[mi];
+  const card = document.getElementById(`mc-${mi}`);
+  if (!card) return;
+  card.querySelector('h2').textContent = m.name;
+  card.querySelector('h2').style.color = m.color;
+  card.querySelector('.icon').textContent = m.icon;
+  card.querySelector('.role').textContent = m.role;
+  autoSave();
+}
+
+// ════════════════════════════════════════════════════════
+//  CALCULATION ENGINE
+// ════════════════════════════════════════════════════════
+function calcState() {
+  const memberTotals = state.members.map(m =>
+    m.holdings.reduce((s, h) => s + (parseFloat(h.amount)||0), 0)
+  );
+  const grandTotal = memberTotals.reduce((a,b) => a+b, 0);
+
+  const catTotals = {};
+  CATEGORIES.forEach(c => catTotals[c.id] = 0);
+  state.members.forEach(m =>
+    m.holdings.forEach(h => {
+      const cat = h.cat || 'other';
+      catTotals[cat] = (catTotals[cat]||0) + (parseFloat(h.amount)||0);
+    })
+  );
+
+  const catPcts = {};
+  CATEGORIES.forEach(c => catPcts[c.id] = grandTotal > 0 ? catTotals[c.id]/grandTotal*100 : 0);
+
+  // Ticker aggregation — normalize tickers, auto-sum duplicates
+  const tickerMap = {};
+  state.members.forEach(m =>
+    m.holdings.forEach(h => {
+      const raw = (h.ticker||'').trim();
+      if (!raw) return;
+      const key = raw.toUpperCase(); // normalized
+      if (!tickerMap[key]) tickerMap[key] = {amount:0, holders:[], cat:h.cat, entryType: h.entryType||'single'};
+      tickerMap[key].amount += parseFloat(h.amount)||0;
+      if (m.name && !tickerMap[key].holders.includes(m.name))
+        tickerMap[key].holders.push(m.name);
+    })
+  );
+  const tickerList = Object.entries(tickerMap)
+    .map(([t,v]) => ({ticker:t, amount:v.amount, holders:v.holders, cat:v.cat,
+                      entryType:v.entryType,
+                      pct: grandTotal>0? v.amount/grandTotal*100 : 0}))
+    .sort((a,b) => b.amount - a.amount);
+
+  // Concentration metrics (single-type only)
+  const singleTickers = tickerList.filter(t => t.entryType !== 'basket' && t.entryType !== 'cash');
+  const top1Pct = singleTickers.length > 0 ? singleTickers[0].pct : 0;
+  const top3Pct = singleTickers.slice(0,3).reduce((s,t)=>s+t.pct,0);
+  const over10 = singleTickers.filter(t=>t.pct>=10);
+
+  return {memberTotals, grandTotal, catTotals, catPcts, tickerList, top1Pct, top3Pct, over10};
+}
+
+function recalc() {
+  const validation = validateState();
+  updateTargetSumBadge();
+  renderValidationPanel(validation);
+  const calc = calcState();
+  updateMemberTotals(calc);
+  updateAnalysisPane(calc, validation);
+  autoSave();
+}
+
+function updateMemberTotals(calc) {
+  state.members.forEach((m, mi) => {
+    const el = document.getElementById(`total-${mi}`);
+    if (el) el.textContent = fmt(calc.memberTotals[mi]) + '만원';
+  });
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR');
+}
+
+// ════════════════════════════════════════════════════════
+//  ANALYSIS PANE
+// ════════════════════════════════════════════════════════
+function updateAnalysisPane(calc, validation) {
+  document.getElementById('analysisDate').textContent =
+    document.getElementById('meta-date').value;
+
+  const {memberTotals, grandTotal, catTotals, catPcts, tickerList, top1Pct, top3Pct, over10} = calc;
+  const targetSum = Object.values(state.catTargets).reduce((a,b)=>a+b,0);
+  const targetOk = Math.abs(targetSum - 100) < 0.01;
+
+  let html = '';
+
+  // ① Total banner
+  html += `<div class="total-banner">
+    <div class="label">가족 합산 총 자산</div>
+    <div class="amount">${fmt(grandTotal)}<span style="font-size:14px;color:var(--muted)">만원</span></div>
+    <div class="sub">${state.members.length}명 · ${state.members.reduce((s,m)=>s+m.holdings.length,0)}개 포지션</div>
+  </div>`;
+
+  // ② Category bars
+  html += `<div class="cat-bar-section"><div class="cat-bar-title">자산군별 비중 (현재 vs 목표)</div>`;
+  CATEGORIES.forEach(c => {
+    const cur = catPcts[c.id] || 0;
+    const tgt = state.catTargets[c.id] || 0;
+    const diff = cur - tgt;
+    const diffClass = Math.abs(diff)<1 ? 'diff-ok' : diff>0 ? 'diff-over' : 'diff-under';
+    const diffLabel = Math.abs(diff)<0.1 ? '적정' : diff>0 ? `+${diff.toFixed(1)}%p 초과` : `${diff.toFixed(1)}%p 부족`;
+    const fillW = Math.min(100, cur);
+    const tgtW = Math.min(100, tgt);
+    html += `<div class="cat-bar-item">
+      <div class="cat-bar-top">
+        <div class="cat-bar-name">
+          <span class="cat-tag cat-${c.id}" style="font-size:8px">${c.label}</span>
+          <span class="cat-diff ${diffClass}">${diffLabel}</span>
+        </div>
+        <div class="cat-bar-nums">
+          <span class="cat-bar-pct" style="color:${c.color}">${cur.toFixed(1)}%</span>
+          <span class="cat-bar-amt">${fmt(catTotals[c.id])}만</span>
+        </div>
+      </div>
+      <div class="cat-bar-track">
+        <div class="cat-bar-fill" style="width:${fillW}%;background:${c.color}88;"></div>
+        <div class="cat-bar-target" style="left:${tgtW}%;"></div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">목표 ${tgt}% · ${fmt(grandTotal*tgt/100)}만</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // ③ Rebalancing — action suggestions (disabled if target sum ≠ 100)
+  if (!targetOk) {
+    html += `<div class="rebal-disabled">🔒 목표 비중 합계가 100%가 아니므로 리밸런싱 계산이 비활성화됩니다</div>`;
+  } else {
+    const suggestions = buildActionSuggestions(calc);
+    if (suggestions.length > 0) {
+      html += `<div class="rebal-section"><div class="rebal-title">🎯 리밸런싱 행동 제안</div>`;
+      suggestions.forEach(s => {
+        html += `<div class="rebal-item rebal-${s.urgency}">
+          <div class="rebal-item-head">
+            <span class="rebal-icon">${s.icon}</span>
+            <span class="rebal-title-text">${s.title}</span>
+          </div>
+          <div style="font-size:10px;color:var(--dim);line-height:1.6">${s.body}</div>
+          <div class="rebal-actions">${s.actions.map(a=>`<span class="rebal-action-tag rat-${a.cls}">${a.label}</span>`).join('')}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  }
+
+  // ④ Concentration risk analysis
+  html += `<div class="concentration-section">
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">집중도 리스크</div>
+    ${buildConcentrationRows(top1Pct, top3Pct, over10)}
+  </div>`;
+
+  // ⑤ Member breakdown
+  html += `<div class="member-breakdown"><div class="mb-title">구성원별 자산</div>`;
+  state.members.forEach((m, mi) => {
+    const amt = memberTotals[mi];
+    const pct = grandTotal > 0 ? amt/grandTotal*100 : 0;
+    const col = m.color || '#3b82f6';
+    html += `<div class="mb-item">
+      <div class="mb-name">${m.icon} ${m.name}</div>
+      <div class="mb-track"><div class="mb-fill" style="width:${pct}%;background:${col}88;"></div></div>
+      <div class="mb-amt">${fmt(amt)}만</div>
+      <div class="mb-pct">${pct.toFixed(1)}%</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // ⑥ Ticker aggregation
+  html += `<div class="ticker-agg"><div class="ta-title">종목별 가족 합산 (금액순)</div>`;
+  tickerList.slice(0,20).forEach((t, idx) => {
+    const isHighConc = t.pct >= 10 && t.entryType === 'single';
+    html += `<div class="ta-item">
+      <div class="ta-rank">${idx+1}</div>
+      <div class="ta-ticker">${t.ticker}${isHighConc?'<span class="ta-conc-warn"> !</span>':''}</div>
+      <div class="ta-holders">${t.holders.join(', ')}</div>
+      <div class="ta-amt">${fmt(t.amount)}만</div>
+      <div class="ta-pct" style="color:${t.pct>=10&&t.entryType==='single'?'var(--red)':'var(--muted)'}">${t.pct.toFixed(1)}%</div>
+    </div>`;
+  });
+  if (tickerList.length > 20) {
+    html += `<div style="font-size:9px;color:var(--muted);padding:6px 0">+ ${tickerList.length-20}개 더...</div>`;
+  }
+  html += `</div>`;
+
+  // ⑦ Version comparison
+  if (snapshot) {
+    html += buildVersionCompareHTML(calc);
+  } else {
+    html += `<div style="font-size:10px;color:var(--muted);text-align:center;padding:12px 0;border:1px dashed var(--border);border-radius:8px;">
+      📸 상단 "스냅샷 저장" 버튼으로 현재 상태를 저장하면<br>다음 업데이트 시 버전 비교를 표시합니다
+    </div>`;
+  }
+
+  document.getElementById('analysisBody').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════
+//  ACTION SUGGESTIONS ENGINE
+// ════════════════════════════════════════════════════════
+function buildActionSuggestions(calc) {
+  const {grandTotal, catTotals, catPcts} = calc;
+  const suggestions = [];
+
+  CATEGORIES.forEach(c => {
+    const cur = catPcts[c.id] || 0;
+    const tgt = state.catTargets[c.id] || 0;
+    const diff = cur - tgt;
+    const absDiff = Math.abs(diff);
+    const amtDiff = Math.round(absDiff * grandTotal / 100);
+    if (absDiff < 1) return;
+
+    if (diff > 0) {
+      // Over-weight
+      const smallOver = absDiff < 3;
+      suggestions.push({
+        icon: absDiff >= 5 ? '🔴' : '🟡',
+        urgency: absDiff >= 5 ? 'urgent' : 'warn',
+        title: `${c.label} ${diff.toFixed(1)}%p 초과`,
+        body: `현재 ${cur.toFixed(1)}% → 목표 ${tgt}%. 약 ${fmt(amtDiff)}만원 초과 상태.`,
+        actions: smallOver
+          ? [{cls:'stop-buy', label:'추가 매수 중단으로 자연 조정 가능'}, {cls:'hold', label:'신규자금 → 다른 자산군'}]
+          : [{cls:'sell', label:'일부 익절 후 재배분 검토'}, {cls:'stop-buy', label:'추가 매수 중단'}, {cls:'new-fund', label:'신규자금 다른 자산군 우선'}]
+      });
+    } else {
+      // Under-weight
+      const isDefense = c.id === 'defense';
+      suggestions.push({
+        icon: isDefense ? '🚨' : '📌',
+        urgency: isDefense ? 'urgent' : 'info',
+        title: `${c.label} ${absDiff.toFixed(1)}%p 부족`,
+        body: `현재 ${cur.toFixed(1)}% → 목표 ${tgt}%. 약 ${fmt(amtDiff)}만원 추가 필요.`,
+        actions: isDefense
+          ? [{cls:'new-fund', label:'신규자금 최우선 배분'}, {cls:'hold', label:'현금·방어자산 확보 긴급'}]
+          : absDiff < 3
+          ? [{cls:'split-buy', label:'분할 매수로 점진 조정'}]
+          : [{cls:'new-fund', label:'신규자금 우선 배분'}, {cls:'split-buy', label:'분할 매수 권장'}]
+      });
+    }
+  });
+
+  // Sort: 🚨 first, then by absDiff
+  suggestions.sort((a,b) => {
+    if (a.urgency==='urgent' && b.urgency!=='urgent') return -1;
+    if (b.urgency==='urgent' && a.urgency!=='urgent') return 1;
+    return 0;
+  });
+
+  return suggestions;
+}
+
+// ════════════════════════════════════════════════════════
+//  CONCENTRATION RISK
+// ════════════════════════════════════════════════════════
+function buildConcentrationRows(top1Pct, top3Pct, over10) {
+  const top1Risk = top1Pct >= 20 ? 'high' : top1Pct >= 12 ? 'mid' : 'low';
+  const top3Risk = top3Pct >= 50 ? 'high' : top3Pct >= 35 ? 'mid' : 'low';
+  const over10Risk = over10.length >= 3 ? 'high' : over10.length >= 2 ? 'mid' : 'low';
+
+  const riskLabel = {high:'고위험', mid:'주의', low:'양호'};
+
+  let html = `
+    <div class="conc-item">
+      <span class="conc-label">상위 1종목 비중</span>
+      <span class="conc-val">${top1Pct.toFixed(1)}%</span>
+      <span class="conc-risk conc-${top1Risk}">${riskLabel[top1Risk]}</span>
+    </div>
+    <div class="conc-item">
+      <span class="conc-label">상위 3종목 합계</span>
+      <span class="conc-val">${top3Pct.toFixed(1)}%</span>
+      <span class="conc-risk conc-${top3Risk}">${riskLabel[top3Risk]}</span>
+    </div>
+    <div class="conc-item">
+      <span class="conc-label">10% 초과 종목</span>
+      <span class="conc-val">${over10.length}개 ${over10.length>0?'('+over10.map(t=>t.ticker).join(', ')+')':''}</span>
+      <span class="conc-risk conc-${over10Risk}">${riskLabel[over10Risk]}</span>
+    </div>`;
+  return html;
+}
+
+// ════════════════════════════════════════════════════════
+//  VERSION COMPARISON
+// ════════════════════════════════════════════════════════
+function buildVersionCompareHTML(calc) {
+  const snap = snapshot;
+  const {grandTotal, tickerList} = calc;
+
+  // Total change
+  const totalChange = grandTotal - snap.grandTotal;
+  const totalChangePct = snap.grandTotal > 0 ? totalChange/snap.grandTotal*100 : 0;
+
+  // Ticker sets
+  const curTickers = new Set(tickerList.filter(t=>t.entryType==='single').map(t=>t.ticker));
+  const snapTickers = new Set((snap.tickerList||[]).filter(t=>t.entryType==='single').map(t=>t.ticker));
+  const newTickers = [...curTickers].filter(t=>!snapTickers.has(t));
+  const delTickers = [...snapTickers].filter(t=>!curTickers.has(t));
+
+  // Top movers
+  const snapTickerMap = Object.fromEntries((snap.tickerList||[]).map(t=>[t.ticker,t]));
+  const movers = tickerList
+    .filter(t=>snapTickerMap[t.ticker])
+    .map(t=>({ticker:t.ticker, change: t.amount - (snapTickerMap[t.ticker].amount||0)}))
+    .sort((a,b)=>Math.abs(b.change)-Math.abs(a.change))
+    .slice(0,6);
+
+  const upMovers = movers.filter(m=>m.change>0).slice(0,3);
+  const dnMovers = movers.filter(m=>m.change<0).slice(0,3);
+
+  let html = `<div class="ver-compare">
+    <div class="vc-title">🔄 버전 비교 (${snap.ver||'이전'} → 현재)</div>
+    <div class="vc-row">
+      <span class="vc-label">총 자산 변화</span>
+      <span class="vc-val ${totalChange>=0?'vc-up':'vc-dn'}">${totalChange>=0?'+':''}${fmt(totalChange)}만 (${totalChangePct>=0?'+':''}${totalChangePct.toFixed(1)}%)</span>
+    </div>`;
+
+  if (newTickers.length > 0) {
+    html += `<div class="vc-row">
+      <span class="vc-label">신규 종목</span>
+      <span>${newTickers.map(t=>`<span class="vc-new-ticker">${t}</span>`).join('')}</span>
+    </div>`;
+  }
+  if (delTickers.length > 0) {
+    html += `<div class="vc-row">
+      <span class="vc-label">제거 종목</span>
+      <span>${delTickers.map(t=>`<span class="vc-del-ticker">${t}</span>`).join('')}</span>
+    </div>`;
+  }
+  if (upMovers.length > 0) {
+    html += `<div class="vc-row">
+      <span class="vc-label">증가 TOP ${upMovers.length}</span>
+      <span class="vc-val vc-up">${upMovers.map(m=>`${m.ticker} +${fmt(m.change)}만`).join(' / ')}</span>
+    </div>`;
+  }
+  if (dnMovers.length > 0) {
+    html += `<div class="vc-row">
+      <span class="vc-label">감소 TOP ${dnMovers.length}</span>
+      <span class="vc-val vc-dn">${dnMovers.map(m=>`${m.ticker} ${fmt(m.change)}만`).join(' / ')}</span>
+    </div>`;
+  }
+
+  // Cat weight changes
+  const catChanges = CATEGORIES.map(c => ({
+    id: c.id, label: c.label,
+    change: (calc.catPcts[c.id]||0) - (snap.catPcts?.[c.id]||0)
+  })).filter(c=>Math.abs(c.change)>0.3).sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
+  if (catChanges.length > 0) {
+    html += `<div class="vc-row" style="align-items:flex-start;flex-direction:column;gap:4px">
+      <span class="vc-label">비중 변화</span>
+      <div>${catChanges.slice(0,4).map(c=>`<span style="font-size:9px;margin-right:6px;font-family:'JetBrains Mono',monospace;font-weight:700;color:${c.change>0?'var(--red)':'var(--green)'}">${c.label} ${c.change>0?'+':''}${c.change.toFixed(1)}%p</span>`).join('')}</div>
+    </div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// ════════════════════════════════════════════════════════
+//  PERSIST
+// ════════════════════════════════════════════════════════
+let saveTimer = null;
+function autoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem('pfeditor_v3_state', JSON.stringify(state));
+      const snap = localStorage.getItem('pfeditor_v3_snapshot');
+      if (snap) snapshot = JSON.parse(snap);
+      const now = new Date();
+      document.getElementById('lastSavedLabel').textContent =
+        `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} 저장`;
+    } catch(e) {}
+  }, 600);
+}
+
+function saveJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `pfeditor_v3_${state.meta.date.replace(/\./g,'')}_${state.meta.ver}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  showToast('✅ JSON 저장 완료');
+}
+
+function loadJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      state = loaded;
+      // migrate: add entryType if missing
+      state.members.forEach(m => m.holdings.forEach(h => {
+        if (!h.entryType) h.entryType = 'single';
+      }));
+      syncMetaInputs();
+      renderCatTargets();
+      renderMembers();
+      recalc();
+      showToast('✅ JSON 불러오기 완료');
+    } catch(err) {
+      showToast('❌ JSON 파일 오류');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function syncMetaInputs() {
+  document.getElementById('meta-date').value = state.meta.date || '';
+  document.getElementById('meta-ver').value = state.meta.ver || '';
+  document.getElementById('meta-memo').value = state.meta.memo || '';
+}
+
+function saveSnapshot() {
+  const calc = calcState();
+  const snap = {
+    ver: state.meta.ver,
+    date: state.meta.date,
+    grandTotal: calc.grandTotal,
+    catPcts: {...calc.catPcts},
+    tickerList: calc.tickerList.map(t=>({ticker:t.ticker, amount:t.amount, entryType:t.entryType, pct:t.pct}))
+  };
+  snapshot = snap;
+  try {
+    localStorage.setItem('pfeditor_v3_snapshot', JSON.stringify(snap));
+  } catch(e) {}
+  showToast(`📸 스냅샷 저장 완료 (${snap.ver} / ${fmt(snap.grandTotal)}만원)`);
+  updateAnalysisPane(calc, validateState());
+}
+
+// ════════════════════════════════════════════════════════
+//  HTML REPORT GENERATOR
+// ════════════════════════════════════════════════════════
+function generateHTML() {
+  const calc = calcState();
+  const validation = validateState();
+  const {memberTotals, grandTotal, catTotals, catPcts, tickerList, top1Pct, top3Pct, over10} = calc;
+  const date = state.meta.date;
+  const ver = state.meta.ver;
+  const targetSum = Object.values(state.catTargets).reduce((a,b)=>a+b,0);
+  const targetOk = Math.abs(targetSum - 100) < 0.01;
+
+  // ── 1. Auto-generated summary ──
+  const suggArr = targetOk ? buildActionSuggestions(calc) : [];
+  const urgentSugg = suggArr.filter(s=>s.urgency==='urgent');
+  const risks = [];
+  if (top1Pct >= 15) risks.push(`상위 1종목 비중 ${top1Pct.toFixed(1)}% — 집중도 과다`);
+  if (urgentSugg.some(s=>s.title.includes('방어자산'))) risks.push('방어자산 비중 부족 지속');
+  if (top3Pct >= 45) risks.push(`상위 3종목 합계 ${top3Pct.toFixed(1)}% — 변동성 확대 가능`);
+  if (risks.length < 2) risks.push('목표 비중 유지 점검 필요');
+
+  const actions = [];
+  suggArr.forEach(s => {
+    if (actions.length >= 3) return;
+    if (s.actions && s.actions.length > 0) actions.push(`${s.title}: ${s.actions[0].label}`);
+  });
+  if (actions.length === 0) actions.push('전체 비중 목표 범위 내 — 현 포지션 유지');
+
+  const summaryHTML = `
+  <div style="background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(6,182,212,.06));border:1px solid rgba(59,130,246,.3);border-radius:13px;padding:18px 20px;margin-bottom:18px;">
+    <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">📋 이번 버전 요약 (자동 생성)</div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:9px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">⚠ 주요 리스크</div>
+      ${risks.slice(0,2).map(r=>`<div style="font-size:11px;color:#fbbf24;padding:3px 0;padding-left:10px;border-left:2px solid rgba(245,158,11,.4)">• ${r}</div>`).join('')}
+    </div>
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">✅ 추천 행동</div>
+      ${actions.slice(0,3).map(a=>`<div style="font-size:11px;color:#6ee7b7;padding:3px 0;padding-left:10px;border-left:2px solid rgba(16,185,129,.4)">→ ${a}</div>`).join('')}
+    </div>
+  </div>`;
+
+  // ── 2. Member tables ──
+  const memberHTMLParts = state.members.map((m, mi) => {
+    const total = memberTotals[mi];
+    const hasAccount = m.holdings.some(h => h.account);
+    const rows = m.holdings.map(h => {
+      const isNeg = (h.pnl||'').startsWith('-');
+      const catInfo = CAT_MAP[h.cat] || CAT_MAP['other'];
+      const amtStr = h.amount > 0 ? `${fmt(h.amount)}만` : '-';
+      const badgeHTML = h.badge ? ` <span class="b b-${h.badge==='신규'?'buy':h.badge.includes('판단')?'watch':'hold'}">${h.badge}</span>` : '';
+      const noteHTML = h.note ? `<span class="dim" style="font-size:9px"> (${h.note})</span>` : '';
+      const accountTd = hasAccount ? `<td><span class="dim">${h.account||''}</span></td>` : '';
+      const etBadge = h.entryType && h.entryType!=='single'
+        ? `<span class="b" style="background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3)">${h.entryType==='basket'?'묶음':'현금'}</span> ` : '';
+      return `<tr>
+        ${accountTd}
+        <td>${etBadge}<span class="mono ticker">${h.ticker}</span>${badgeHTML}${noteHTML}</td>
+        <td><span class="mono">${h.qty}</span></td>
+        <td><span class="${isNeg?'r':'g'} mono">${h.pnl}</span></td>
+        <td class="num-r"><span class="mono amt-cell">${amtStr}</span></td>
+        <td><span class="cat-tag cat-${h.cat||'other'}">${catInfo.label}</span></td>
+      </tr>`;
+    }).join('');
+    const accountTh = hasAccount ? '<th>계좌</th>' : '';
+    return `
+  <div class="sec">
+    <div class="sec-head">
+      <h3>${m.icon} ${m.name} — ${m.role}</h3>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="tag tag-cyan">총 ${fmt(total)}만원</div>
+        <div class="tag tag-blue">${(grandTotal>0?total/grandTotal*100:0).toFixed(1)}%</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr>${accountTh}<th>종목</th><th>수량</th><th>손익</th><th>금액</th><th>분류</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        ${hasAccount?'<td></td>':''}
+        <td colspan="3" style="text-align:right;padding:8px 10px;font-size:10px;color:var(--muted)">소계</td>
+        <td style="text-align:right;padding:8px 10px"><span class="mono" style="color:var(--cyan);font-weight:700">${fmt(total)}만</span></td>
+        <td></td>
+      </tr></tfoot>
+    </table>
+  </div>`;
+  }).join('');
+
+  // ── 3. Category bars ──
+  const catBarsHTML = CATEGORIES.map(c => {
+    const cur = catPcts[c.id]||0;
+    const tgt = state.catTargets[c.id]||0;
+    const diff = cur - tgt;
+    const diffClass = Math.abs(diff)<1 ? 'diff-ok' : diff>0 ? 'diff-over' : 'diff-under';
+    const diffLabel = Math.abs(diff)<0.1 ? '적정' : diff>0 ? `+${diff.toFixed(1)}%p` : `${diff.toFixed(1)}%p`;
+    return `
+    <div class="ratio-item">
+      <div class="ri-label"><span class="cat-tag cat-${c.id}">${c.label}</span></div>
+      <div class="ri-track">
+        <div class="ri-fill" style="width:${Math.min(100,cur)}%;background:${c.color}88;position:relative;">
+          <div style="position:absolute;right:0;top:0;bottom:0;width:2px;background:${c.color};"></div>
+        </div>
+        <div style="position:absolute;left:${Math.min(100,tgt)}%;top:0;bottom:0;width:2px;border-left:2px dashed rgba(255,255,255,.3);"></div>
+      </div>
+      <div class="ri-num" style="color:${c.color}">${cur.toFixed(1)}%</div>
+      <div style="font-size:9px;width:60px;flex-shrink:0;text-align:right">→ ${tgt}%</div>
+      <div class="ri-diff ${diffClass}" style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0">${diffLabel}</div>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin:-6px 0 8px;padding-left:130px;">${fmt(catTotals[c.id])}만원</div>`;
+  }).join('');
+
+  // ── 4. Ticker table ──
+  const tickerTableHTML = tickerList.map(t => {
+    const catInfo = CAT_MAP[t.cat] || CAT_MAP['other'];
+    const isHighConc = t.pct >= 10 && t.entryType === 'single';
+    return `<tr>
+      <td><span class="mono ticker">${t.ticker}</span>${t.entryType!=='single'?`<span class="b" style="margin-left:4px;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3);font-size:8px">${t.entryType==='basket'?'묶음':'현금'}</span>`:''}</td>
+      <td><span class="dim">${t.holders.join(', ')}</span></td>
+      <td><span class="cat-tag cat-${t.cat||'other'}">${catInfo.label}</span></td>
+      <td class="num-r"><span class="mono">${fmt(t.amount)}만</span></td>
+      <td class="num-r"><span class="mono ${isHighConc?'r':''}">${t.pct.toFixed(1)}%${isHighConc?' ⚠':''}</span></td>
+    </tr>`;
+  }).join('');
+
+  // ── 5. Rebalancing in report ──
+  const suggestions = targetOk ? buildActionSuggestions(calc) : [];
+  const rebalHTML = suggestions.map(s =>
+    `<div class="alert ${s.urgency==='urgent'?'alert-red':s.urgency==='warn'?'alert-yellow':'alert-blue'}" style="margin:0 12px 8px">
+      <span>${s.icon}</span>
+      <div><strong>${s.title}</strong><br><span style="font-size:10px">${s.body}</span><br>${s.actions.map(a=>`<span style="display:inline-block;margin-top:4px;margin-right:6px;font-size:9px;font-weight:700;background:rgba(255,255,255,.08);padding:2px 7px;border-radius:4px">→ ${a.label}</span>`).join('')}</div>
+    </div>`
+  ).join('');
+
+  // ── 6. Concentration ──
+  const concHTML = buildConcentrationRows(top1Pct, top3Pct, over10);
+
+  const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이현규 가족 포트폴리오 ${ver}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+:root{
+  --bg:#060a12;--s1:#0d1421;--s2:#111d2e;--border:#1c2d42;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#10b981;--red:#ef4444;
+  --yellow:#f59e0b;--purple:#8b5cf6;
+  --text:#e2e8f0;--muted:#475569;--dim:#94a3b8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);padding:16px;font-size:13px;line-height:1.6;}
+.pdf-btn{position:fixed;bottom:24px;right:20px;z-index:999;background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.5);display:flex;align-items:center;gap:7px;}
+.header{text-align:center;padding:28px 16px 20px;margin-bottom:20px;}
+.ver-badge{display:inline-block;background:linear-gradient(135deg,#1d4ed8,#06b6d4);color:white;font-size:10px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;}
+.header h1{font-size:20px;font-weight:900;background:linear-gradient(135deg,#e2e8f0,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.header .sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.tabs{display:flex;gap:5px;margin-bottom:14px;overflow-x:auto;padding-bottom:3px;}
+.tab{padding:7px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--s1);color:var(--dim);white-space:nowrap;flex-shrink:0;}
+.tab.active{color:white;border-color:transparent;}
+.tab-a.active{background:linear-gradient(135deg,#1d4ed8,#06b6d4);}
+.tab-b.active{background:var(--blue);}.tab-c.active{background:var(--green);}.tab-d.active{background:var(--purple);}
+.panel{display:none;}.panel.active{display:block;}
+.ratio-box{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;}
+.ratio-box h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.ratio-item{display:flex;align-items:center;gap:8px;margin-bottom:4px;position:relative;}
+.ri-label{font-size:11px;width:120px;flex-shrink:0;}
+.ri-track{flex:1;background:var(--s2);border-radius:4px;height:9px;position:relative;overflow:visible;}
+.ri-fill{height:100%;border-radius:4px;}
+.ri-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;width:42px;text-align:right;flex-shrink:0;}
+.diff-ok{background:rgba(16,185,129,.15);color:#10b981;}
+.diff-over{background:rgba(239,68,68,.15);color:#ef4444;}
+.diff-under{background:rgba(245,158,11,.15);color:#f59e0b;}
+.total-banner{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(6,182,212,.08));border:1px solid rgba(59,130,246,.25);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;}
+.total-banner .tb-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.total-banner .tb-amount{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:900;color:var(--cyan);}
+.total-banner .tb-sub{font-size:10px;color:var(--muted);margin-top:4px;}
+.sec{background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);}
+.sec-head h3{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;}
+.tag-blue{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3);}
+.tag-cyan{background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3);}
+.tag-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.tag-yellow{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3);}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--s2);font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:7px 10px;text-align:left;}
+td{padding:7px 10px;font-size:12px;border-bottom:1px solid rgba(28,45,66,.5);vertical-align:middle;}
+tfoot td{border-bottom:none;border-top:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+.num-r{text-align:right;}
+.b{display:inline-block;padding:2px 7px;border-radius:7px;font-size:9px;font-weight:700;}
+.b-buy{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);}
+.b-hold{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2);}
+.b-watch{background:rgba(139,92,246,.15);color:#8b5cf6;border:1px solid rgba(139,92,246,.3);}
+.mono{font-family:'JetBrains Mono',monospace;}
+.ticker{color:var(--blue);font-weight:700;}
+.g{color:var(--green);}.r{color:var(--red);}
+.dim{color:var(--dim);}
+.cat-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;}
+.cat-core{background:rgba(59,130,246,.15);color:#3b82f6;border:1px solid rgba(59,130,246,.3);}
+.cat-bigtech{background:rgba(139,92,246,.15);color:#8b5cf6;border:1px solid rgba(139,92,246,.3);}
+.cat-ai{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+.cat-semi{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3);}
+.cat-defense{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);}
+.cat-other{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2);}
+.alert{border-radius:10px;padding:11px 13px;font-size:12px;border:1px solid;display:flex;align-items:flex-start;gap:8px;line-height:1.6;}
+.alert-red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);color:#fca5a5;}
+.alert-blue{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3);color:#93c5fd;}
+.alert-yellow{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3);color:#fbbf24;}
+.conc-item{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--s2);border-radius:7px;margin-bottom:4px;font-size:11px;}
+.conc-label{color:var(--dim);}
+.conc-val{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.conc-risk{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.conc-high{background:rgba(239,68,68,.12);color:var(--red);}
+.conc-mid{background:rgba(245,158,11,.12);color:var(--yellow);}
+.conc-low{background:rgba(16,185,129,.12);color:var(--green);}
+.footer{text-align:center;padding:20px 0 60px;border-top:1px solid var(--border);margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+@media print{
+  @page{margin:12mm 10mm;size:A4;}
+  body{background:white!important;color:#1a1a1a!important;font-size:11pt;}
+  .pdf-btn,.tabs{display:none!important;}
+  .panel{display:block!important;page-break-before:always;}
+  .panel:first-of-type{page-break-before:auto;}
+  .header h1{background:none!important;-webkit-text-fill-color:#1a1a1a!important;}
+  *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+<button class="pdf-btn" onclick="window.print()">🖨️ PDF 저장</button>
+
+<div class="header">
+  <div class="ver-badge">🔷 v3 · ${ver}</div>
+  <h1>이현규 가족 포트폴리오<br>${ver}</h1>
+  <div class="sub">${date} · ${state.meta.memo}</div>
+</div>
+
+<div class="tabs">
+  <div class="tab tab-a active" onclick="switchTab('a')">📐 비중 분석 + 제안</div>
+  <div class="tab tab-b" onclick="switchTab('b')">📋 보유 현황</div>
+  <div class="tab tab-c" onclick="switchTab('c')">🔀 종목 합산</div>
+  <div class="tab tab-d" onclick="switchTab('d')">🎯 집중도 리스크</div>
+</div>
+
+<!-- ── 비중 분석 탭 ── -->
+<div id="panel-a" class="panel active">
+
+  ${summaryHTML}
+
+  <div class="total-banner">
+    <div class="tb-label">가족 합산 총 자산</div>
+    <div class="tb-amount">${fmt(grandTotal)}<span style="font-size:16px;color:var(--muted)">만원</span></div>
+    <div class="tb-sub">${state.members.length}명 합산 · ${date} 기준</div>
+  </div>
+
+  <div class="ratio-box">
+    <h3>자산군별 비중 — 현재 vs 목표</h3>
+    ${catBarsHTML}
+  </div>
+
+  ${rebalHTML ? `<div class="sec"><div class="sec-head"><h3>리밸런싱 행동 제안</h3></div><div style="padding:12px">${rebalHTML}</div></div>` : ''}
+
+</div>
+
+<!-- ── 보유 현황 탭 ── -->
+<div id="panel-b" class="panel">
+  ${memberHTMLParts}
+  <div class="sec">
+    <div class="sec-head"><h3>가족 합산 총계</h3></div>
+    <table>
+      <tbody>
+        ${state.members.map((m,mi)=>`<tr>
+          <td style="width:100px">${m.icon} ${m.name}</td>
+          <td><span class="dim">${m.role}</span></td>
+          <td class="num-r"><span class="mono" style="color:var(--cyan)">${fmt(memberTotals[mi])}만</span></td>
+          <td class="num-r"><span class="mono dim">${(grandTotal>0?memberTotals[mi]/grandTotal*100:0).toFixed(1)}%</span></td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="background:rgba(59,130,246,.05)">
+          <td colspan="2"><strong>가족 합계</strong></td>
+          <td class="num-r"><span class="mono" style="color:var(--cyan);font-size:14px;font-weight:900">${fmt(grandTotal)}만</span></td>
+          <td class="num-r"><span class="mono dim">100%</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- ── 종목 합산 탭 ── -->
+<div id="panel-c" class="panel">
+  <div class="sec">
+    <div class="sec-head"><h3>종목별 가족 합산 (ticker 정규화)</h3><div class="tag tag-yellow">자동 집계</div></div>
+    <table>
+      <thead><tr><th>#</th><th>종목</th><th>보유자</th><th>분류</th><th style="text-align:right">금액</th><th style="text-align:right">비중</th></tr></thead>
+      <tbody>${tickerList.map((t,i)=>{
+        const catInfo = CAT_MAP[t.cat]||CAT_MAP['other'];
+        const isHighConc = t.pct>=10&&t.entryType==='single';
+        return `<tr>
+          <td class="dim mono" style="font-size:10px">${i+1}</td>
+          <td><span class="mono ticker">${t.ticker}</span>${t.entryType!=='single'?'<span class="b" style="margin-left:4px;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3);font-size:8px">'+(t.entryType==='basket'?'묶음':'현금')+'</span>':''}</td>
+          <td><span class="dim">${t.holders.join(', ')}</span></td>
+          <td><span class="cat-tag cat-${t.cat||'other'}">${catInfo.label}</span></td>
+          <td class="num-r"><span class="mono">${fmt(t.amount)}만</span></td>
+          <td class="num-r"><span class="mono ${isHighConc?'r':''}">${t.pct.toFixed(1)}%${isHighConc?' ⚠':''}</span></td>
+        </tr>`;
+      }).join('')}</tbody>
+      <tfoot><tr>
+        <td colspan="3"><strong>합계</strong></td>
+        <td></td>
+        <td class="num-r"><span class="mono" style="color:var(--cyan);font-weight:900">${fmt(grandTotal)}만</span></td>
+        <td class="num-r"><span class="mono dim">100%</span></td>
+      </tr></tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- ── 집중도 리스크 탭 ── -->
+<div id="panel-d" class="panel">
+  <div class="sec">
+    <div class="sec-head"><h3>집중도 리스크 분석</h3></div>
+    <div style="padding:14px">${concHTML}</div>
+  </div>
+  ${over10.length>0?`<div class="sec">
+    <div class="sec-head"><h3>10% 초과 종목 목록</h3></div>
+    <table>
+      <thead><tr><th>종목</th><th>보유자</th><th style="text-align:right">금액</th><th style="text-align:right">비중</th></tr></thead>
+      <tbody>${over10.map(t=>`<tr>
+        <td><span class="mono ticker">${t.ticker}</span></td>
+        <td><span class="dim">${t.holders.join(', ')}</span></td>
+        <td class="num-r"><span class="mono">${fmt(t.amount)}만</span></td>
+        <td class="num-r"><span class="mono r">${t.pct.toFixed(1)}% ⚠</span></td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`:''}
+</div>
+
+<div class="footer">
+  이현규 가족 포트폴리오 v3 · ${ver} · ${date}<br>
+  본 자료는 투자 참고용이며 최종 판단은 본인 책임입니다
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelector('.tab-'+id).classList.add('active');
+}
+<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `family_portfolio_v3_${ver}_${date.replace(/\./g,'')}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  showToast('✅ v3 보고서 HTML 생성 완료!');
+}
+
+// ════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+function init() {
+  try {
+    const saved = localStorage.getItem('pfeditor_v3_state');
+    if (saved) {
+      state = JSON.parse(saved);
+      // migration: add entryType if missing
+      state.members.forEach(m => m.holdings.forEach(h => {
+        if (!h.entryType) h.entryType = 'single';
+      }));
+    }
+    const savedSnap = localStorage.getItem('pfeditor_v3_snapshot');
+    if (savedSnap) snapshot = JSON.parse(savedSnap);
+  } catch(e) {}
+  syncMetaInputs();
+  renderCatTargets();
+  renderMembers();
+  recalc();
+  ['meta-date','meta-ver','meta-memo'].forEach(id => {
+    document.getElementById(id).addEventListener('input', e => {
+      const key = id.replace('meta-','');
+      state.meta[key] = e.target.value;
+      recalc();
+    });
+  });
+}
+
+init();
+</script>
+</body>
+</html>
