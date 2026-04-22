@@ -13,7 +13,7 @@
   --yellow:#f59e0b; --purple:#8b5cf6; --orange:#f97316; --pink:#ec4899;
   --text:#e2e8f0; --muted:#475569; --dim:#94a3b8;
   --cat-core:#3b82f6; --cat-bigtech:#8b5cf6; --cat-ai:#ef4444;
-  --cat-semi:#f59e0b; --cat-defense:#10b981;
+  --cat-semi:#f59e0b; --cat-defense:#10b981; --cat-growth:#f97316; --cat-domestic:#06b6d4;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
@@ -156,6 +156,8 @@ select{cursor:pointer;}
 .cat-ai{background:rgba(239,68,68,.15);color:var(--cat-ai);border:1px solid rgba(239,68,68,.3);}
 .cat-semi{background:rgba(245,158,11,.15);color:var(--cat-semi);border:1px solid rgba(245,158,11,.3);}
 .cat-defense{background:rgba(16,185,129,.15);color:var(--cat-defense);border:1px solid rgba(16,185,129,.3);}
+.cat-growth{background:rgba(249,115,22,.15);color:var(--cat-growth);border:1px solid rgba(249,115,22,.3);}
+.cat-domestic{background:rgba(6,182,212,.15);color:var(--cat-domestic);border:1px solid rgba(6,182,212,.3);}
 .cat-other{background:rgba(100,116,139,.1);color:var(--dim);border:1px solid rgba(100,116,139,.2);}
 
 .btn-add-row{
@@ -388,12 +390,14 @@ select.cat-select option[value="defense"]{color:#10b981;}
 //  CONSTANTS
 // ════════════════════════════════════════════════════════
 const CATEGORIES = [
-  { id:'core',    label:'코어 ETF',   color:'#3b82f6', colorAlpha:'rgba(59,130,246,' },
-  { id:'bigtech', label:'빅테크',     color:'#8b5cf6', colorAlpha:'rgba(139,92,246,' },
-  { id:'ai',      label:'AI/반도체',  color:'#ef4444', colorAlpha:'rgba(239,68,68,' },
-  { id:'semi',    label:'반도체 ETF', color:'#f59e0b', colorAlpha:'rgba(245,158,11,' },
-  { id:'defense', label:'방어자산',   color:'#10b981', colorAlpha:'rgba(16,185,129,' },
-  { id:'other',   label:'기타',       color:'#94a3b8', colorAlpha:'rgba(148,163,184,' },
+  { id:'core',     label:'코어 ETF',      color:'#3b82f6', colorAlpha:'rgba(59,130,246,'  },
+  { id:'bigtech',  label:'빅테크·플랫폼', color:'#8b5cf6', colorAlpha:'rgba(139,92,246,'  },
+  { id:'ai',       label:'AI·반도체',     color:'#ef4444', colorAlpha:'rgba(239,68,68,'   },
+  { id:'semi',     label:'반도체 ETF',    color:'#f59e0b', colorAlpha:'rgba(245,158,11,'  },
+  { id:'defense',  label:'방어·현금',     color:'#10b981', colorAlpha:'rgba(16,185,129,'  },
+  { id:'growth',   label:'성장·테마',     color:'#f97316', colorAlpha:'rgba(249,115,22,'  },
+  { id:'domestic', label:'국내·기타ETF',  color:'#06b6d4', colorAlpha:'rgba(6,182,212,'   },
+  { id:'other',    label:'기타',          color:'#94a3b8', colorAlpha:'rgba(148,163,184,' },
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 
@@ -414,7 +418,7 @@ const ENTRY_TYPES = [
 // ════════════════════════════════════════════════════════
 let state = {
   meta: { date:'2026.04.21', ver:'v7', memo:'v3 업그레이드' },
-  catTargets: { core:35, bigtech:22, ai:21, semi:10, defense:10, other:2 },
+  catTargets: { core:30, bigtech:20, ai:20, semi:8, defense:10, growth:7, domestic:3, other:2 },
   members: [
     {
       id:'hyunkyu', name:'이현규', icon:'⚡', role:'전술·현금·기회포착', color:'#3b82f6',
@@ -422,14 +426,14 @@ let state = {
         {account:'일반',ticker:'VRT',     entryType:'single',qty:'7주',  pnl:'+50.4%', amount:780,  cat:'ai',      badge:'',      note:''},
         {account:'일반',ticker:'ONTO',    entryType:'single',qty:'7주',  pnl:'+36.1%', amount:620,  cat:'semi',    badge:'',      note:''},
         {account:'일반',ticker:'MRVL',    entryType:'single',qty:'13주', pnl:'+0.1%',  amount:850,  cat:'ai',      badge:'신규',  note:''},
-        {account:'일반',ticker:'OII',     entryType:'single',qty:'21주', pnl:'+11.8%', amount:520,  cat:'other',   badge:'',      note:''},
-        {account:'일반',ticker:'BWXT',    entryType:'single',qty:'6주',  pnl:'+15.0%', amount:390,  cat:'other',   badge:'',      note:''},
-        {account:'일반',ticker:'TEM',     entryType:'single',qty:'12주', pnl:'+0.6%',  amount:280,  cat:'other',   badge:'',      note:''},
+        {account:'일반',ticker:'OII',     entryType:'single',qty:'21주', pnl:'+11.8%', amount:520,  cat:'growth',  badge:'',      note:''},
+        {account:'일반',ticker:'BWXT',    entryType:'single',qty:'6주',  pnl:'+15.0%', amount:390,  cat:'defense', badge:'',      note:''},
+        {account:'일반',ticker:'TEM',     entryType:'single',qty:'12주', pnl:'+0.6%',  amount:280,  cat:'growth',  badge:'',      note:''},
         {account:'일반',ticker:'ALAB',    entryType:'single',qty:'4주',  pnl:'+7.1%',  amount:190,  cat:'ai',      badge:'',      note:''},
-        {account:'일반',ticker:'TechnipFMC',entryType:'single',qty:'5주',pnl:'+17.0%', amount:210,  cat:'other',   badge:'',      note:''},
+        {account:'일반',ticker:'TechnipFMC',entryType:'single',qty:'5주',pnl:'+17.0%', amount:210,  cat:'growth',  badge:'',      note:''},
         {account:'ISA', ticker:'KODEX 나스닥100 외',entryType:'basket',qty:'4종',pnl:'+15.71%',amount:1200,cat:'core',badge:'',note:'나스닥100·반도체·S&P500·테크TOP10'},
         {account:'연금', ticker:'TIGER S&P500 외',entryType:'basket',qty:'2종',pnl:'+24.30%',amount:800,cat:'core',badge:'',note:'TIGER S&P500·KODEX 나스닥100'},
-        {account:'토스', ticker:'소수점 포트폴리오',entryType:'basket',qty:'8종',pnl:'복수',amount:450,cat:'other',badge:'',note:'LRCX·ONTO·VRT 등'},
+        {account:'토스', ticker:'소수점 포트폴리오',entryType:'basket',qty:'8종',pnl:'복수',amount:450,cat:'domestic',badge:'',note:'LRCX·ONTO·VRT 등'},
         {account:'현금', ticker:'폭락 대기 현금',entryType:'cash',qty:'-',pnl:'-',amount:690,cat:'defense',badge:'',note:'절대 건드리지 말 것'},
       ]
     },
@@ -437,10 +441,10 @@ let state = {
       id:'insuk', name:'임인숙', icon:'🛡', role:'코어 장기복리·은퇴축', color:'#8b5cf6',
       holdings:[
         {account:'토스',ticker:'MSFT·GOOGL·NVDA·QQQ',entryType:'basket',qty:'복수',pnl:'+7.7%',amount:1800,cat:'bigtech',badge:'',note:''},
-        {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+7.6%',amount:380,cat:'other',badge:'',note:''},
+        {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+7.6%',amount:380,cat:'growth',badge:'',note:''},
         {account:'종합',ticker:'AVGO',entryType:'single',qty:'3주',pnl:'-0.17%',amount:420,cat:'ai',badge:'5월판단',note:''},
         {account:'종합',ticker:'META',entryType:'single',qty:'3주',pnl:'-0.59%',amount:400,cat:'bigtech',badge:'5월판단',note:''},
-        {account:'종합',ticker:'GRID',entryType:'single',qty:'6주',pnl:'+9.46%',amount:180,cat:'other',badge:'',note:''},
+        {account:'종합',ticker:'GRID',entryType:'single',qty:'6주',pnl:'+9.46%',amount:180,cat:'growth',badge:'',note:''},
         {account:'ISA',ticker:'TIGER S&P500 외',entryType:'basket',qty:'4종',pnl:'+8.98%',amount:980,cat:'core',badge:'',note:'TIGER S&P500·나스닥100·테크TOP10·반도체'},
         {account:'연금',ticker:'TIGER S&P500 외',entryType:'basket',qty:'2종',pnl:'+14.85%',amount:634,cat:'core',badge:'',note:''},
       ]
@@ -450,7 +454,7 @@ let state = {
       holdings:[
         {account:'',ticker:'GOOGL',entryType:'single',qty:'26주',pnl:'+45.34%',amount:1200,cat:'bigtech',badge:'',note:''},
         {account:'',ticker:'MRVL', entryType:'single',qty:'52주',pnl:'+50.93%',amount:1950,cat:'ai',    badge:'',note:'구글협력 논의 중'},
-        {account:'',ticker:'NVDA', entryType:'single',qty:'24주',pnl:'+64.73%',amount:1580,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'NVDA', entryType:'single',qty:'24주',pnl:'+64.73%',amount:1580,cat:'ai',    badge:'',note:''},
         {account:'',ticker:'MSFT', entryType:'single',qty:'11주',pnl:'+1.81%', amount:520, cat:'bigtech',badge:'',note:''},
         {account:'',ticker:'TSM',  entryType:'single',qty:'12주',pnl:'+4.49%', amount:680, cat:'semi',  badge:'',note:''},
         {account:'',ticker:'MU',   entryType:'single',qty:'5주', pnl:'-1.06%', amount:290, cat:'ai',    badge:'신규',note:''},
@@ -462,14 +466,14 @@ let state = {
       id:'jaeyeon', name:'이재연', icon:'✨', role:'성장 + 구조개선', color:'#f97316',
       holdings:[
         {account:'',ticker:'GOOGL',entryType:'single',qty:'25주',pnl:'+43.17%',amount:1150,cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'NVDA', entryType:'single',qty:'23주',pnl:'+64.86%',amount:1510,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'NVDA', entryType:'single',qty:'23주',pnl:'+64.86%',amount:1510,cat:'ai',    badge:'',note:''},
         {account:'',ticker:'MRVL', entryType:'single',qty:'26주',pnl:'+56.80%',amount:980, cat:'ai',    badge:'',note:''},
         {account:'',ticker:'TSM',  entryType:'single',qty:'12주',pnl:'+4.21%', amount:670, cat:'semi',  badge:'',note:''},
         {account:'',ticker:'MSFT', entryType:'single',qty:'8주', pnl:'-12.77%',amount:375, cat:'bigtech',badge:'',note:''},
         {account:'',ticker:'MU',   entryType:'single',qty:'7주', pnl:'+0.07%', amount:410, cat:'ai',    badge:'신규',note:''},
         {account:'',ticker:'AVGO', entryType:'single',qty:'2주', pnl:'-1.09%', amount:290, cat:'ai',    badge:'5월판단',note:''},
-        {account:'',ticker:'TSLA', entryType:'single',qty:'2주', pnl:'+3.43%', amount:60,  cat:'other', badge:'',note:'비중 0.3% — 모니터링 불필요'},
-        {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.95%',amount:235,cat:'other',badge:'',note:''},
+        {account:'',ticker:'TSLA', entryType:'single',qty:'2주', pnl:'+3.43%', amount:60,  cat:'growth',badge:'',note:'비중 0.3% — 모니터링 불필요'},
+        {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.95%',amount:235,cat:'domestic',badge:'',note:''},
       ]
     }
   ]
@@ -1411,6 +1415,8 @@ tr:last-child td{border-bottom:none;}
 .cat-ai{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
 .cat-semi{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3);}
 .cat-defense{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3);}
+.cat-growth{background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3);}
+.cat-domestic{background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);}
 .cat-other{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2);}
 .alert{border-radius:10px;padding:11px 13px;font-size:12px;border:1px solid;display:flex;align-items:flex-start;gap:8px;line-height:1.6;}
 .alert-red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);color:#fca5a5;}
