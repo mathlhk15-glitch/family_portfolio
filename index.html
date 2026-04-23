@@ -341,17 +341,17 @@ select.cat-select option[value="defense"]{color:#10b981;}
       <div class="meta-item"><label>메모</label><input type="text" id="meta-memo" value="v3 업그레이드" oninput="recalc()"></div>
     </div>
 
-    <!-- Category targets -->
-    <div class="sec-divider"><h3>자산군 목표 비중 설정</h3></div>
+    <!-- Category summary -->
+    <div class="sec-divider"><h3>자산군 자동 집계</h3></div>
     <div class="card">
       <div class="card-head">
-        <h4>🎯 목표 비중 (%)</h4>
+        <h4>📊 자산 분류별 합계 · 비중</h4>
         <div id="targetSumBadge"></div>
       </div>
       <div class="card-body">
-        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;" id="catTargetGrid"></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="catTargetGrid"></div>
         <div style="font-size:10px;color:var(--muted);margin-top:8px;">
-          합계가 정확히 100%여야 리밸런싱 계산이 활성화됩니다.
+          개인 보유 현황을 수정하면 자산 분류별 금액과 비중이 자동으로 다시 계산됩니다.
         </div>
       </div>
     </div>
@@ -489,16 +489,7 @@ function validateState() {
   const errors = [];
   const warnings = [];
 
-  // 1. Target sum check
-  const targetSum = Object.values(state.catTargets).reduce((a,b)=>a+b,0);
-  if (Math.abs(targetSum - 100) > 0.01) {
-    errors.push({
-      type:'error',
-      msg:`목표 비중 합계 = ${targetSum.toFixed(1)}% (100%여야 함)`
-    });
-  }
-
-  // 2. Ticker/amount checks per member
+  // 1. Ticker/amount checks per member
   const allTickers = {}; // ticker -> [{mi, hi}]
   state.members.forEach((m, mi) => {
     m.holdings.forEach((h, hi) => {
@@ -530,7 +521,7 @@ function validateState() {
     }
   });
 
-  // 3. Duplicate ticker check across members (same ticker held by same person more than once)
+  // 2. Duplicate ticker check across members (same ticker held by same person more than once)
   Object.entries(allTickers).forEach(([ticker, entries]) => {
     const memberCounts = {};
     entries.forEach(e => {
@@ -554,40 +545,40 @@ function normalizeTicker(t) {
 // ════════════════════════════════════════════════════════
 //  RENDER: Category Targets
 // ════════════════════════════════════════════════════════
-function renderCatTargets() {
+function renderCatTargets(calc = calcState()) {
   const grid = document.getElementById('catTargetGrid');
+  if (!grid) return;
+  const {grandTotal, catTotals, catPcts} = calc;
   grid.innerHTML = '';
   CATEGORIES.forEach(c => {
+    const amount = catTotals[c.id] || 0;
+    const pct = catPcts[c.id] || 0;
     const div = document.createElement('div');
-    div.style.cssText = 'background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;';
+    div.style.cssText = 'background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;';
     div.innerHTML = `
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;justify-content:space-between;flex-wrap:wrap">
         <span class="cat-tag cat-${c.id}" style="font-size:8px">${c.label}</span>
+        <span style="font-size:9px;color:var(--muted)">${grandTotal > 0 ? '자동 계산' : '데이터 없음'}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:4px">
-        <input type="number" min="0" max="100" step="1" value="${state.catTargets[c.id]}"
-          style="width:52px;font-size:13px;font-weight:700;color:${c.color};text-align:center"
-          id="cat-target-${c.id}"
-          oninput="state.catTargets['${c.id}']=parseFloat(this.value)||0;recalc()">
-        <span style="font-size:11px;color:var(--muted)">%</span>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:${c.color};line-height:1.2">${fmt(amount)}만</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;gap:8px;">
+        <span style="font-size:10px;color:var(--muted)">비중</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:${c.color}">${pct.toFixed(1)}%</span>
       </div>
     `;
     grid.appendChild(div);
   });
 }
 
-function updateTargetSumBadge() {
-  const sum = Object.values(state.catTargets).reduce((a,b)=>a+b,0);
+function updateTargetSumBadge(calc = calcState()) {
   const badge = document.getElementById('targetSumBadge');
   if (!badge) return;
-  let cls, label;
-  if (Math.abs(sum-100) < 0.01) {
-    cls='tsb-ok'; label=`✓ 합계 100%`;
-  } else if (sum < 100) {
-    cls='tsb-low'; label=`⚠ 합계 ${sum.toFixed(1)}% (부족 ${(100-sum).toFixed(1)}%p)`;
-  } else {
-    cls='tsb-high'; label=`✗ 합계 ${sum.toFixed(1)}% (초과 ${(sum-100).toFixed(1)}%p)`;
-  }
+  const {grandTotal, catPcts} = calc;
+  const sum = Object.values(catPcts).reduce((a,b)=>a+b,0);
+  const cls = grandTotal > 0 && Math.abs(sum-100) < 0.01 ? 'tsb-ok' : 'tsb-low';
+  const label = grandTotal > 0
+    ? `✓ 분류합계 ${sum.toFixed(1)}% · 총 ${fmt(grandTotal)}만`
+    : '입력 대기 중';
   badge.innerHTML = `<span class="target-sum-badge ${cls}">${label}</span>`;
 }
 
@@ -837,9 +828,10 @@ function calcState() {
 
 function recalc() {
   const validation = validateState();
-  updateTargetSumBadge();
-  renderValidationPanel(validation);
   const calc = calcState();
+  renderCatTargets(calc);
+  updateTargetSumBadge(calc);
+  renderValidationPanel(validation);
   updateMemberTotals(calc);
   updateAnalysisPane(calc, validation);
   autoSave();
@@ -1177,7 +1169,6 @@ function loadJSON(event) {
         if (!h.entryType) h.entryType = 'single';
       }));
       syncMetaInputs();
-      renderCatTargets();
       renderMembers();
       recalc();
       showToast('✅ JSON 불러오기 완료');
@@ -1601,7 +1592,6 @@ function init() {
     if (savedSnap) snapshot = JSON.parse(savedSnap);
   } catch(e) {}
   syncMetaInputs();
-  renderCatTargets();
   renderMembers();
   recalc();
   ['meta-date','meta-ver','meta-memo'].forEach(id => {
