@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>포트폴리오 편집기 v7 — 뀨 가족</title>
+<title>포트폴리오 편집기 v8 — 뀨 가족</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
@@ -298,7 +298,7 @@ select{cursor:pointer;}
 }
 
 /* ══════════════════════════════════════════════
-   v7: WEEKLY STATUS DASHBOARD
+   WEEKLY STATUS DASHBOARD
 ══════════════════════════════════════════════ */
 
 /* Status Board Container */
@@ -512,7 +512,7 @@ select.cat-select option[value="defense"]{color:#10b981;}
 .pnl-pos{color:var(--green);}
 .pnl-neg{color:var(--red);}
 
-/* ── v7: 정렬 헤더 ── */
+/* ── 정렬 헤더 ── */
 .sortable-th {
   cursor:pointer;user-select:none;transition:color .15s;
   position:relative;padding-right:16px!important;
@@ -528,6 +528,63 @@ select.cat-select option[value="defense"]{color:#10b981;}
 
 /* ── v6: 탭 버튼 (분석 패널 내부) ── */
 .apane-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+
+/* ── 집행플랜 탭 ── */
+.plan-section{margin-bottom:14px;}
+.plan-section-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.plan-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.plan-timeline{display:flex;flex-direction:column;gap:0;}
+.plan-month{display:flex;gap:0;position:relative;}
+.plan-month:not(:last-child) .ptm-line{flex:1;}
+.ptm-dot-col{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0;}
+.ptm-dot{width:12px;height:12px;border-radius:50%;border:2px solid;flex-shrink:0;margin-top:3px;}
+.ptm-dot.apr{background:rgba(59,130,246,.25);border-color:var(--blue);}
+.ptm-dot.aug{background:rgba(16,185,129,.25);border-color:var(--green);}
+.ptm-dot.nov{background:rgba(245,158,11,.25);border-color:var(--yellow);}
+.ptm-line{width:2px;background:var(--border);flex:1;margin-top:2px;min-height:10px;}
+.ptm-body{flex:1;padding-bottom:14px;}
+.ptm-header{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.ptm-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.ptm-badge.apr{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3);}
+.ptm-badge.aug{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.ptm-badge.nov{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3);}
+.ptm-title{font-size:11px;font-weight:700;color:var(--text);}
+.ptm-sub{font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.5;}
+.ptm-items{display:flex;flex-direction:column;gap:4px;}
+.ptm-item{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:10px;display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.ptm-item-left{display:flex;align-items:center;gap:6px;}
+.ptm-item-ticker{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;color:var(--cyan);}
+.ptm-item-note{color:var(--dim);}
+.ptm-item-right{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;}
+.plan-alloc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
+.pac-item{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.pac-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.pac-name{font-size:10px;font-weight:700;color:var(--text);}
+.pac-pct{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:900;}
+.pac-bar-track{background:var(--border);border-radius:3px;height:5px;}
+.pac-bar-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+.pac-tickers{font-size:9px;color:var(--muted);margin-top:4px;}
+.plan-total-note{font-size:9px;color:var(--muted);text-align:center;padding:4px 0;}
+
+/* ── 집행플랜 인라인 입력 ── */
+.plan-input{background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 5px;text-align:right;transition:border-color .15s;}
+.plan-input:focus{outline:none;border-color:var(--blue);}
+.plan-input-pct{width:52px;min-width:52px;}
+.plan-input-amt{width:68px;}
+
+/* ── 라이트 모드 ── */
+body.light-mode{
+  --bg:#f0f4f8;--s1:#ffffff;--s2:#edf2f7;--s3:#f7faff;--border:#d0dae8;
+  --text:#1a202c;--muted:#718096;--dim:#4a5568;
+}
+body.light-mode .app-header{background:linear-gradient(135deg,#ffffff,#f0f4f8);box-shadow:0 1px 8px rgba(0,0,0,.08);}
+body.light-mode .app-header-left h1{background:linear-gradient(135deg,#1a202c,#2563eb,#0891b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+body.light-mode .analysis-pane{background:#f7faff;}
+body.light-mode .card,.light-mode .member-card,.light-mode .meta-item{background:#ffffff;}
+body.light-mode input[type="text"],body.light-mode input[type="number"],body.light-mode select{background:#fff;color:#1a202c;border-color:#d0dae8;}
+body.light-mode .holdings-table th{background:#edf2f7;}
+body.light-mode .holdings-table tbody tr:hover td{background:rgba(0,0,0,.025);}
+body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 .apane-tab{
   background:var(--s2);border:1px solid var(--border);border-radius:7px;
   padding:4px 9px;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;
@@ -626,27 +683,125 @@ select.cat-select option[value="defense"]{color:#10b981;}
 .strategy-summary .ss-label{font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
 .strategy-summary .ss-text{font-size:11px;font-weight:700;color:var(--text);line-height:1.5;}
 
-@media(max-width:900px){
-  .app-body{grid-template-columns:1fr;}
-  .analysis-pane{display:none;}
+/* ══════════════════════════════════
+   RESPONSIVE / MOBILE
+══════════════════════════════════ */
+
+/* ── Mobile FAB (분석 패널 토글) ── */
+.mobile-fab{
+  display:none;
+  position:fixed;bottom:20px;right:16px;z-index:300;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  color:white;border:none;border-radius:50px;
+  padding:11px 18px;font-size:12px;font-weight:700;
+  font-family:'Noto Sans KR',sans-serif;
+  box-shadow:0 4px 18px rgba(59,130,246,.55);
+  cursor:pointer;align-items:center;gap:6px;
+  transition:transform .2s,box-shadow .2s;
 }
+.mobile-fab:active{transform:scale(.95);}
+
+/* ── Bottom drawer (분석 패널 모바일용) ── */
+.mobile-drawer{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:290;
+  background:var(--s3);border-top:2px solid var(--blue);
+  border-radius:18px 18px 0 0;
+  max-height:75vh;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.32,.72,0,1);
+  flex-direction:column;
+  box-shadow:0 -8px 40px rgba(0,0,0,.5);
+}
+.mobile-drawer.open{transform:translateY(0);}
+.mobile-drawer-handle{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px 6px;flex-shrink:0;
+}
+.mobile-drawer-pill{
+  width:36px;height:4px;border-radius:2px;background:var(--border);
+  margin:0 auto 0;
+}
+.mobile-drawer-close{
+  background:none;border:none;color:var(--muted);
+  font-size:18px;cursor:pointer;padding:2px 6px;line-height:1;
+}
+.mobile-drawer-body{flex:1;overflow-y:auto;padding:0 12px 80px;}
+.mobile-overlay{
+  display:none;position:fixed;inset:0;z-index:280;
+  background:rgba(0,0,0,.5);
+}
+.mobile-overlay.open{display:block;}
+
+/* ── 헤더 모바일 ── */
+@media(max-width:640px){
+  .app-header{padding:9px 12px;gap:7px;}
+  .editor-pane{padding-bottom:80px;}   /* FAB 위 여백 */
+  .holdings-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .card-body{padding:8px 10px;}
+  .meta-grid{grid-template-columns:1fr 1fr;}
+  .app-header-left .sub{display:none;}
+  .app-header-left h1{font-size:13px;}
+  /* 버튼 텍스트 숨기고 이모지만 */
+  .btn-label{display:none;}
+  .btn-sm{padding:6px 8px;font-size:13px;}
+  .header-date-box{padding:3px 8px;}
+  .header-date-box span{display:none;}
+  .header-date-box input{width:72px;}
+}
+
+/* ── 태블릿 이하: 드로어 활성화 ── */
+@media(max-width:900px){
+  .app-body{
+    grid-template-columns:1fr;
+    height:calc(100vh - 53px);
+  }
+  .editor-pane{padding:12px 14px;}
+  .analysis-pane{display:none;}          /* 데스크탑용 사이드패널 숨김 */
+  .mobile-fab{display:flex;}
+  .mobile-drawer{display:flex;}
+}
+
+/* ── 보고서용 프린트 ── */
+
 </style>
+<script>
+// 4월·5월 추이 데이터 강제 초기화 (즉시 실행)
+(function() {
+  var KEY = 'pf_monthly_snapshots';
+  var seed = [{"ym":"2026-04","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  try {
+    var existing = JSON.parse(localStorage.getItem(KEY) || '[]');
+    var others = existing.filter(function(s){ return s.ym !== '2026-04' && s.ym !== '2026-05'; });
+    var merged = seed.concat(others);
+    merged.sort(function(a,b){ return a.ym < b.ym ? -1 : 1; });
+    localStorage.setItem(KEY, JSON.stringify(merged));
+  } catch(e) {}
+})();
+</script>
 </head>
 <body>
 
 <!-- ── Header ── -->
 <header class="app-header">
   <div class="app-header-left">
-    <h1>📊 포트폴리오 편집기 v7</h1>
+    <h1>📊 포트폴리오 편집기</h1>
     <div class="sub">뀨 가족 · 주간상태판·수익률·시뮬레이터·목표 의사결정 엔진</div>
   </div>
   <div class="header-actions">
-    <button class="btn btn-secondary btn-sm" onclick="saveSnapshot()">📸 스냅샷 저장</button>
-    <button class="btn btn-secondary btn-sm" onclick="saveJSON()">💾 JSON 저장</button>
+    <div class="header-date-box" style="display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:4px 10px;">
+      <span style="font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap;">📅 기준일</span>
+      <input type="text" id="meta-date" value="2026.05.02" oninput="recalc()"
+        style="background:transparent;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;width:80px;padding:0;outline:none;">
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="saveSnapshot()">📸 <span class="btn-label">스냅샷 저장</span></button>
+    <button class="btn btn-secondary btn-sm" onclick="saveJSON()">💾 <span class="btn-label">JSON 저장</span></button>
     <label class="btn btn-secondary btn-sm" style="cursor:pointer">
-      📂 불러오기 <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
+      📂 <span class="btn-label">불러오기</span> <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
     </label>
-    <button class="btn btn-primary" onclick="generateHTML()">⬇️ 보고서 HTML 생성</button>
+    <button id="themeToggleBtn" class="btn btn-secondary btn-sm" onclick="toggleTheme()" title="라이트/다크 모드 전환">☀️ 라이트</button>
+    <button class="btn btn-danger btn-sm" onclick="resetTrendData()" title="월별추이 데이터를 4/22·5/2 기준으로 초기화">🗑 추이초기화</button>
+    <button class="btn btn-primary" onclick="generateHTML()">⬇️ <span class="btn-label">보고서</span></button>
   </div>
 </header>
 
@@ -655,14 +810,6 @@ select.cat-select option[value="defense"]{color:#10b981;}
 
   <!-- ════ Editor Pane ════ -->
   <div class="editor-pane" id="editorPane">
-
-    <!-- Meta -->
-    <div class="sec-divider"><h3>기본 정보</h3></div>
-    <div class="meta-grid">
-      <div class="meta-item"><label>기준일</label><input type="text" id="meta-date" value="2026.04.21" oninput="recalc()"></div>
-      <div class="meta-item"><label>버전</label><input type="text" id="meta-ver" value="v7" oninput="recalc()"></div>
-      <div class="meta-item"><label>메모</label><input type="text" id="meta-memo" value="v3 업그레이드" oninput="recalc()"></div>
-    </div>
 
     <!-- Category summary -->
     <div class="sec-divider"><h3>자산군 자동 집계</h3></div>
@@ -738,7 +885,7 @@ select.cat-select option[value="defense"]{color:#10b981;}
   <!-- ════ Analysis Pane ════ -->
   <div class="analysis-pane">
     <div class="analysis-header">
-      <span class="title">📈 자동 분석 · v7</span>
+      <span class="title">📈 자동 분석</span>
       <span id="analysisDate" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);"></span>
     </div>
     <div style="padding:8px 14px 0;border-bottom:1px solid var(--border);flex-shrink:0;">
@@ -748,6 +895,8 @@ select.cat-select option[value="defense"]{color:#10b981;}
         <div class="apane-tab" onclick="switchApaneTab('simulator')">⚖️ 시뮬레이터</div>
         <div class="apane-tab" onclick="switchApaneTab('scenario')">🔮 시나리오</div>
         <div class="apane-tab" onclick="switchApaneTab('pnl')">💹 수익률</div>
+        <div class="apane-tab" onclick="switchApaneTab('plan')">📅 집행플랜</div>
+        <div class="apane-tab" onclick="switchApaneTab('trend')">📈 월별추이</div>
       </div>
     </div>
     <div class="analysis-body" id="analysisBody">
@@ -761,15 +910,33 @@ select.cat-select option[value="defense"]{color:#10b981;}
 
 </div><!-- /app-body -->
 
+
+<!-- ── Mobile: Overlay ── -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileDrawer()"></div>
+
+<!-- ── Mobile: Bottom Drawer ── -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="mobile-drawer-handle">
+    <div style="width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto;"></div>
+    <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
+  </div>
+  <div class="mobile-drawer-body" id="mobileDrawerBody"></div>
+</div>
+
+<!-- ── Mobile: FAB ── -->
+<button class="mobile-fab" id="mobileFab" onclick="toggleMobileDrawer()">
+  📈 <span>분석 보기</span>
+</button>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ════════════════════════════════════════════════════════
 //  CONSTANTS
 // ════════════════════════════════════════════════════════
-let currentApaneTab = 'weekly'; // v7: default to weekly status board
+let currentApaneTab = 'weekly';
 
-// ── v7: 정렬 상태 (memberIndex → {key, dir})
+// ── 정렬 상태 (memberIndex → {key, dir})
 let sortState = {}; // { mi: { key: 'account'|'ticker'|'entryType'|'qty'|'pnl'|'amount'|'cat'|'badge', dir: 1|-1 } }
 const CATEGORIES = [
   { id:'core',     label:'코어 ETF',      color:'#3b82f6', colorAlpha:'rgba(59,130,246,'  },
@@ -799,7 +966,7 @@ const ENTRY_TYPES = [
 //  STATE
 // ════════════════════════════════════════════════════════
 let state = {
-  meta: { date:'2026.04.21', ver:'v7', memo:'v3 업그레이드' },
+  meta: { date:'2026.04.21' },
   catTargets: { core:30, bigtech:20, ai:20, semi:8, defense:10, growth:7, domestic:3, other:2 },
   members: [
     {
@@ -858,7 +1025,48 @@ let state = {
         {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.95%',amount:235,cat:'domestic',badge:'',note:''},
       ]
     }
-  ]
+  ],
+  planConfig: {
+    periods: [
+      { label:'4월', year:'2026', color:'#3b82f6', ca:'rgba(59,130,246,',
+        groups:[
+          { type:'invest', account:'ISA', members:'현규 · 인숙', perPerson:2000, numMembers:2, note:null,
+            items:[{name:'나스닥100',pct:45},{name:'반도체',pct:30},{name:'테크TOP10',pct:15},{name:'S&P500',pct:10}] },
+          { type:'invest', account:'연금저축', members:'현규 · 인숙', perPerson:900, numMembers:2, note:null,
+            items:[{name:'S&P500',pct:60},{name:'나스닥100',pct:40}] },
+          { type:'cash', account:'CMA (현규)', label:'현금 보관', totalAmt:690, debt:false },
+        ]
+      },
+      { label:'8월', year:'2026', color:'#10b981', ca:'rgba(16,185,129,',
+        groups:[
+          { type:'invest', account:'ISA', members:'재연 · 재현', perPerson:2000, numMembers:2, note:null,
+            items:[{name:'S&P500',pct:35},{name:'나스닥100',pct:30},{name:'반도체',pct:20},{name:'AI전력핵심',pct:15}] },
+          { type:'invest', account:'일반계좌', members:'재연 · 재현', perPerson:3000, numMembers:2, note:'5회 분할매수',
+            items:[{name:'S&P500',pct:35},{name:'나스닥100',pct:30},{name:'반도체',pct:20},{name:'AI전력핵심',pct:15}] },
+          { type:'event', label:'증여세 신고', icon:'📋' },
+        ]
+      },
+      { label:'11월', year:'2026', color:'#f97316', ca:'rgba(249,115,22,',
+        groups:[
+          { type:'invest', account:'일반계좌', members:'현규 · 인숙', perPerson:12950, numMembers:2, note:'10회 분할매수',
+            items:[{name:'S&P500',pct:37},{name:'나스닥100',pct:20},{name:'SCHD',pct:17},{name:'AI전력핵심',pct:13},{name:'미국반도체',pct:10},{name:'HBM',pct:3}] },
+          { type:'cash', account:'', label:'엄마 빚 상환', totalAmt:22000, debt:true },
+          { type:'cash', account:'CMA (현규)', label:'폭락 대기 현금', totalAmt:4650, debt:false },
+          { type:'cash', account:'CMA (현규)', label:'2027년 ISA 대기', totalAmt:4000, debt:false },
+          { type:'cash', account:'CMA (현규)', label:'2027년 연금저축 대기', totalAmt:1800, debt:false },
+          { type:'cash', account:'CMA (인숙)', label:'세금 납부용 분리 보관', totalAmt:10000, debt:false },
+        ]
+      },
+      { label:'1월', year:'2027', color:'#8b5cf6', ca:'rgba(139,92,246,',
+        groups:[
+          { type:'invest', account:'ISA', members:'현규 · 인숙', perPerson:2000, numMembers:2, note:null,
+            items:[{name:'S&P500',pct:37},{name:'나스닥100',pct:20},{name:'SCHD',pct:17},{name:'AI전력핵심',pct:13},{name:'미국반도체',pct:10},{name:'HBM',pct:3}] },
+          { type:'invest', account:'연금저축', members:'현규 · 인숙', perPerson:900, numMembers:2, note:null,
+            items:[{name:'S&P500',pct:60},{name:'나스닥100',pct:40}] },
+        ]
+      },
+    ]
+  }
 };
 
 // Snapshot for version comparison
@@ -1122,7 +1330,7 @@ function addHoldingRow(mi) {
 }
 
 // ════════════════════════════════════════════════════════
-//  v7: 정렬 기능
+//  정렬 기능
 // ════════════════════════════════════════════════════════
 function sortHoldings(mi, key) {
   const prev = sortState[mi];
@@ -1471,9 +1679,19 @@ function updateAnalysisPane(calc, validation) {
 
   } else if (currentApaneTab === 'pnl') {
     body += buildPnlAnalysis(calc);
+  } else if (currentApaneTab === 'plan') {
+    body += buildExecutionPlan(calc);
+  } else if (currentApaneTab === 'trend') {
+    body += buildTrendAnalysis(calc);
   }
 
   document.getElementById('analysisBody').innerHTML = header + body;
+  // 모바일 드로어가 열려 있으면 내용 동기화
+  const _drawer = document.getElementById('mobileDrawer');
+  if (_drawer && _drawer.classList.contains('open')) {
+    const _dst = document.getElementById('mobileDrawerBody');
+    if (_dst) _dst.innerHTML = header + body;
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -1588,7 +1806,7 @@ function buildVersionCompareHTML(calc) {
   const dnMovers = movers.filter(m=>m.change<0).slice(0,3);
 
   let html = `<div class="ver-compare">
-    <div class="vc-title">🔄 버전 비교 (${snap.ver||'이전'} → 현재)</div>
+    <div class="vc-title">🔄 스냅샷 비교 (${snap.date||'이전'} → 현재)</div>
     <div class="vc-row">
       <span class="vc-label">총 자산 변화</span>
       <span class="vc-val ${totalChange>=0?'vc-up':'vc-dn'}">${totalChange>=0?'+':''}${fmt(totalChange)}만 (${totalChangePct>=0?'+':''}${totalChangePct.toFixed(1)}%)</span>
@@ -1639,6 +1857,8 @@ function buildVersionCompareHTML(calc) {
 //  PERSIST
 // ════════════════════════════════════════════════════════
 let saveTimer = null;
+const TREND_KEY = 'pf_monthly_snapshots';
+
 function autoSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
@@ -1649,6 +1869,8 @@ function autoSave() {
       const now = new Date();
       document.getElementById('lastSavedLabel').textContent =
         `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} 저장`;
+      // ── 편집할 때마다 해당 월 추이 데이터 자동 누적 ──
+      autoSaveTrendSnapshot();
     } catch(e) {}
   }, 600);
 }
@@ -1657,10 +1879,12 @@ function saveJSON() {
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `pfeditor_v7_${state.meta.date.replace(/\./g,'')}_${state.meta.ver}.json`;
+  // 파일명에 YYYY-MM 형태 날짜 자동 포함 (예: portfolio_2026-05.json)
+  const ym = state.meta.date.replace(/\./g,'-').slice(0,7);
+  a.download = `portfolio_${ym}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast('✅ JSON 저장 완료');
+  showToast('✅ JSON 저장 완료 — portfolio_' + ym + '.json');
 }
 
 function loadJSON(event) {
@@ -1678,7 +1902,9 @@ function loadJSON(event) {
       syncMetaInputs();
       renderMembers();
       recalc();
-      showToast('✅ JSON 불러오기 완료');
+      // ── 자동 월별 스냅샷 저장 ──
+      autoSaveTrendSnapshot();
+      showToast('✅ JSON 불러오기 완료 — 월별추이 자동 저장됨');
     } catch(err) {
       showToast('❌ JSON 파일 오류');
     }
@@ -1687,16 +1913,43 @@ function loadJSON(event) {
   event.target.value = '';
 }
 
+function autoSaveTrendSnapshot() {
+  // JSON 불러올 때 해당 월 스냅샷을 월별추이에 자동 추가
+  // (같은 달이 이미 있으면 덮어씀 — 최신 파일이 기준)
+  const calc = calcState();
+  const {memberTotals, grandTotal} = calc;
+  const dateVal = state.meta.date || new Date().toISOString().slice(0,10).replace(/-/g,'.');
+  const ym = dateVal.replace(/\./g,'-').slice(0,7);
+
+  const snapshots = loadTrendSnapshots();
+  const idx = snapshots.findIndex(s => s.ym === ym);
+  const entry = {
+    ym,
+    label: dateVal,
+    grandTotal,
+    members: state.members.map((m,mi) => ({name:m.name, icon:m.icon, total:memberTotals[mi]})),
+    tickers: (() => {
+      const map = {};
+      state.members.forEach(m => m.holdings.forEach(h => {
+        const t = (h.ticker||'').trim();
+        if (!t || h.entryType === 'cash') return;
+        map[t] = (map[t]||0) + (parseFloat(h.amount)||0);
+      }));
+      return map;
+    })()
+  };
+  if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
+  snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
+  try { localStorage.setItem(TREND_KEY, JSON.stringify(snapshots)); } catch(e) {}
+}
+
 function syncMetaInputs() {
   document.getElementById('meta-date').value = state.meta.date || '';
-  document.getElementById('meta-ver').value = state.meta.ver || '';
-  document.getElementById('meta-memo').value = state.meta.memo || '';
 }
 
 function saveSnapshot() {
   const calc = calcState();
   const snap = {
-    ver: state.meta.ver,
     date: state.meta.date,
     grandTotal: calc.grandTotal,
     catPcts: {...calc.catPcts},
@@ -1706,7 +1959,7 @@ function saveSnapshot() {
   try {
     localStorage.setItem('pfeditor_v7_snapshot', JSON.stringify(snap));
   } catch(e) {}
-  showToast(`📸 스냅샷 저장 완료 (${snap.ver} / ${fmt(snap.grandTotal)}만원)`);
+  showToast(`📸 스냅샷 저장 완료 (${fmt(snap.grandTotal)}만원)`);
   updateAnalysisPane(calc, validateState());
 }
 
@@ -1718,7 +1971,6 @@ function generateHTML() {
   const validation = validateState();
   const {memberTotals, grandTotal, catTotals, catPcts, tickerList, top1Pct, top3Pct, over10} = calc;
   const date = state.meta.date;
-  const ver = state.meta.ver;
   const targetSum = Object.values(state.catTargets).reduce((a,b)=>a+b,0);
   const targetOk = Math.abs(targetSum - 100) < 0.01;
 
@@ -1917,6 +2169,11 @@ function generateHTML() {
   }
   const reportConclusion = buildReportConclusion();
   const weeklyMemo = loadWeeklyMemo();
+  const planReportHTML = buildPlanStaticHTML(state.planConfig);
+
+  // Trend snapshots for report
+  const trendSnaps = loadTrendSnapshots();
+  const trendSnapsJSON = JSON.stringify(trendSnaps);
 
   // Weekly status HTML block for report
   const weeklyPanelHTML = `
@@ -1944,7 +2201,7 @@ function generateHTML() {
           <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${item.color};">${item.val}</span>
         </div>`).join('')}
       </div>
-      ${hasSnap?`<div style="font-size:9px;color:#475569;margin-top:6px;">기준: ${snap.ver||'이전'} · ${snap.date||''} · ${fmt(snap.grandTotal)}만원</div>`:''}
+      ${hasSnap?`<div style="font-size:9px;color:#475569;margin-top:6px;">기준: ${snap.date||''} · ${fmt(snap.grandTotal)}만원</div>`:''}
     </div>
 
     <!-- 위험 신호 -->
@@ -1979,12 +2236,14 @@ function generateHTML() {
   </div>`;
 
 
+  const isLightNow = document.body.classList.contains('light-mode');
+  const reportClass = isLightNow ? ' class="light-report"' : '';
   const html = `<!DOCTYPE html>
-<html lang="ko">
+<html lang="ko"${reportClass}>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>뀨 가족 포트폴리오 ${ver}</title>
+<title>뀨 가족 포트폴리오</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 :root{
@@ -2007,7 +2266,31 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .tab-b.active{background:var(--blue);}.tab-c.active{background:var(--green);}.tab-d.active{background:var(--purple);}
 .tab-e.active{background:linear-gradient(135deg,#10b981,#06b6d4);}
 .tab-f.active{background:linear-gradient(135deg,#3b82f6,#8b5cf6);}
+.tab-g.active{background:linear-gradient(135deg,#f97316,#f59e0b);}
+.tab-h.active{background:linear-gradient(135deg,#10b981,#3b82f6);}
 .panel{display:none;}.panel.active{display:block;}
+.theme-btn{position:fixed;top:14px;right:14px;z-index:999;background:var(--s1);color:var(--dim);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 10px rgba(0,0,0,.3);}
+.theme-btn:hover{border-color:var(--blue);color:var(--text);}
+body.light-report,html.light-report body{--bg:#f0f4f8;--s1:#ffffff;--s2:#edf2f7;--border:#d0dae8;--text:#1a202c;--muted:#718096;--dim:#4a5568;}
+html.light-report body{background:var(--bg);color:var(--text);}
+html.light-report table th{background:#edf2f7;}
+html.light-report .sec,html.light-report .ratio-box,html.light-report .total-banner{background:#fff;}
+html.light-report td{border-bottom-color:rgba(208,218,232,.6);}
+html.light-report .conc-item{background:#edf2f7;}
+html.light-report .plan-static-grp{background:#fff;}
+html.light-report .plan-static-head{background:rgba(0,0,0,.04);}
+html.light-report .sort-btn{background:#edf2f7;}
+html.light-report .tab{background:#fff;}
+body.light-mode{--bg:#f0f4f8;--s1:#ffffff;--s2:#edf2f7;--border:#d0dae8;--text:#1a202c;--muted:#718096;--dim:#4a5568;}
+body.light-mode table th{background:#edf2f7;}
+body.light-mode .sec,.light-mode .ratio-box,.light-mode .total-banner{background:#fff;}
+.plan-static-grp{background:var(--s1);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+.plan-static-head{padding:6px 10px;background:rgba(0,0,0,.12);display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10px;}
+.plan-static-head .acc{font-weight:700;color:var(--text);}
+.plan-static-head .mem{color:var(--muted);font-size:9px;}
+.plan-static-head .tot{margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:700;color:#06b6d4;}
+.plan-row-cash{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;margin-bottom:6px;font-size:10px;}
+.plan-row-event{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;margin-bottom:6px;background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.25);font-size:10px;color:#8b5cf6;}
 
 /* ── 수익률 정렬 ── */
 .sort-bar{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
@@ -2090,9 +2373,8 @@ tr:last-child td{border-bottom:none;}
 <button class="pdf-btn" onclick="window.print()">🖨️ PDF 저장</button>
 
 <div class="header">
-  <div class="ver-badge">🔷 v7 · ${ver}</div>
-  <h1>뀨 가족 포트폴리오<br>${ver}</h1>
-  <div class="sub">${date} · ${state.meta.memo}</div>
+  <h1>뀨 가족 포트폴리오</h1>
+  <div class="sub">${date} 기준</div>
 </div>
 
 <div class="tabs">
@@ -2102,7 +2384,10 @@ tr:last-child td{border-bottom:none;}
   <div class="tab tab-d" onclick="switchTab('d')">🎯 집중도 리스크</div>
   <div class="tab tab-e" onclick="switchTab('e')">💹 수익률</div>
   <div class="tab tab-f" onclick="switchTab('f')">📋 주간상태판</div>
+  <div class="tab tab-g" onclick="switchTab('g')">📅 집행플랜</div>
+  <div class="tab tab-h" onclick="switchTab('h')">📈 월별추이</div>
 </div>
+<button class="theme-btn" id="rptThemeBtn" onclick="toggleRptTheme()">☀️ 라이트</button>
 
 <!-- ── 비중 분석 탭 ── -->
 <div id="panel-a" class="panel active">
@@ -2113,6 +2398,22 @@ tr:last-child td{border-bottom:none;}
     <div class="tb-label">가족 합산 총 자산</div>
     <div class="tb-amount">${fmt(grandTotal)}<span style="font-size:16px;color:var(--muted)">만원</span></div>
     <div class="tb-sub">${state.members.length}명 합산 · ${date} 기준</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:16px;">
+    ${state.members.map((m,mi)=>{
+      const amt = memberTotals[mi];
+      const pct = grandTotal>0 ? amt/grandTotal*100 : 0;
+      const col = m.color||'#3b82f6';
+      return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:700;margin-bottom:6px;">${m.icon} ${m.name}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:900;color:var(--cyan);margin-bottom:4px;">${fmt(amt)}<span style="font-size:10px;color:var(--muted);font-weight:400">만</span></div>
+        <div style="background:var(--border);border-radius:3px;height:4px;margin-bottom:4px;overflow:hidden;">
+          <div style="width:${pct.toFixed(1)}%;height:100%;border-radius:3px;background:${col}99;"></div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);">${pct.toFixed(1)}% · ${m.role}</div>
+      </div>`;
+    }).join('')}
   </div>
 
   <div class="ratio-box">
@@ -2247,8 +2548,18 @@ tr:last-child td{border-bottom:none;}
   ${weeklyPanelHTML}
 </div>
 
+<!-- ── 집행플랜 탭 ── -->
+<div id="panel-g" class="panel">
+  ${planReportHTML}
+</div>
+
+<!-- ── 월별추이 탭 ── -->
+<div id="panel-h" class="panel">
+  <div id="trend-panel-content">로딩 중...</div>
+</div>
+
 <div class="footer">
-  뀨 가족 포트폴리오 v7 · ${ver} · ${date}<br>
+  뀨 가족 포트폴리오 · ${date}<br>
   본 자료는 투자 참고용이며 최종 판단은 본인 책임입니다
 </div>
 
@@ -2257,6 +2568,9 @@ tr:last-child td{border-bottom:none;}
 const pnlData = ${pnlDataJSON};
 let pnlSortKey = 'pnl';
 let pnlSortDir = 'desc';
+
+// ── 월별추이 데이터 ──
+const trendSnapshots = ${trendSnapsJSON};
 
 function fmt(n){ return Math.round(n).toLocaleString('ko-KR'); }
 
@@ -2305,10 +2619,176 @@ function switchTab(id){
   document.getElementById('panel-'+id).classList.add('active');
   document.querySelector('.tab-'+id).classList.add('active');
   if (id === 'e') renderPnlTable();
+  if (id === 'h') renderTrendPanel();
+}
+
+function renderTrendPanel() {
+  const snaps = trendSnapshots;
+  const box = document.getElementById('trend-panel-content');
+  if (!box) return;
+  if (!snaps || snaps.length === 0) {
+    box.innerHTML = '<div style="text-align:center;padding:40px;color:#475569;">월별추이 데이터 없음</div>';
+    return;
+  }
+  const memberColors = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#f97316'];
+  const tickerColors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#f97316','#06b6d4','#ec4899'];
+
+  // collect members
+  const allMembers = [];
+  snaps.forEach(s => s.members.forEach(m => { if (!allMembers.find(x=>x.name===m.name)) allMembers.push({name:m.name,icon:m.icon}); }));
+
+  // top 8 tickers
+  const tickerTotals = {};
+  snaps.forEach(s => { if(s.tickers) Object.entries(s.tickers).forEach(([t,v]) => { tickerTotals[t]=(tickerTotals[t]||0)+v; }); });
+  const topTickers = Object.entries(tickerTotals).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]);
+
+  // display labels (MM.DD)
+  const dispLabels = snaps.map(s => (s.label||s.ym).slice(5));
+
+  function miniChart(datasets, labels, height, showLegend) {
+    const W=380, H=height||120, PAD={t:8,r:8,b:28,l:60};
+    const cW=W-PAD.l-PAD.r, cH=H-PAD.t-PAD.b;
+    const allVals = datasets.flatMap(d=>d.data).filter(v=>v!=null&&v>0);
+    if (!allVals.length) return '<div style="color:#475569;font-size:11px;text-align:center;padding:20px">데이터 없음</div>';
+    const minV=Math.min(...allVals)*0.9, maxV=Math.max(...allVals)*1.05;
+    const range=maxV-minV||1;
+    const xStep=labels.length>1?cW/(labels.length-1):cW;
+    const yPos=v=>PAD.t+cH-(v-minV)/range*cH;
+    const xPos=i=>PAD.l+(labels.length>1?i*xStep:cW/2);
+    let svg=\`<svg viewBox="0 0 \${W} \${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:\${W}px;display:block;">\`;
+    for(let i=0;i<=3;i++){
+      const y=PAD.t+(cH/3)*i; const val=maxV-(range/3)*i;
+      svg+=\`<line x1="\${PAD.l}" y1="\${y}" x2="\${W-PAD.r}" y2="\${y}" stroke="#1c2d42" stroke-width="1"/>\`;
+      svg+=\`<text x="\${PAD.l-4}" y="\${y+3}" text-anchor="end" font-size="8" fill="#475569">\${Math.round(val).toLocaleString()}</text>\`;
+    }
+    labels.forEach((l,i)=>{
+      svg+=\`<text x="\${xPos(i)}" y="\${H-6}" text-anchor="middle" font-size="8" fill="#475569">\${l}</text>\`;
+    });
+    datasets.forEach(ds=>{
+      const pts=ds.data.map((v,i)=>v!=null?\`\${xPos(i)},\${yPos(v)}\`:null).filter(Boolean);
+      if(pts.length>=2) svg+=\`<polyline points="\${pts.join(' ')}" fill="none" stroke="\${ds.color}" stroke-width="2" stroke-linejoin="round"/>\`;
+      ds.data.forEach((v,i)=>{ if(v!=null) svg+=\`<circle cx="\${xPos(i)}" cy="\${yPos(v)}" r="3" fill="\${ds.color}" stroke="#060a12" stroke-width="1.5"/>\`; });
+    });
+    svg+=\`</svg>\`;
+    if(showLegend){
+      svg+=\`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">\`;
+      datasets.forEach(ds=>{ svg+=\`<span style="display:flex;align-items:center;gap:4px;font-size:9px;color:#94a3b8;"><span style="width:10px;height:2px;background:\${ds.color};display:inline-block;border-radius:1px;"></span>\${ds.label}</span>\`; });
+      svg+=\`</div>\`;
+    }
+    return svg;
+  }
+
+  const memberDatasets = allMembers.map((m,i) => ({
+    label: m.icon+' '+m.name,
+    color: memberColors[i%memberColors.length],
+    data: snaps.map(s=>{ const f=s.members.find(x=>x.name===m.name); return f?f.total:null; })
+  }));
+  const tickerDatasets = topTickers.map((t,i) => ({
+    label: t, color: tickerColors[i%tickerColors.length],
+    data: snaps.map(s=>s.tickers?.[t]||null)
+  }));
+
+  // Member table
+  const memberTableRows = allMembers.map((m,i) => {
+    const color = memberColors[i%memberColors.length];
+    const vals = snaps.map(s=>{ const f=s.members.find(x=>x.name===m.name); return f?f.total:null; });
+    const first = vals.find(v=>v!=null);
+    const last = [...vals].reverse().find(v=>v!=null);
+    const change = (first!=null&&last!=null&&snaps.length>=2)?last-first:null;
+    const chColor = change===null?'#475569':change>=0?'#10b981':'#ef4444';
+    return \`<tr style="border-bottom:1px solid rgba(28,45,66,.4);">
+      <td style="padding:6px 8px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:\${color};display:inline-block;"></span><span style="font-weight:700;color:#e2e8f0;">\${m.icon} \${m.name}</span></span></td>
+      \${vals.map(v=>\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;color:\${v!=null?'#06b6d4':'#475569'};font-size:11px;">\${v!=null?Math.round(v).toLocaleString('ko-KR')+'만':'-'}</td>\`).join('')}
+      \${snaps.length>=2?\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-weight:700;color:\${chColor};font-size:11px;">\${change===null?'-':(change>=0?'+':'')+Math.round(change).toLocaleString('ko-KR')+'만'}</td>\`:''}
+    </tr>\`;
+  }).join('');
+
+  // Ticker table
+  const tickerTableRows = topTickers.map((t,i) => {
+    const color = tickerColors[i%tickerColors.length];
+    const vals = snaps.map(s=>s.tickers?.[t]||null);
+    const first = vals.find(v=>v!=null);
+    const last = [...vals].reverse().find(v=>v!=null);
+    const change = (first!=null&&last!=null&&snaps.length>=2)?last-first:null;
+    const chColor = change===null?'#475569':change>=0?'#10b981':'#ef4444';
+    return \`<tr style="border-bottom:1px solid rgba(28,45,66,.4);">
+      <td style="padding:6px 8px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:\${color};display:inline-block;"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#e2e8f0;font-size:11px;">\${t}</span></span></td>
+      \${vals.map(v=>\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;color:\${v!=null?'#06b6d4':'#475569'};font-size:11px;">\${v!=null?Math.round(v).toLocaleString('ko-KR')+'만':'-'}</td>\`).join('')}
+      \${snaps.length>=2?\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-weight:700;color:\${chColor};font-size:11px;">\${change===null?'-':(change>=0?'+':'')+Math.round(change).toLocaleString('ko-KR')+'만'}</td>\`:''}
+    </tr>\`;
+  }).join('');
+
+  const colHeaders = dispLabels.map(l=>\`<th style="text-align:right;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">\${l}</th>\`).join('');
+  const changeHeader = snaps.length>=2?'<th style="text-align:right;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;">변화</th>':'';
+
+  const latest = snaps[snaps.length-1];
+  const prev = snaps.length>=2?snaps[snaps.length-2]:null;
+  const totalChange = prev?latest.grandTotal-prev.grandTotal:null;
+  const chColor2 = totalChange===null?'#475569':totalChange>=0?'#10b981':'#ef4444';
+
+  box.innerHTML = \`
+    <div style="background:rgba(28,45,66,.4);border:1px solid #1c2d42;border-radius:9px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:9px;color:#475569;margin-bottom:3px;">최신 총 자산 (\${latest.label||latest.ym})</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:900;color:#06b6d4;">\${Math.round(latest.grandTotal).toLocaleString('ko-KR')}만</div>
+      </div>
+      \${totalChange!==null?\`<div style="text-align:right;"><div style="font-size:9px;color:#475569;margin-bottom:3px;">전 스냅샷 대비</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:\${chColor2};">\${totalChange>=0?'+':''}\${Math.round(totalChange).toLocaleString('ko-KR')}만</div></div>\`:''}
+    </div>
+
+    <div style="background:rgba(28,45,66,.3);border:1px solid #1c2d42;border-radius:9px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">👨‍👩‍👧‍👦 구성원별 자산 현황</div>
+      \${miniChart(memberDatasets, dispLabels, 140, true)}
+      <div style="overflow-x:auto;margin-top:12px;">
+        <table style="width:100%;border-collapse:collapse;min-width:280px;">
+          <thead><tr>
+            <th style="text-align:left;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;">구성원</th>
+            \${colHeaders}\${changeHeader}
+          </tr></thead>
+          <tbody>\${memberTableRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    \${topTickers.length>0?\`
+    <div style="background:rgba(28,45,66,.3);border:1px solid #1c2d42;border-radius:9px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📊 종목별 금액 변화 (상위 8개)</div>
+      \${miniChart(tickerDatasets, dispLabels, 150, true)}
+      <div style="overflow-x:auto;margin-top:12px;">
+        <table style="width:100%;border-collapse:collapse;min-width:280px;">
+          <thead><tr>
+            <th style="text-align:left;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;">종목</th>
+            \${colHeaders}\${changeHeader}
+          </tr></thead>
+          <tbody>\${tickerTableRows}</tbody>
+        </table>
+      </div>
+    </div>\`:''}
+
+    <div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">저장된 스냅샷 (\${snaps.length}개)</div>
+    \${[...snaps].reverse().map(s=>\`<div style="background:rgba(28,45,66,.3);border:1px solid #1c2d42;border-radius:7px;padding:7px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#06b6d4;font-weight:700;">\${s.label||s.ym}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#e2e8f0;flex:1;">\${Math.round(s.grandTotal).toLocaleString('ko-KR')}만</span>
+      <span style="font-size:9px;color:#475569;">\${s.members.map(m=>m.icon+m.name).join(' · ')}</span>
+    </div>\`).join('')}
+  \`;
+}
+
+function toggleRptTheme(){
+  const html = document.documentElement;
+  const isLight = html.classList.toggle('light-report');
+  const btn = document.getElementById('rptThemeBtn');
+  if (btn) btn.textContent = isLight ? '🌙 다크' : '☀️ 라이트';
 }
 
 // Init
 renderPnlTable();
+// Set initial theme button text
+(function(){
+  const html = document.documentElement;
+  const isLight = html.classList.contains('light-report');
+  const btn = document.getElementById('rptThemeBtn');
+  if (btn) btn.textContent = isLight ? '🌙 다크' : '☀️ 라이트';
+})();
 <\/script>
 </body>
 </html>`;
@@ -2316,10 +2796,10 @@ renderPnlTable();
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `family_portfolio_v7_${ver}_${date.replace(/\./g,'')}.html`;
+  a.download = `family_portfolio_${date.replace(/\./g,'')}.html`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast('✅ v7 보고서 HTML 생성 완료!');
+  showToast('✅ 보고서 HTML 생성 완료!');
 }
 
 // ════════════════════════════════════════════════════════
@@ -2335,43 +2815,342 @@ function showToast(msg) {
 //  INIT
 // ════════════════════════════════════════════════════════
 function init() {
+  // ── 월별추이 초기 데이터 강제 설정 (4월·5월 두 개만) ──
+  const SEED_SNAPSHOTS = [{"ym":"2026-04","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
   try {
-    // v7: try v7 key first, fallback to v6 for migration
+    const existing = JSON.parse(localStorage.getItem(TREND_KEY) || '[]');
+    const otherMonths = existing.filter(s => s.ym !== '2026-04' && s.ym !== '2026-05');
+    const merged = [...SEED_SNAPSHOTS, ...otherMonths];
+    merged.sort((a, b) => a.ym.localeCompare(b.ym));
+    localStorage.setItem(TREND_KEY, JSON.stringify(merged));
+  } catch(e) {}
+
+  try {
+    // try v7 key first, fallback to v6 for migration
     const saved = localStorage.getItem('pfeditor_v7_state') || localStorage.getItem('pfeditor_v6_state');
     if (saved) {
-      state = JSON.parse(saved);
+      const savedState = JSON.parse(saved);
       // migration: add entryType if missing
-      state.members.forEach(m => m.holdings.forEach(h => {
+      savedState.members.forEach(m => m.holdings.forEach(h => {
         if (!h.entryType) h.entryType = 'single';
       }));
+      // migration: planConfig — keep saved if present, else use default
+      if (!savedState.planConfig) savedState.planConfig = state.planConfig;
+      state = savedState;
     }
     const savedSnap = localStorage.getItem('pfeditor_v7_snapshot') || localStorage.getItem('pfeditor_v6_snapshot');
     if (savedSnap) snapshot = JSON.parse(savedSnap);
   } catch(e) {}
+  // 테마 복원
+  const savedTheme = localStorage.getItem('pfTheme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.textContent = '🌙 다크';
+  }
   syncMetaInputs();
   renderMembers();
   recalc();
-  ['meta-date','meta-ver','meta-memo'].forEach(id => {
-    document.getElementById(id).addEventListener('input', e => {
-      const key = id.replace('meta-','');
-      state.meta[key] = e.target.value;
-      recalc();
-    });
+  document.getElementById('meta-date').addEventListener('input', e => {
+    state.meta.date = e.target.value;
+    recalc();
   });
 }
 
 // ════════════════════════════════════════════════════════
-//  v7: ANALYSIS PANE TAB SWITCHER
+//  ANALYSIS PANE TAB SWITCHER
 // ════════════════════════════════════════════════════════
 function switchApaneTab(tab) {
   currentApaneTab = tab;
-  const tabs = ['weekly','overview','simulator','scenario','pnl'];
+  const tabs = ['weekly','overview','simulator','scenario','pnl','plan'];
   document.querySelectorAll('.apane-tab').forEach((el, i) => {
     el.classList.toggle('active', tabs[i] === tab);
   });
   const calc = calcState();
   const validation = validateState();
   updateAnalysisPane(calc, validation);
+}
+
+// ════════════════════════════════════════════════════════
+//  집행플랜 — 필드 업데이트
+// ════════════════════════════════════════════════════════
+function updatePlan(pidx, gidx, field, iidx, value) {
+  const g = state.planConfig.periods[pidx].groups[gidx];
+  const v = parseFloat(value) || 0;
+  if (iidx !== null && iidx !== undefined) {
+    g.items[iidx][field] = v;
+  } else {
+    g[field] = v;
+    if (field === 'perPerson') g.totalAmt = v * (g.numMembers || 2);
+  }
+  autoSave();
+  if (field === 'pct') validatePlanPct(pidx, gidx);
+}
+
+function validatePlanPct(pidx, gidx) {
+  const g = state.planConfig.periods[pidx].groups[gidx];
+  if (!g || g.type !== 'invest') return;
+  const total = (g.items || []).reduce((s, item) => s + (parseFloat(item.pct) || 0), 0);
+  const warnId = `plan-pct-warn-${pidx}-${gidx}`;
+  let warn = document.getElementById(warnId);
+  if (Math.abs(total - 100) > 0.01) {
+    if (!warn) {
+      // find the table for this group and insert warning before it
+      const inputs = document.querySelectorAll(
+        `input[oninput*="updatePlan(${pidx},${gidx},'pct'"]`
+      );
+      if (inputs.length > 0) {
+        const tbl = inputs[0].closest('table');
+        if (tbl) {
+          warn = document.createElement('div');
+          warn.id = warnId;
+          warn.style.cssText = 'background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;color:#ef4444;display:flex;align-items:center;gap:5px;margin-bottom:4px;';
+          tbl.parentNode.insertBefore(warn, tbl);
+        }
+      }
+    }
+    if (warn) {
+      const diff = total - 100;
+      warn.innerHTML = `⚠ 비중 합계 ${total.toFixed(1)}% — 100%에서 ${diff > 0 ? '+' : ''}${diff.toFixed(1)}%p ${diff > 0 ? '초과' : '부족'}`;
+    }
+  } else {
+    if (warn) warn.remove();
+  }
+}
+
+function refreshPlan() {
+  const calc = calcState();
+  const validation = validateState();
+  updateAnalysisPane(calc, validation);
+  // Re-validate all plan pct groups
+  state.planConfig.periods.forEach((period, pidx) => {
+    period.groups.forEach((g, gidx) => {
+      if (g.type === 'invest') validatePlanPct(pidx, gidx);
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  테마 토글
+// ════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════
+//  MOBILE DRAWER
+// ════════════════════════════════════════════════════════
+function toggleMobileDrawer() {
+  const drawer = document.getElementById('mobileDrawer');
+  const overlay = document.getElementById('mobileOverlay');
+  const fab = document.getElementById('mobileFab');
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    closeMobileDrawer();
+  } else {
+    // Sync content from analysis pane
+    const src = document.getElementById('analysisBody');
+    const dst = document.getElementById('mobileDrawerBody');
+    if (src && dst) dst.innerHTML = src.innerHTML;
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    fab.innerHTML = '✕ <span>닫기</span>';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeMobileDrawer() {
+  const drawer = document.getElementById('mobileDrawer');
+  const overlay = document.getElementById('mobileOverlay');
+  const fab = document.getElementById('mobileFab');
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  fab.innerHTML = '📈 <span>분석 보기</span>';
+  document.body.style.overflow = '';
+}
+
+// After recalc, if drawer is open, re-sync content
+
+
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('pfTheme', isLight ? 'light' : 'dark');
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = isLight ? '🌙 다크' : '☀️ 라이트';
+}
+
+// ════════════════════════════════════════════════════════
+//  집행플랜 탭
+// ════════════════════════════════════════════════════════
+function buildExecutionPlan() {
+  const periods = state.planConfig.periods;
+  let html = '';
+
+  periods.forEach((period, pidx) => {
+    const isLast = pidx === periods.length - 1;
+
+    let periodTotal = 0;
+    period.groups.forEach(g => {
+      if (g.type === 'invest') periodTotal += (g.perPerson || 0) * (g.numMembers || 2);
+      else if (g.type === 'cash') periodTotal += g.totalAmt || 0;
+    });
+
+    html += `<div style="display:flex;gap:0;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0;">
+        <div style="width:11px;height:11px;border-radius:50%;background:${period.ca}.18);border:2px solid ${period.color};flex-shrink:0;margin-top:5px;box-shadow:0 0 6px ${period.ca}.2);"></div>
+        ${!isLast ? `<div style="width:2px;flex:1;background:var(--border);margin-top:3px;min-height:20px;"></div>` : ''}
+      </div>
+      <div style="flex:1;padding-bottom:${isLast ? '4' : '20'}px;">`;
+
+    html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <span style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;background:${period.ca}.15);color:${period.color};border:1px solid ${period.ca}.3);">${period.year} · ${period.label}</span>
+        <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:900;color:${period.color};">총 ${fmt(periodTotal)}만</span>
+      </div>`;
+
+    period.groups.forEach((g, gidx) => {
+      if (g.type === 'invest') {
+        const grpTotal = (g.perPerson || 0) * (g.numMembers || 2);
+        html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden;">
+          <div style="padding:6px 10px;background:rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:10px;font-weight:700;color:var(--text);">${g.account}</span>
+            <span style="font-size:9px;color:var(--muted);">${g.members} 각자</span>
+            <input type="number" class="plan-input plan-input-amt" value="${g.perPerson}"
+              oninput="updatePlan(${pidx},${gidx},'perPerson',null,this.value)"
+              onblur="refreshPlan()" title="1인당 금액(만원)">
+            <span style="font-size:9px;color:var(--muted);">만</span>
+            ${g.note ? `<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.3);">${g.note}</span>` : ''}
+            <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--cyan);">합계 ${fmt(grpTotal)}만</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:rgba(0,0,0,.1);">
+              <th style="padding:4px 8px;font-size:8px;font-weight:600;color:var(--muted);text-align:left;">종목</th>
+              <th style="padding:4px 6px;font-size:8px;font-weight:600;color:var(--muted);text-align:right;width:70px;">비중</th>
+              <th style="padding:4px 6px;font-size:8px;font-weight:600;color:var(--muted);text-align:right;width:66px;">1인당</th>
+              <th style="padding:4px 6px;font-size:8px;font-weight:600;color:var(--muted);text-align:right;width:66px;">합계</th>
+            </tr></thead>
+            <tbody>`;
+        g.items.forEach((item, iidx) => {
+          const pp = Math.round((g.perPerson || 0) * item.pct / 100);
+          html += `<tr style="border-top:1px solid var(--border);">
+              <td style="padding:4px 8px;">
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <span style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;">${item.name}</span>
+                  <div style="height:3px;background:rgba(255,255,255,.06);border-radius:2px;flex:1;overflow:hidden;min-width:8px;">
+                    <div style="width:${item.pct}%;height:100%;border-radius:2px;background:${period.color}77;"></div>
+                  </div>
+                </div>
+              </td>
+              <td style="padding:4px 6px;text-align:right;width:70px;white-space:nowrap;">
+                <input type="number" class="plan-input plan-input-pct" value="${item.pct}" min="0" max="100"
+                  oninput="updatePlan(${pidx},${gidx},'pct',${iidx},this.value)"
+                  onblur="refreshPlan()" title="비중(%)">
+                <span style="font-size:9px;color:var(--muted);">%</span>
+              </td>
+              <td style="padding:4px 6px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);">${fmt(pp)}만</td>
+              <td style="padding:4px 6px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--cyan);">${fmt(pp * (g.numMembers || 2))}만</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div>`;
+
+      } else if (g.type === 'cash') {
+        const fc = g.debt ? 'var(--red)' : 'var(--dim)';
+        const bg = g.debt ? 'rgba(239,68,68,.06)' : 'var(--s2)';
+        const bd = g.debt ? 'rgba(239,68,68,.2)'  : 'var(--border)';
+        const ic = g.debt ? '💸' : '🏦';
+        html += `<div style="background:${bg};border:1px solid ${bd};border-radius:8px;padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:7px;">
+          <span style="font-size:11px;">${ic}</span>
+          <span style="font-size:10px;color:${fc};flex:1;">${g.account ? `<span style="color:var(--muted);font-size:9px;">${g.account} · </span>` : ''}${g.label}</span>
+          <input type="number" class="plan-input plan-input-amt" value="${g.totalAmt}"
+            oninput="updatePlan(${pidx},${gidx},'totalAmt',null,this.value)"
+            onblur="refreshPlan()" style="color:${fc};">
+          <span style="font-size:9px;color:${fc};">만</span>
+        </div>`;
+
+      } else if (g.type === 'event') {
+        html += `<div style="background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.25);border-radius:8px;padding:6px 10px;margin-bottom:6px;display:flex;align-items:center;gap:7px;">
+          <span style="font-size:11px;">${g.icon}</span>
+          <span style="font-size:10px;color:var(--purple);">${g.label}</span>
+        </div>`;
+      }
+    });
+
+    html += `</div></div>`;
+  });
+
+  return html;
+}
+
+// ════════════════════════════════════════════════════════
+//  집행플랜 정적 HTML (보고서용 — 입력 없음)
+// ════════════════════════════════════════════════════════
+function buildPlanStaticHTML(cfg) {
+  const fmtN = n => Math.round(n).toLocaleString('ko-KR');
+  let html = '';
+  cfg.periods.forEach((period, pidx) => {
+    const isLast = pidx === cfg.periods.length - 1;
+    let periodTotal = 0;
+    period.groups.forEach(g => {
+      if (g.type === 'invest') periodTotal += (g.perPerson||0)*(g.numMembers||2);
+      else if (g.type === 'cash') periodTotal += g.totalAmt||0;
+    });
+    html += `<div style="display:flex;gap:0;margin-bottom:0;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0;">
+        <div style="width:11px;height:11px;border-radius:50%;background:${period.ca}.18);border:2px solid ${period.color};margin-top:5px;"></div>
+        ${!isLast ? `<div style="width:2px;flex:1;background:var(--border);margin-top:2px;min-height:14px;"></div>` : ''}
+      </div>
+      <div style="flex:1;padding-bottom:${isLast?'4':'18'}px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;background:${period.ca}.15);color:${period.color};border:1px solid ${period.ca}.3);">${period.year} · ${period.label}</span>
+          <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:900;color:${period.color};">총 ${fmtN(periodTotal)}만</span>
+        </div>`;
+    period.groups.forEach(g => {
+      if (g.type === 'invest') {
+        const grpTotal = (g.perPerson||0)*(g.numMembers||2);
+        html += `<div class="plan-static-grp">
+          <div class="plan-static-head">
+            <span class="acc">${g.account}</span>
+            <span class="mem">${g.members} 각자 ${fmtN(g.perPerson)}만</span>
+            ${g.note ? `<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);">${g.note}</span>` : ''}
+            <span class="tot">합계 ${fmtN(grpTotal)}만</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:rgba(0,0,0,.1);">
+              <th style="padding:4px 8px;font-size:8px;font-weight:600;color:var(--muted);text-align:left;">종목</th>
+              <th style="padding:4px 6px;font-size:8px;text-align:right;width:34px;color:var(--muted);">비중</th>
+              <th style="padding:4px 6px;font-size:8px;text-align:right;width:70px;color:var(--muted);">1인당</th>
+              <th style="padding:4px 6px;font-size:8px;text-align:right;width:70px;color:var(--muted);">합계</th>
+            </tr></thead>
+            <tbody>`;
+        g.items.forEach(item => {
+          const pp = Math.round((g.perPerson||0)*item.pct/100);
+          html += `<tr style="border-top:1px solid var(--border);">
+            <td style="padding:5px 8px;">
+              <div style="display:flex;align-items:center;gap:5px;">
+                <span style="font-size:10px;font-weight:700;">${item.name}</span>
+                <div style="height:3px;background:rgba(255,255,255,.06);border-radius:2px;flex:1;overflow:hidden;min-width:8px;">
+                  <div style="width:${item.pct}%;height:100%;border-radius:2px;background:${period.color}77;"></div>
+                </div>
+              </div>
+            </td>
+            <td style="padding:5px 6px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${period.color};">${item.pct}%</td>
+            <td style="padding:5px 6px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);">${fmtN(pp)}만</td>
+            <td style="padding:5px 6px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#06b6d4;">${fmtN(pp*(g.numMembers||2))}만</td>
+          </tr>`;
+        });
+        html += `</tbody></table></div>`;
+      } else if (g.type === 'cash') {
+        const fc = g.debt ? '#ef4444' : 'var(--dim)';
+        const bg = g.debt ? 'rgba(239,68,68,.06)' : 'var(--s1)';
+        const bd = g.debt ? 'rgba(239,68,68,.2)' : 'var(--border)';
+        html += `<div class="plan-row-cash" style="background:${bg};border:1px solid ${bd};">
+          <span>${g.debt?'💸':'🏦'}</span>
+          <span style="flex:1;color:${fc};">${g.account?`<span style="color:var(--muted);font-size:9px;">${g.account} · </span>`:''}${g.label}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${fc};">${fmtN(g.totalAmt)}만</span>
+        </div>`;
+      } else if (g.type === 'event') {
+        html += `<div class="plan-row-event"><span>${g.icon}</span><span>${g.label}</span></div>`;
+      }
+    });
+    html += `</div></div>`;
+  });
+  return html;
 }
 
 // ════════════════════════════════════════════════════════
@@ -2670,7 +3449,7 @@ function buildScenarioAnalysis(calc) {
 }
 
 // ════════════════════════════════════════════════════════
-//  v7: WEEKLY STATUS BOARD
+//  WEEKLY STATUS BOARD
 // ════════════════════════════════════════════════════════
 
 // Memo persistence
@@ -2828,7 +3607,7 @@ function buildWeeklyStatusBoard(calc) {
 
   if (snap) {
     html += `<div style="font-size:9px;color:var(--muted);margin-top:6px;">
-      기준: ${snap.ver || '이전'} · ${snap.date || '날짜 미상'} · ${fmt(snap.grandTotal)}만원
+      기준: ${snap.date || '날짜 미상'} · ${fmt(snap.grandTotal)}만원
     </div>`;
   }
 
@@ -3043,6 +3822,340 @@ function recalcDrawdown() {
   </div>`;
 
   box.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════
+//  월별추이: SNAPSHOT & TREND
+// ════════════════════════════════════════════════════════
+
+function loadTrendSnapshots() {
+  try { return JSON.parse(localStorage.getItem(TREND_KEY) || '[]'); } catch(e) { return []; }
+}
+
+
+// ════════════════════════════════════════════════════════
+//  월별추이: JSON 파일 배치 임포트
+// ════════════════════════════════════════════════════════
+function importTrendFromJSON(event) {
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+
+  let done = 0;
+  let added = 0;
+  let skipped = 0;
+
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const loaded = JSON.parse(e.target.result);
+        // migrate entryType
+        if (loaded.members) {
+          loaded.members.forEach(m => (m.holdings||[]).forEach(h => {
+            if (!h.entryType) h.entryType = 'single';
+          }));
+        }
+
+        // compute grandTotal & member totals from loaded data
+        let grandTotal = 0;
+        const memberTotals = (loaded.members||[]).map(m => {
+          const t = (m.holdings||[]).reduce((s,h) => s + (parseFloat(h.amount)||0), 0);
+          grandTotal += t;
+          return t;
+        });
+
+        const dateVal = (loaded.meta && loaded.meta.date) || '';
+        if (!dateVal) { skipped++; finish(); return; }
+        const ym = dateVal.replace(/\./g,'-').slice(0,7);
+        if (!ym.match(/^\d{4}-\d{2}$/)) { skipped++; finish(); return; }
+
+        const entry = {
+          ym,
+          label: dateVal,
+          grandTotal,
+          members: (loaded.members||[]).map((m,mi) => ({
+            name: m.name, icon: m.icon||'', total: memberTotals[mi]
+          })),
+          tickers: (() => {
+            const map = {};
+            (loaded.members||[]).forEach(m => (m.holdings||[]).forEach(h => {
+              const t = (h.ticker||'').trim();
+              if (!t || h.entryType === 'cash') return;
+              map[t] = (map[t]||0) + (parseFloat(h.amount)||0);
+            }));
+            return map;
+          })()
+        };
+
+        const snapshots = loadTrendSnapshots();
+        const idx = snapshots.findIndex(s => s.ym === ym);
+        if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
+        snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
+        try { localStorage.setItem(TREND_KEY, JSON.stringify(snapshots)); } catch(err) {}
+        added++;
+      } catch(err) { skipped++; }
+      finish();
+    };
+    reader.readAsText(file);
+  });
+
+  function finish() {
+    done++;
+    if (done === files.length) {
+      const msg = skipped > 0
+        ? `📈 ${added}개월 추이 추가 완료 (${skipped}개 오류)`
+        : `📈 ${added}개월 추이 추가 완료`;
+      showToast(msg);
+      const calc = calcState();
+      updateAnalysisPane(calc, validateState());
+      // 추이 탭으로 자동 전환
+      switchApaneTab('trend');
+    }
+  }
+
+  event.target.value = '';
+}
+
+function saveTrendSnapshot() {
+  const calc = calcState();
+  const {memberTotals, grandTotal, catTotals} = calc;
+  const dateVal = document.getElementById('meta-date')?.value || new Date().toISOString().slice(0,7);
+  // use YYYY-MM as key
+  const ym = dateVal.replace(/\./g,'-').slice(0,7);
+
+  const snapshots = loadTrendSnapshots();
+  // overwrite if same month exists
+  const idx = snapshots.findIndex(s => s.ym === ym);
+  const entry = {
+    ym,
+    label: dateVal,
+    grandTotal,
+    members: state.members.map((m,mi) => ({name:m.name, icon:m.icon, total:memberTotals[mi]})),
+    tickers: (() => {
+      const map = {};
+      state.members.forEach(m => m.holdings.forEach(h => {
+        const t = (h.ticker||'').trim();
+        if (!t) return;
+        map[t] = (map[t]||0) + (parseFloat(h.amount)||0);
+      }));
+      return map;
+    })()
+  };
+  if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
+  snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
+  localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
+  showToast('📸 월별 스냅샷 저장 완료 — ' + ym);
+  if (currentApaneTab === 'trend') { const calc2 = calcState(); updateAnalysisPane(calc2, validateState()); }
+}
+
+function deleteTrendSnapshot(ym) {
+  const snapshots = loadTrendSnapshots().filter(s => s.ym !== ym);
+  localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
+  showToast('🗑 ' + ym + ' 스냅샷 삭제');
+  const calc = calcState(); updateAnalysisPane(calc, validateState());
+}
+
+function resetTrendData() {
+  if (!confirm('월별추이를 4월 22일 · 5월 2일 데이터로 초기화할까요?\n기존 데이터는 모두 삭제됩니다.')) return;
+  const correct = [{"ym":"2026-04","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  localStorage.setItem(TREND_KEY, JSON.stringify(correct));
+  showToast('✅ 월별추이 초기화 완료 — 4월22일·5월2일');
+  const calc = calcState(); updateAnalysisPane(calc, validateState());
+}
+
+function buildTrendAnalysis(calc) {
+  const snapshots = loadTrendSnapshots();
+
+  if (snapshots.length === 0) {
+    return `<div style="text-align:center;padding:40px 16px;">
+      <div style="font-size:28px;margin-bottom:12px;">📈</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">월별 추이 데이터 없음</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:16px;">
+        매월 아래 버튼을 눌러 스냅샷을 저장하세요.<br>
+        저장된 데이터로 구성원별·종목별<br>월별 변화를 자동으로 차트로 보여드립니다.
+      </div>
+      <button class="btn btn-primary" onclick="saveTrendSnapshot()" style="margin:0 auto;">📸 이번 달 스냅샷 저장</button>
+      <label class="btn btn-secondary" style="margin:4px auto 0;cursor:pointer;">
+        📂 JSON 파일로 추이 추가
+        <input type="file" accept=".json" multiple style="display:none" onchange="importTrendFromJSON(event)">
+      </label>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;">여러 달의 JSON 파일을 한번에 선택하면 각 날짜별로 자동 등록됩니다</div>
+    </div>`;
+  }
+
+  const months = snapshots.map(s => s.ym);
+  // Display labels: use label field (e.g. "2026.04.22") to show MM.DD
+  const displayLabels = snapshots.map(s => s.label || s.ym);
+  const allMembers = [];
+  snapshots.forEach(s => s.members.forEach(m => { if (!allMembers.find(x=>x.name===m.name)) allMembers.push({name:m.name,icon:m.icon}); }));
+
+  // collect all tickers across all snapshots (top 8 by latest total)
+  const tickerTotals = {};
+  snapshots.forEach(s => { if(s.tickers) Object.entries(s.tickers).forEach(([t,v]) => { tickerTotals[t]=(tickerTotals[t]||0)+v; }); });
+  const topTickers = Object.entries(tickerTotals).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]);
+
+  const memberColors = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#f97316'];
+  const tickerColors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#f97316','#06b6d4','#ec4899'];
+
+  function miniLineChart(datasets, labels, height, showLegend) {
+    const W = 360, H = height || 120, PAD = {t:8,r:8,b:28,l:52};
+    const cW = W - PAD.l - PAD.r, cH = H - PAD.t - PAD.b;
+    const allVals = datasets.flatMap(d=>d.data).filter(v=>v!=null&&v>0);
+    if (allVals.length === 0) return '<div style="color:var(--muted);font-size:11px;text-align:center;padding:20px">데이터 없음</div>';
+    const minV = Math.min(...allVals) * 0.9, maxV = Math.max(...allVals) * 1.05;
+    const range = maxV - minV || 1;
+    const xStep = labels.length > 1 ? cW / (labels.length-1) : cW;
+
+    function yPos(v) { return PAD.t + cH - (v - minV) / range * cH; }
+    function xPos(i) { return PAD.l + (labels.length > 1 ? i * xStep : cW/2); }
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${W}px;display:block;">`;
+
+    // grid lines
+    for (let i=0;i<=3;i++) {
+      const y = PAD.t + (cH/3)*i;
+      const val = maxV - (range/3)*i;
+      svg += `<line x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}" stroke="#1c2d42" stroke-width="1"/>`;
+      svg += `<text x="${PAD.l-4}" y="${y+3}" text-anchor="end" font-size="8" fill="#475569">${Math.round(val).toLocaleString()}</text>`;
+    }
+
+    // x labels (show MM-DD from label field, passed as xLabels)
+    labels.forEach((l,i) => {
+      // l is the display label: extract MM-DD from YYYY.MM.DD or use last 5 chars of YYYY-MM
+      let display = l;
+      if (l && l.match(/^\d{4}\.\d{2}\.\d{2}$/)) {
+        display = l.slice(5); // "MM.DD"
+      } else if (l && l.match(/^\d{4}-\d{2}$/)) {
+        display = l.slice(5) + '-??'; // fallback
+      }
+      svg += `<text x="${xPos(i)}" y="${H-6}" text-anchor="middle" font-size="8" fill="#475569">${display}</text>`;
+    });
+
+    // lines
+    datasets.forEach(ds => {
+      const pts = ds.data.map((v,i)=>v!=null ? `${xPos(i)},${yPos(v)}` : null).filter(Boolean);
+      if (pts.length >= 2) {
+        svg += `<polyline points="${pts.join(' ')}" fill="none" stroke="${ds.color}" stroke-width="2" stroke-linejoin="round"/>`;
+      }
+      ds.data.forEach((v,i) => {
+        if (v!=null) svg += `<circle cx="${xPos(i)}" cy="${yPos(v)}" r="3" fill="${ds.color}" stroke="#060a12" stroke-width="1.5"/>`;
+      });
+    });
+
+    svg += `</svg>`;
+
+    if (showLegend) {
+      svg += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">`;
+      datasets.forEach(ds => {
+        svg += `<span style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--dim);">
+          <span style="width:10px;height:2px;background:${ds.color};display:inline-block;border-radius:1px;"></span>${ds.label}</span>`;
+      });
+      svg += `</div>`;
+    }
+    return svg;
+  }
+
+  // Member datasets
+  const memberDatasets = allMembers.map((m,i) => ({
+    label: m.icon + ' ' + m.name,
+    color: memberColors[i % memberColors.length],
+    data: snapshots.map(s => { const f=s.members.find(x=>x.name===m.name); return f?f.total:null; })
+  }));
+
+  // Ticker datasets
+  const tickerDatasets = topTickers.map((t,i) => ({
+    label: t,
+    color: tickerColors[i % tickerColors.length],
+    data: snapshots.map(s => s.tickers?.[t] || null)
+  }));
+
+  // Total asset change
+  const latest = snapshots[snapshots.length-1];
+  const prev = snapshots.length >= 2 ? snapshots[snapshots.length-2] : null;
+  const totalChange = prev ? latest.grandTotal - prev.grandTotal : null;
+  const changeColor = totalChange === null ? 'var(--muted)' : totalChange >= 0 ? 'var(--green)' : 'var(--red)';
+
+  let html = `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">월별 추이 · ${snapshots.length}개월 데이터</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+      <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+        📂 JSON 추가<input type="file" accept=".json" multiple style="display:none" onchange="importTrendFromJSON(event)">
+      </label>
+      <button class="btn btn-secondary btn-sm" onclick="saveTrendSnapshot()">📸 이달 저장</button>
+    </div>
+  </div>`;
+
+  // summary row
+  html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">최신 총 자산 (${latest.ym})</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:900;color:var(--cyan)">${fmt(latest.grandTotal)}만</div>
+    </div>
+    ${totalChange !== null ? `<div style="text-align:right;">
+      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">전월 대비</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${changeColor}">${totalChange>=0?'+':''}${fmt(Math.round(totalChange))}만</div>
+    </div>` : ''}
+  </div>`;
+
+  // Member chart
+  html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;">
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">👨‍👩‍👧‍👦 구성원별 자산 변화</div>
+    ${miniLineChart(memberDatasets, displayLabels, 130, true)}
+  </div>`;
+
+  // Ticker chart
+  if (topTickers.length > 0) {
+    // Build ticker amounts table
+    const tickerTableRows = topTickers.map((t,i) => {
+      const color = tickerColors[i % tickerColors.length];
+      const vals = snapshots.map(s => s.tickers?.[t] || null);
+      const first = vals.find(v=>v!=null);
+      const last = [...vals].reverse().find(v=>v!=null);
+      const change = (first!=null&&last!=null&&snapshots.length>=2) ? last-first : null;
+      const chColor = change===null?'#475569':change>=0?'#10b981':'#ef4444';
+      return `<tr style="border-bottom:1px solid rgba(28,45,66,.4);">
+        <td style="padding:5px 6px;"><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#e2e8f0;font-size:10px;">${t}</span></span></td>
+        ${vals.map(v => `<td style="text-align:right;padding:5px 6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:${v!=null?'#06b6d4':'#475569'};">${v!=null?Math.round(v).toLocaleString('ko-KR')+'만':'-'}</td>`).join('')}
+        ${snapshots.length>=2 ? `<td style="text-align:right;padding:5px 6px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${chColor};">${change===null?'-':(change>=0?'+':'')+Math.round(change).toLocaleString('ko-KR')+'만'}</td>` : ''}
+      </tr>`;
+    }).join('');
+
+    const tickerTableHTML = `<div style="overflow-x:auto;margin-top:10px;">
+      <table style="width:100%;border-collapse:collapse;min-width:280px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">종목</th>
+            ${snapshots.map(s => {
+              const disp = (s.label||s.ym).slice(5);
+              return `<th style="text-align:right;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">${disp}</th>`;
+            }).join('')}
+            ${snapshots.length>=2 ? `<th style="text-align:right;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">변화</th>` : ''}
+          </tr>
+        </thead>
+        <tbody>${tickerTableRows}</tbody>
+      </table>
+    </div>`;
+
+    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📊 종목별 금액 변화 (상위 8개)</div>
+      ${miniLineChart(tickerDatasets, displayLabels, 140, true)}
+      ${tickerTableHTML}
+    </div>`;
+  }
+
+  // Snapshot list
+  html += `<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">저장된 스냅샷</div>`;
+  [...snapshots].reverse().forEach(s => {
+    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;margin-bottom:5px;display:flex;align-items:center;gap:8px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);font-weight:700;">${s.ym}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);flex:1;">${fmt(s.grandTotal)}만</span>
+      <span style="font-size:9px;color:var(--muted);">${s.members.map(m=>m.icon+m.name).join(' · ')}</span>
+      <button onclick="deleteTrendSnapshot('${s.ym}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;" title="삭제">✕</button>
+    </div>`;
+  });
+
+  return html;
 }
 
 init();
