@@ -800,7 +800,6 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
       📂 <span class="btn-label">불러오기</span> <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
     </label>
     <button id="themeToggleBtn" class="btn btn-secondary btn-sm" onclick="toggleTheme()" title="라이트/다크 모드 전환">☀️ 라이트</button>
-    <button class="btn btn-danger btn-sm" onclick="resetTrendData()" title="월별추이 데이터를 4/22·5/2 기준으로 초기화">🗑 추이초기화</button>
     <button class="btn btn-primary" onclick="generateHTML()">⬇️ <span class="btn-label">보고서</span></button>
   </div>
 </header>
@@ -966,65 +965,80 @@ const ENTRY_TYPES = [
 //  STATE
 // ════════════════════════════════════════════════════════
 let state = {
-  meta: { date:'2026.04.21' },
-  catTargets: { core:30, bigtech:20, ai:20, semi:8, defense:10, growth:7, domestic:3, other:2 },
+  meta: { date:'2026.04.22' },
+  catTargets: { core:35, bigtech:22, ai:21, semi:10, defense:10, growth:0, domestic:0, other:2 },
   members: [
     {
       id:'hyunkyu', name:'이현규', icon:'⚡', role:'전술·현금·기회포착', color:'#3b82f6',
       holdings:[
-        {account:'일반',ticker:'VRT',     entryType:'single',qty:'7주',  pnl:'+50.4%', amount:780,  cat:'ai',      badge:'',      note:''},
-        {account:'일반',ticker:'ONTO',    entryType:'single',qty:'7주',  pnl:'+36.1%', amount:620,  cat:'semi',    badge:'',      note:''},
-        {account:'일반',ticker:'MRVL',    entryType:'single',qty:'13주', pnl:'+0.1%',  amount:850,  cat:'ai',      badge:'신규',  note:''},
-        {account:'일반',ticker:'OII',     entryType:'single',qty:'21주', pnl:'+11.8%', amount:520,  cat:'growth',  badge:'',      note:''},
-        {account:'일반',ticker:'BWXT',    entryType:'single',qty:'6주',  pnl:'+15.0%', amount:390,  cat:'defense', badge:'',      note:''},
-        {account:'일반',ticker:'TEM',     entryType:'single',qty:'12주', pnl:'+0.6%',  amount:280,  cat:'growth',  badge:'',      note:''},
-        {account:'일반',ticker:'ALAB',    entryType:'single',qty:'4주',  pnl:'+7.1%',  amount:190,  cat:'ai',      badge:'',      note:''},
-        {account:'일반',ticker:'TechnipFMC',entryType:'single',qty:'5주',pnl:'+17.0%', amount:210,  cat:'growth',  badge:'',      note:''},
-        {account:'ISA', ticker:'KODEX 나스닥100 외',entryType:'basket',qty:'4종',pnl:'+15.71%',amount:1200,cat:'core',badge:'',note:'나스닥100·반도체·S&P500·테크TOP10'},
-        {account:'연금', ticker:'TIGER S&P500 외',entryType:'basket',qty:'2종',pnl:'+24.30%',amount:800,cat:'core',badge:'',note:'TIGER S&P500·KODEX 나스닥100'},
-        {account:'토스', ticker:'소수점 포트폴리오',entryType:'basket',qty:'8종',pnl:'복수',amount:450,cat:'domestic',badge:'',note:'LRCX·ONTO·VRT 등'},
-        {account:'현금', ticker:'폭락 대기 현금',entryType:'cash',qty:'-',pnl:'-',amount:690,cat:'defense',badge:'',note:'절대 건드리지 말 것'},
+        {account:'일반',ticker:'VRT',entryType:'single',qty:'7주',pnl:'+48.46%',amount:314,cat:'ai',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'ONTO',entryType:'single',qty:'7주',pnl:'+37.49%',amount:306,cat:'ai',badge:'',note:''},
+        {account:'일반',ticker:'MRVL',entryType:'single',qty:'13주',pnl:'+8.23%',amount:301,cat:'ai',badge:'신규',note:''},
+        {account:'일반',ticker:'OII',entryType:'single',qty:'21주',pnl:'13.73%',amount:119,cat:'growth',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'BWXT',entryType:'single',qty:'6주',pnl:'+9.43%',amount:193,cat:'growth',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'TEM',entryType:'single',qty:'12주',pnl:'-1.24%',amount:98,cat:'growth',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'ALAB',entryType:'single',qty:'4주',pnl:'+22%',amount:114,cat:'ai',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'TechnipFMC',entryType:'single',qty:'5주',pnl:'+18.64%',amount:53,cat:'growth',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'390주',pnl:'+13.16%',amount:1020,cat:'core',badge:'',note:''},
+        {account:'연금',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'227',pnl:'+9.39%',amount:591,cat:'core',badge:'',note:''},
+        {account:'토스',ticker:'소수점 포트폴리오',entryType:'basket',qty:'8종',pnl:'+32.4%',amount:127,cat:'other',badge:'',note:'LRCX·ONTO·VRT 등'},
+        {account:'현금',ticker:'폭락 대기 현금',entryType:'cash',qty:'-',pnl:'+0.1%',amount:694,cat:'defense',badge:'',note:'절대 건드리지 말 것'},
+        {account:'ISA',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'85주',pnl:'+9.28%',amount:221,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'TIGER 미국테크 TOP10 INDXX',entryType:'basket',qty:'109주',pnl:'+16.06%',amount:346,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국반도체',entryType:'basket',qty:'158',pnl:'+25.16%',amount:748,cat:'semi',badge:'',note:''},
+        {account:'연금',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'155',pnl:'+13.08%',amount:405,cat:'core',badge:'',note:''},
       ]
     },
     {
       id:'insuk', name:'임인숙', icon:'🛡', role:'코어 장기복리·은퇴축', color:'#8b5cf6',
       holdings:[
-        {account:'토스',ticker:'MSFT·GOOGL·NVDA·QQQ',entryType:'basket',qty:'복수',pnl:'+7.7%',amount:1800,cat:'bigtech',badge:'',note:''},
-        {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+7.6%',amount:380,cat:'growth',badge:'',note:''},
-        {account:'종합',ticker:'AVGO',entryType:'single',qty:'3주',pnl:'-0.17%',amount:420,cat:'ai',badge:'5월판단',note:''},
-        {account:'종합',ticker:'META',entryType:'single',qty:'3주',pnl:'-0.59%',amount:400,cat:'bigtech',badge:'5월판단',note:''},
-        {account:'종합',ticker:'GRID',entryType:'single',qty:'6주',pnl:'+9.46%',amount:180,cat:'growth',badge:'',note:''},
-        {account:'ISA',ticker:'TIGER S&P500 외',entryType:'basket',qty:'4종',pnl:'+8.98%',amount:980,cat:'core',badge:'',note:'TIGER S&P500·나스닥100·테크TOP10·반도체'},
-        {account:'연금',ticker:'TIGER S&P500 외',entryType:'basket',qty:'2종',pnl:'+14.85%',amount:634,cat:'core',badge:'',note:''},
+        {account:'토스',ticker:'MSFT',entryType:'single',qty:'5주',pnl:'-3.2%%',amount:313,cat:'bigtech',badge:'',note:''},
+        {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+16.2%',amount:256,cat:'growth',badge:'',note:''},
+        {account:'종합',ticker:'AVGO',entryType:'single',qty:'3주',pnl:'+2.16%',amount:180,cat:'ai',badge:'5월판단',note:''},
+        {account:'종합',ticker:'META',entryType:'single',qty:'3주',pnl:'+0.13%',amount:298,cat:'bigtech',badge:'5월판단',note:''},
+        {account:'종합',ticker:'GRID',entryType:'basket',qty:'6주',pnl:'+11%',amount:163,cat:'domestic',badge:'',note:'미국 ETF'},
+        {account:'ISA',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'243주',pnl:'+5.82%',amount:633,cat:'core',badge:'',note:''},
+        {account:'연금',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'168주',pnl:'+8.47%',amount:439,cat:'core',badge:'',note:''},
+        {account:'토스',ticker:'GOOGL',entryType:'single',qty:'5주',pnl:'+10.7%',amount:248,cat:'bigtech',badge:'',note:''},
+        {account:'토스',ticker:'NVDA',entryType:'single',qty:'3.02주',pnl:'+63.6%',amount:89,cat:'ai',badge:'',note:''},
+        {account:'토스',ticker:'QQQ',entryType:'single',qty:'0.94주',pnl:'+8.9%',amount:90,cat:'domestic',badge:'',note:''},
+        {account:'연금',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'200',pnl:'+5.64%',amount:521,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'319주',pnl:'+8.62%',amount:834,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'TIGER 미국테크 TOP10 INDXX',entryType:'basket',qty:'80',pnl:'+10.8%',amount:254,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국반도체',entryType:'basket',qty:'100',pnl:'+17.17%',amount:474,cat:'semi',badge:'',note:''},
       ]
     },
     {
       id:'jaehyun', name:'이재현', icon:'🚀', role:'공격 성장 엔진', color:'#10b981',
       holdings:[
-        {account:'',ticker:'GOOGL',entryType:'single',qty:'26주',pnl:'+45.34%',amount:1200,cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'MRVL', entryType:'single',qty:'52주',pnl:'+50.93%',amount:1950,cat:'ai',    badge:'',note:'구글협력 논의 중'},
-        {account:'',ticker:'NVDA', entryType:'single',qty:'24주',pnl:'+64.73%',amount:1580,cat:'ai',    badge:'',note:''},
-        {account:'',ticker:'MSFT', entryType:'single',qty:'11주',pnl:'+1.81%', amount:520, cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'TSM',  entryType:'single',qty:'12주',pnl:'+4.49%', amount:680, cat:'semi',  badge:'',note:''},
-        {account:'',ticker:'MU',   entryType:'single',qty:'5주', pnl:'-1.06%', amount:290, cat:'ai',    badge:'신규',note:''},
-        {account:'',ticker:'AVGO', entryType:'single',qty:'5.89주',pnl:'복수', amount:870, cat:'ai',    badge:'5월판단',note:'5월실적 시나리오표 적용'},
-        {account:'',ticker:'TIGER 필라델피아 외',entryType:'basket',qty:'49주',pnl:'+16%·+13%',amount:890,cat:'semi',badge:'',note:'TIGER 필라델피아·KODEX AI테크'},
+        {account:'',ticker:'GOOGL',entryType:'single',qty:'26주',pnl:'+46.14%',amount:1302,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MRVL',entryType:'single',qty:'52주',pnl:'+64.66%',amount:1207,cat:'ai',badge:'',note:'구글협력 논의 중'},
+        {account:'',ticker:'NVDA',entryType:'single',qty:'24주',pnl:'+67.35%',amount:711,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MSFT',entryType:'single',qty:'11주',pnl:'+5.82%',amount:703,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'TSM',entryType:'single',qty:'12주',pnl:'+10.54%',amount:686,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MU',entryType:'single',qty:'5주',pnl:'+8.21%',amount:360,cat:'ai',badge:'신규',note:''},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'2주',pnl:'+5.3%',amount:125,cat:'ai',badge:'5월판단',note:'5월실적 시나리오표 적용'},
+        {account:'',ticker:'TIGER 미국필라델피아반도체나스닥',entryType:'basket',qty:'33주',pnl:'+22.92',amount:128,cat:'semi',badge:'',note:'군월급 중 남은돈 70% 매달 구매'},
+        {account:'',ticker:'KODEX 미국AI전력햄심인프라',entryType:'basket',qty:'16',pnl:'+19.47%',amount:39,cat:'domestic',badge:'',note:'군월급 중 남은돈 30% 매달 구매'},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'3.89주',pnl:'+27.84%',amount:243,cat:'ai',badge:'5월판단',note:''},
       ]
     },
     {
       id:'jaeyeon', name:'이재연', icon:'✨', role:'성장 + 구조개선', color:'#f97316',
       holdings:[
-        {account:'',ticker:'GOOGL',entryType:'single',qty:'25주',pnl:'+43.17%',amount:1150,cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'NVDA', entryType:'single',qty:'23주',pnl:'+64.86%',amount:1510,cat:'ai',    badge:'',note:''},
-        {account:'',ticker:'MRVL', entryType:'single',qty:'26주',pnl:'+56.80%',amount:980, cat:'ai',    badge:'',note:''},
-        {account:'',ticker:'TSM',  entryType:'single',qty:'12주',pnl:'+4.21%', amount:670, cat:'semi',  badge:'',note:''},
-        {account:'',ticker:'MSFT', entryType:'single',qty:'8주', pnl:'-12.77%',amount:375, cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'MU',   entryType:'single',qty:'7주', pnl:'+0.07%', amount:410, cat:'ai',    badge:'신규',note:''},
-        {account:'',ticker:'AVGO', entryType:'single',qty:'2주', pnl:'-1.09%', amount:290, cat:'ai',    badge:'5월판단',note:''},
-        {account:'',ticker:'TSLA', entryType:'single',qty:'2주', pnl:'+3.43%', amount:60,  cat:'growth',badge:'',note:'비중 0.3% — 모니터링 불필요'},
-        {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.95%',amount:235,cat:'domestic',badge:'',note:''},
+        {account:'',ticker:'GOOGL',entryType:'single',qty:'25주',pnl:'+44.01%',amount:1252,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'NVDA',entryType:'single',qty:'23주',pnl:'+67.12%',amount:681,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MRVL',entryType:'single',qty:'26주',pnl:'+70.45%',amount:604,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'TSM',entryType:'single',qty:'12주',pnl:'+5.56%',amount:657,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MSFT',entryType:'single',qty:'8주',pnl:'-9.31%',amount:511,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MU',entryType:'single',qty:'7주',pnl:'+9.16%',amount:504,cat:'ai',badge:'신규',note:''},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'2주',pnl:'+5.23%',amount:125,cat:'ai',badge:'5월판단',note:''},
+        {account:'',ticker:'TSLA',entryType:'single',qty:'2주',pnl:'+2.57%',amount:114,cat:'growth',badge:'',note:'비중 0.3% — 모니터링 불필요'},
+        {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.87%',amount:154,cat:'domestic',badge:'',note:''},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'0.2주',pnl:'+5.65%',amount:12,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MSFT',entryType:'single',qty:'0.17주',pnl:'-0.99%',amount:11,cat:'bigtech',badge:'',note:''},
       ]
-    }
+    },
   ],
   planConfig: {
     periods: [
@@ -2826,20 +2840,11 @@ function init() {
   } catch(e) {}
 
   try {
-    // try v7 key first, fallback to v6 for migration
-    const saved = localStorage.getItem('pfeditor_v7_state') || localStorage.getItem('pfeditor_v6_state');
-    if (saved) {
-      const savedState = JSON.parse(saved);
-      // migration: add entryType if missing
-      savedState.members.forEach(m => m.holdings.forEach(h => {
-        if (!h.entryType) h.entryType = 'single';
-      }));
-      // migration: planConfig — keep saved if present, else use default
-      if (!savedState.planConfig) savedState.planConfig = state.planConfig;
-      state = savedState;
-    }
-    const savedSnap = localStorage.getItem('pfeditor_v7_snapshot') || localStorage.getItem('pfeditor_v6_snapshot');
-    if (savedSnap) snapshot = JSON.parse(savedSnap);
+    // ── 파일의 state를 항상 우선 사용 (localStorage state 초기화) ──
+    localStorage.removeItem('pfeditor_v7_state');
+    localStorage.removeItem('pfeditor_v6_state');
+    localStorage.removeItem('pfeditor_v7_snapshot');
+    localStorage.removeItem('pfeditor_v6_snapshot');
   } catch(e) {}
   // 테마 복원
   const savedTheme = localStorage.getItem('pfTheme');
