@@ -766,16 +766,26 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 
 </style>
 <script>
-// 4월·5월 추이 데이터 강제 초기화 (즉시 실행)
+// 4월·5월 추이 시드 데이터 — localStorage가 완전히 비어있을 때만 초기 설정
 (function() {
   var KEY = 'pf_monthly_snapshots';
   var seed = [{"ym":"2026-04","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
   try {
     var existing = JSON.parse(localStorage.getItem(KEY) || '[]');
-    var others = existing.filter(function(s){ return s.ym !== '2026-04' && s.ym !== '2026-05'; });
-    var merged = seed.concat(others);
-    merged.sort(function(a,b){ return a.ym < b.ym ? -1 : 1; });
-    localStorage.setItem(KEY, JSON.stringify(merged));
+    if (existing.length === 0) {
+      // 완전히 비어있을 때만 시드 데이터로 초기화
+      localStorage.setItem(KEY, JSON.stringify(seed));
+    } else {
+      // 이미 데이터가 있으면 4·5월 시드가 없는 경우에만 채워줌 (절대 덮어쓰지 않음)
+      var ymSet = {};
+      existing.forEach(function(s){ ymSet[s.ym] = true; });
+      var needsMerge = false;
+      seed.forEach(function(s){ if (!ymSet[s.ym]) { existing.push(s); needsMerge = true; } });
+      if (needsMerge) {
+        existing.sort(function(a,b){ return a.ym < b.ym ? -1 : 1; });
+        localStorage.setItem(KEY, JSON.stringify(existing));
+      }
+    }
   } catch(e) {}
 })();
 </script>
@@ -791,10 +801,14 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
   <div class="header-actions">
     <div class="header-date-box" style="display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:4px 10px;">
       <span style="font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap;">📅 기준일</span>
-      <input type="text" id="meta-date" value="2026.05.02" oninput="recalc()"
-        style="background:transparent;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;width:80px;padding:0;outline:none;">
+      <input type="text" id="meta-date" value="2026.05.02" oninput="state.meta.date=this.value;recalc()"
+        style="background:transparent;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;width:80px;padding:0;outline:none;" placeholder="YYYY.MM.DD">
+      <select id="snapshot-date-picker" onchange="loadSnapshotByDate(this.value)"
+        style="background:transparent;border:none;color:var(--muted);font-size:10px;padding:0;outline:none;cursor:pointer;max-width:70px;"
+        title="저장된 날짜 선택">
+        <option value="">▾ 이력</option>
+      </select>
     </div>
-    <button class="btn btn-secondary btn-sm" onclick="saveSnapshot()">📸 <span class="btn-label">스냅샷 저장</span></button>
     <button class="btn btn-secondary btn-sm" onclick="saveJSON()">💾 <span class="btn-label">JSON 저장</span></button>
     <label class="btn btn-secondary btn-sm" style="cursor:pointer">
       📂 <span class="btn-label">불러오기</span> <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
@@ -819,8 +833,9 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
       </div>
       <div class="card-body">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="catTargetGrid"></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:8px;">
-          개인 보유 현황을 수정하면 자산 분류별 금액과 비중이 자동으로 다시 계산됩니다.
+        <div id="catTargetSumRow" style="font-size:10px;font-weight:700;margin-top:8px;text-align:right;"></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">
+          목표 비중을 직접 수정하면 리밸런싱 제안이 자동으로 업데이트됩니다.
         </div>
       </div>
     </div>
@@ -902,8 +917,8 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
       <div style="color:var(--muted);font-size:11px;text-align:center;padding:40px 0;">데이터를 입력하면 자동 분석됩니다</div>
     </div>
     <div class="storage-bar">
-      <span><span class="auto-save-dot"></span>자동 저장 중</span>
-      <span id="lastSavedLabel" style="font-size:10px;font-family:'JetBrains Mono',monospace;"></span>
+      <span><span class="auto-save-dot"></span>편집 중 — <strong style="color:var(--yellow)">💾 JSON 저장</strong>으로 파일 백업하세요</span>
+      <span id="lastSavedLabel" style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--dim);"></span>
     </div>
   </div>
 
@@ -950,8 +965,8 @@ const CATEGORIES = [
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 
 const BADGE_OPTIONS = [
-  {v:'',l:'배지없음'},{v:'신규',l:'신규'},{v:'5월판단',l:'5월판단'},
-  {v:'5월실적후판단',l:'5월실적후'},{v:'매도검토',l:'매도검토'},{v:'보유',l:'보유'},
+  {v:'',l:'배지없음'},{v:'신규',l:'신규'},{v:'실적후판단',l:'실적후판단'},
+  {v:'매도검토',l:'매도검토'},{v:'보유',l:'보유'},{v:'관찰중',l:'관찰중'},
 ];
 
 // Entry types
@@ -1156,32 +1171,65 @@ function renderCatTargets(calc = calcState()) {
   grid.innerHTML = '';
   CATEGORIES.forEach(c => {
     const amount = catTotals[c.id] || 0;
-    const pct = catPcts[c.id] || 0;
+    const pct    = catPcts[c.id]  || 0;
+    const tgt    = state.catTargets[c.id] ?? 0;
+    const diff   = pct - tgt;
+    const diffColor = Math.abs(diff) < 1 ? 'var(--green)' : diff > 0 ? 'var(--red)' : 'var(--yellow)';
+    const diffText  = Math.abs(diff) < 0.1 ? '적정'
+                    : diff > 0 ? `+${diff.toFixed(1)}%p` : `${diff.toFixed(1)}%p`;
     const div = document.createElement('div');
     div.style.cssText = 'background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;';
     div.innerHTML = `
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;justify-content:space-between;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:4px;">
         <span class="cat-tag cat-${c.id}" style="font-size:8px">${c.label}</span>
-        <span style="font-size:9px;color:var(--muted)">${grandTotal > 0 ? '자동 계산' : '데이터 없음'}</span>
+        <span style="font-size:9px;font-weight:700;color:${diffColor}">${diffText}</span>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:${c.color};line-height:1.2">${fmt(amount)}만</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;gap:8px;">
-        <span style="font-size:10px;color:var(--muted)">비중</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:${c.color}">${pct.toFixed(1)}%</span>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:800;color:${c.color};line-height:1.2;margin-bottom:6px;">${fmt(amount)}만</div>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <span style="font-size:9px;color:var(--muted);white-space:nowrap;">현재</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${c.color};flex:1;">${pct.toFixed(1)}%</span>
+        <span style="font-size:9px;color:var(--muted);white-space:nowrap;">목표</span>
+        <input type="number" min="0" max="100" step="1"
+          value="${tgt}"
+          id="cat-tgt-${c.id}"
+          oninput="updateCatTarget('${c.id}', this.value)"
+          style="width:46px;padding:2px 5px;font-size:11px;text-align:right;color:var(--dim);background:var(--s1);border:1px solid var(--border);border-radius:4px;">
+        <span style="font-size:9px;color:var(--muted);">%</span>
       </div>
     `;
     grid.appendChild(div);
   });
+  updateCatTargetSumRow();
+}
+
+function updateCatTarget(catId, val) {
+  state.catTargets[catId] = parseFloat(val) || 0;
+  autoSave();
+  const calc = calcState();
+  updateTargetSumBadge(calc);
+  updateCatTargetSumRow();
+  // 분석 패널 overview 탭이 열려 있으면 실시간 반영
+  if (currentApaneTab === 'overview') updateAnalysisPane(calc, validateState());
+}
+
+function updateCatTargetSumRow() {
+  const sum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const el = document.getElementById('catTargetSumRow');
+  if (!el) return;
+  const ok = Math.abs(sum - 100) < 0.01;
+  el.textContent = `목표 합계: ${sum.toFixed(0)}% ${ok ? '✓' : '← 100%가 되어야 합니다'}`;
+  el.style.color = ok ? 'var(--green)' : 'var(--yellow)';
 }
 
 function updateTargetSumBadge(calc = calcState()) {
   const badge = document.getElementById('targetSumBadge');
   if (!badge) return;
-  const {grandTotal, catPcts} = calc;
-  const sum = Object.values(catPcts).reduce((a,b)=>a+b,0);
-  const cls = grandTotal > 0 && Math.abs(sum-100) < 0.01 ? 'tsb-ok' : 'tsb-low';
+  const {grandTotal} = calc;
+  const tgtSum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const tgtOk = Math.abs(tgtSum - 100) < 0.01;
+  const cls = grandTotal > 0 && tgtOk ? 'tsb-ok' : !tgtOk ? 'tsb-high' : 'tsb-low';
   const label = grandTotal > 0
-    ? `✓ 분류합계 ${sum.toFixed(1)}% · 총 ${fmt(grandTotal)}만`
+    ? `총 ${fmt(grandTotal)}만 · 목표합 ${tgtSum.toFixed(0)}%${tgtOk ? ' ✓' : ' ⚠'}`
     : '입력 대기 중';
   badge.innerHTML = `<span class="target-sum-badge ${cls}">${label}</span>`;
 }
@@ -1290,9 +1338,13 @@ function buildHoldingRow(mi, hi, h) {
   const catOptions = CATEGORIES.map(c =>
     `<option value="${c.id}" ${h.cat===c.id?'selected':''}>${c.label}</option>`
   ).join('');
+  const knownBadge = BADGE_OPTIONS.find(b => b.v === (h.badge||''));
+  const extraBadge = (!knownBadge && h.badge)
+    ? `<option value="${h.badge}" selected>${h.badge}</option>`
+    : '';
   const badgeOptions = BADGE_OPTIONS.map(b =>
-    `<option value="${b.v}" ${h.badge===b.v?'selected':''}>${b.l}</option>`
-  ).join('');
+    `<option value="${b.v}" ${(!extraBadge && h.badge===b.v)?'selected':''}>${b.l}</option>`
+  ).join('') + extraBadge;
   const typeOptions = ENTRY_TYPES.map(t =>
     `<option value="${t.v}" ${(h.entryType||'single')===t.v?'selected':''}>${t.l}</option>`
   ).join('');
@@ -1551,6 +1603,7 @@ function recalc() {
   recalcGoal();
   recalcDrawdown();
   rerenderAllTbodies();
+  refreshSnapshotPicker();
   autoSave();
 }
 
@@ -1871,18 +1924,33 @@ function buildVersionCompareHTML(calc) {
 //  PERSIST
 // ════════════════════════════════════════════════════════
 let saveTimer = null;
+let isDirty = false;   // 미저장 변경 추적
 const TREND_KEY = 'pf_monthly_snapshots';
+
+function markDirty() {
+  if (!isDirty) {
+    isDirty = true;
+    const lbl = document.getElementById('lastSavedLabel');
+    if (lbl) lbl.textContent = '⚠ 미저장 변경 있음';
+  }
+}
+
+function markClean() {
+  isDirty = false;
+  const now = new Date();
+  const lbl = document.getElementById('lastSavedLabel');
+  if (lbl) lbl.textContent =
+    `✓ ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} 저장됨`;
+}
 
 function autoSave() {
   clearTimeout(saveTimer);
+  markDirty();
   saveTimer = setTimeout(() => {
     try {
       localStorage.setItem('pfeditor_v7_state', JSON.stringify(state));
       const snap = localStorage.getItem('pfeditor_v7_snapshot');
       if (snap) snapshot = JSON.parse(snap);
-      const now = new Date();
-      document.getElementById('lastSavedLabel').textContent =
-        `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} 저장`;
       // ── 편집할 때마다 해당 월 추이 데이터 자동 누적 ──
       autoSaveTrendSnapshot();
     } catch(e) {}
@@ -1890,7 +1958,11 @@ function autoSave() {
 }
 
 function saveJSON() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  // 현재 추이 스냅샷을 먼저 최신화한 뒤 파일에 함께 포함
+  autoSaveTrendSnapshot();
+  const trendSnapshots = loadTrendSnapshots();
+  const exportData = Object.assign({}, state, { trendSnapshots });
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   // 파일명에 YYYY-MM 형태 날짜 자동 포함 (예: portfolio_2026-05.json)
@@ -1898,7 +1970,8 @@ function saveJSON() {
   a.download = `portfolio_${ym}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast('✅ JSON 저장 완료 — portfolio_' + ym + '.json');
+  markClean();
+  showToast('✅ JSON 저장 완료 — 추이 ' + trendSnapshots.length + '개월 포함');
 }
 
 function loadJSON(event) {
@@ -1908,7 +1981,22 @@ function loadJSON(event) {
   reader.onload = e => {
     try {
       const loaded = JSON.parse(e.target.result);
-      state = loaded;
+
+      // ── 파일에 포함된 추이 스냅샷 복원 ──
+      // 파일 내 trendSnapshots이 있으면, 기존 localStorage 데이터와 병합한 뒤 덮어씀
+      if (Array.isArray(loaded.trendSnapshots) && loaded.trendSnapshots.length > 0) {
+        const existing = loadTrendSnapshots();
+        // 파일 데이터 우선 — 겹치는 달은 파일 버전으로 교체
+        const mergeMap = {};
+        existing.forEach(s => { mergeMap[s.ym] = s; });
+        loaded.trendSnapshots.forEach(s => { mergeMap[s.ym] = s; });
+        const merged = Object.values(mergeMap).sort((a,b) => a.ym.localeCompare(b.ym));
+        try { localStorage.setItem(TREND_KEY, JSON.stringify(merged)); } catch(err) {}
+      }
+
+      // trendSnapshots 키는 state에 포함시키지 않음
+      const { trendSnapshots: _ignored, ...stateOnly } = loaded;
+      state = stateOnly;
       // migrate: add entryType if missing
       state.members.forEach(m => m.holdings.forEach(h => {
         if (!h.entryType) h.entryType = 'single';
@@ -1916,9 +2004,11 @@ function loadJSON(event) {
       syncMetaInputs();
       renderMembers();
       recalc();
-      // ── 자동 월별 스냅샷 저장 ──
+      // ── 이 파일 날짜의 월별 스냅샷도 자동 갱신 ──
       autoSaveTrendSnapshot();
-      showToast('✅ JSON 불러오기 완료 — 월별추이 자동 저장됨');
+      const trendCount = loadTrendSnapshots().length;
+      markClean();
+      showToast('✅ JSON 불러오기 완료 — 월별추이 ' + trendCount + '개월 복원됨');
     } catch(err) {
       showToast('❌ JSON 파일 오류');
     }
@@ -1959,6 +2049,51 @@ function autoSaveTrendSnapshot() {
 
 function syncMetaInputs() {
   document.getElementById('meta-date').value = state.meta.date || '';
+  refreshSnapshotPicker();
+}
+
+// 월별추이 스냅샷 날짜 드롭다운 갱신
+function refreshSnapshotPicker() {
+  const sel = document.getElementById('snapshot-date-picker');
+  if (!sel) return;
+  const snapshots = loadTrendSnapshots();
+  // 현재 선택값 보존
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">▾ 이력</option>';
+  // 최신 순으로 나열
+  [...snapshots].reverse().forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.ym;
+    opt.textContent = s.label || s.ym;
+    if (s.ym === prev) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  // 드롭다운이 비어있으면 숨김
+  sel.style.display = snapshots.length > 0 ? '' : 'none';
+}
+
+// 스냅샷 날짜 선택 → 해당 달 데이터로 현재 화면 전환
+function loadSnapshotByDate(ym) {
+  if (!ym) return;
+  const snapshots = loadTrendSnapshots();
+  const snap = snapshots.find(s => s.ym === ym);
+  if (!snap) return;
+
+  // state의 날짜만 해당 스냅샷 label로 바꾸고 recalc
+  // (보유 데이터는 건드리지 않고 기준일만 변경 — 날짜 조회용)
+  const label = snap.label || ym.replace('-', '.');
+  state.meta.date = label;
+  document.getElementById('meta-date').value = label;
+
+  // 월별추이 탭으로 전환해서 해당 시점 차트 강조
+  recalc();
+  showToast('📅 ' + label + ' 기준으로 설정됨');
+
+  // 드롭다운 선택 해제 (재선택 가능하도록)
+  setTimeout(() => {
+    const sel = document.getElementById('snapshot-date-picker');
+    if (sel) sel.value = '';
+  }, 100);
 }
 
 function saveSnapshot() {
@@ -2829,16 +2964,6 @@ function showToast(msg) {
 //  INIT
 // ════════════════════════════════════════════════════════
 function init() {
-  // ── 월별추이 초기 데이터 강제 설정 (4월·5월 두 개만) ──
-  const SEED_SNAPSHOTS = [{"ym":"2026-04","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
-  try {
-    const existing = JSON.parse(localStorage.getItem(TREND_KEY) || '[]');
-    const otherMonths = existing.filter(s => s.ym !== '2026-04' && s.ym !== '2026-05');
-    const merged = [...SEED_SNAPSHOTS, ...otherMonths];
-    merged.sort((a, b) => a.ym.localeCompare(b.ym));
-    localStorage.setItem(TREND_KEY, JSON.stringify(merged));
-  } catch(e) {}
-
   try {
     // ── 파일의 state를 항상 우선 사용 (localStorage state 초기화) ──
     localStorage.removeItem('pfeditor_v7_state');
@@ -2846,6 +2971,15 @@ function init() {
     localStorage.removeItem('pfeditor_v7_snapshot');
     localStorage.removeItem('pfeditor_v6_snapshot');
   } catch(e) {}
+
+  // ── 미저장 변경 경고 (브라우저 종료·탭 닫기 시) ──
+  window.addEventListener('beforeunload', e => {
+    if (isDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
   // 테마 복원
   const savedTheme = localStorage.getItem('pfTheme');
   if (savedTheme === 'light') {
@@ -2856,10 +2990,6 @@ function init() {
   syncMetaInputs();
   renderMembers();
   recalc();
-  document.getElementById('meta-date').addEventListener('input', e => {
-    state.meta.date = e.target.value;
-    recalc();
-  });
 }
 
 // ════════════════════════════════════════════════════════
@@ -2867,7 +2997,7 @@ function init() {
 // ════════════════════════════════════════════════════════
 function switchApaneTab(tab) {
   currentApaneTab = tab;
-  const tabs = ['weekly','overview','simulator','scenario','pnl','plan'];
+  const tabs = ['weekly','overview','simulator','scenario','pnl','plan','trend'];
   document.querySelectorAll('.apane-tab').forEach((el, i) => {
     el.classList.toggle('active', tabs[i] === tab);
   });
@@ -3854,14 +3984,25 @@ function importTrendFromJSON(event) {
     reader.onload = e => {
       try {
         const loaded = JSON.parse(e.target.result);
-        // migrate entryType
+
+        // ── 새 포맷: trendSnapshots 키가 있으면 일괄 병합 ──
+        if (Array.isArray(loaded.trendSnapshots) && loaded.trendSnapshots.length > 0) {
+          const snapshots = loadTrendSnapshots();
+          const mergeMap = {};
+          snapshots.forEach(s => { mergeMap[s.ym] = s; });
+          loaded.trendSnapshots.forEach(s => { mergeMap[s.ym] = s; added++; });
+          const merged = Object.values(mergeMap).sort((a,b) => a.ym.localeCompare(b.ym));
+          try { localStorage.setItem(TREND_KEY, JSON.stringify(merged)); } catch(err) {}
+          finish(); return;
+        }
+
+        // ── 구 포맷: members/meta 키로 스냅샷 직접 계산 ──
         if (loaded.members) {
           loaded.members.forEach(m => (m.holdings||[]).forEach(h => {
             if (!h.entryType) h.entryType = 'single';
           }));
         }
 
-        // compute grandTotal & member totals from loaded data
         let grandTotal = 0;
         const memberTotals = (loaded.members||[]).map(m => {
           const t = (m.holdings||[]).reduce((s,h) => s + (parseFloat(h.amount)||0), 0);
@@ -3954,9 +4095,11 @@ function saveTrendSnapshot() {
 }
 
 function deleteTrendSnapshot(ym) {
+  if (!confirm(ym + ' 스냅샷을 삭제할까요?')) return;
   const snapshots = loadTrendSnapshots().filter(s => s.ym !== ym);
   localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
-  showToast('🗑 ' + ym + ' 스냅샷 삭제');
+  markDirty();
+  showToast('🗑 ' + ym + ' 삭제 — 💾 JSON 저장으로 파일에도 반영하세요');
   const calc = calcState(); updateAnalysisPane(calc, validateState());
 }
 
@@ -3979,7 +4122,6 @@ function buildTrendAnalysis(calc) {
         매월 아래 버튼을 눌러 스냅샷을 저장하세요.<br>
         저장된 데이터로 구성원별·종목별<br>월별 변화를 자동으로 차트로 보여드립니다.
       </div>
-      <button class="btn btn-primary" onclick="saveTrendSnapshot()" style="margin:0 auto;">📸 이번 달 스냅샷 저장</button>
       <label class="btn btn-secondary" style="margin:4px auto 0;cursor:pointer;">
         📂 JSON 파일로 추이 추가
         <input type="file" accept=".json" multiple style="display:none" onchange="importTrendFromJSON(event)">
@@ -4083,12 +4225,6 @@ function buildTrendAnalysis(calc) {
   let html = `
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
     <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">월별 추이 · ${snapshots.length}개월 데이터</div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap;">
-      <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
-        📂 JSON 추가<input type="file" accept=".json" multiple style="display:none" onchange="importTrendFromJSON(event)">
-      </label>
-      <button class="btn btn-secondary btn-sm" onclick="saveTrendSnapshot()">📸 이달 저장</button>
-    </div>
   </div>`;
 
   // summary row
