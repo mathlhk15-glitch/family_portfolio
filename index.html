@@ -769,9 +769,31 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 // 4월·5월 추이 시드 데이터 — localStorage가 완전히 비어있을 때만 초기 설정
 (function() {
   var KEY = 'pf_monthly_snapshots';
-  var seed = [{"ym":"2026-04","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  var seed = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
   try {
     var existing = JSON.parse(localStorage.getItem(KEY) || '[]');
+
+    // ── 마이그레이션: 구 포맷 YYYY-MM → 새 포맷 YYYY-MM-DD, 중복 제거 ──
+    var migrated = false;
+    existing = existing.map(function(s) {
+      if (s.ym && s.ym.match(/^\d{4}-\d{2}$/) && s.label) {
+        var newYm = s.label.replace(/\./g, '-');
+        if (newYm.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          migrated = true;
+          return Object.assign({}, s, { ym: newYm });
+        }
+      }
+      return s;
+    });
+    // 중복 ym 제거 (나중 항목 우선)
+    var deduped = {};
+    existing.forEach(function(s){ deduped[s.ym] = s; });
+    existing = Object.values(deduped);
+    if (migrated || Object.keys(deduped).length !== existing.length) {
+      existing.sort(function(a,b){ return a.ym < b.ym ? -1 : 1; });
+      localStorage.setItem(KEY, JSON.stringify(existing));
+    }
+
     if (existing.length === 0) {
       // 완전히 비어있을 때만 시드 데이터로 초기화
       localStorage.setItem(KEY, JSON.stringify(seed));
@@ -1951,8 +1973,10 @@ function autoSave() {
       localStorage.setItem('pfeditor_v7_state', JSON.stringify(state));
       const snap = localStorage.getItem('pfeditor_v7_snapshot');
       if (snap) snapshot = JSON.parse(snap);
-      // ── 편집할 때마다 해당 월 추이 데이터 자동 누적 ──
-      autoSaveTrendSnapshot();
+      markClean();
+      if (typeof currentApaneTab !== 'undefined' && currentApaneTab === 'trend') {
+        updateAnalysisPane(calcState(), validateState());
+      }
     } catch(e) {}
   }, 600);
 }
@@ -1965,13 +1989,13 @@ function saveJSON() {
   const blob = new Blob([JSON.stringify(exportData, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  // 파일명에 YYYY-MM 형태 날짜 자동 포함 (예: portfolio_2026-05.json)
-  const ym = state.meta.date.replace(/\./g,'-').slice(0,7);
-  a.download = `portfolio_${ym}.json`;
+  // 파일명에 YYYY-MM-DD 형태 날짜 자동 포함 (예: portfolio_2026-05-10.json)
+  const ymd = state.meta.date.replace(/\./g,'-').slice(0,10);
+  a.download = `portfolio_${ymd}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
   markClean();
-  showToast('✅ JSON 저장 완료 — 추이 ' + trendSnapshots.length + '개월 포함');
+  showToast('✅ JSON 저장 완료 — 추이 ' + trendSnapshots.length + '주 포함');
 }
 
 function loadJSON(event) {
@@ -1986,10 +2010,18 @@ function loadJSON(event) {
       // 파일 내 trendSnapshots이 있으면, 기존 localStorage 데이터와 병합한 뒤 덮어씀
       if (Array.isArray(loaded.trendSnapshots) && loaded.trendSnapshots.length > 0) {
         const existing = loadTrendSnapshots();
-        // 파일 데이터 우선 — 겹치는 달은 파일 버전으로 교체
+        // 파일 내 스냅샷도 YYYY-MM-DD 포맷으로 마이그레이션
+        const migratedFromFile = loaded.trendSnapshots.map(s => {
+          if (s.ym && s.ym.match(/^\d{4}-\d{2}$/) && s.label) {
+            const newYm = s.label.replace(/\./g, '-');
+            if (newYm.match(/^\d{4}-\d{2}-\d{2}$/)) return Object.assign({}, s, { ym: newYm });
+          }
+          return s;
+        });
+        // 파일 데이터 우선 — 겹치는 날짜는 파일 버전으로 교체, 정렬 보장
         const mergeMap = {};
         existing.forEach(s => { mergeMap[s.ym] = s; });
-        loaded.trendSnapshots.forEach(s => { mergeMap[s.ym] = s; });
+        migratedFromFile.forEach(s => { mergeMap[s.ym] = s; });
         const merged = Object.values(mergeMap).sort((a,b) => a.ym.localeCompare(b.ym));
         try { localStorage.setItem(TREND_KEY, JSON.stringify(merged)); } catch(err) {}
       }
@@ -2004,11 +2036,9 @@ function loadJSON(event) {
       syncMetaInputs();
       renderMembers();
       recalc();
-      // ── 이 파일 날짜의 월별 스냅샷도 자동 갱신 ──
-      autoSaveTrendSnapshot();
       const trendCount = loadTrendSnapshots().length;
       markClean();
-      showToast('✅ JSON 불러오기 완료 — 월별추이 ' + trendCount + '개월 복원됨');
+      showToast('✅ JSON 불러오기 완료 — 주별추이 ' + trendCount + '주 복원됨');
     } catch(err) {
       showToast('❌ JSON 파일 오류');
     }
@@ -2018,12 +2048,13 @@ function loadJSON(event) {
 }
 
 function autoSaveTrendSnapshot() {
-  // JSON 불러올 때 해당 월 스냅샷을 월별추이에 자동 추가
-  // (같은 달이 이미 있으면 덮어씀 — 최신 파일이 기준)
+  // JSON 불러올 때 해당 날짜 스냅샷을 주별추이에 자동 추가
+  // (같은 날짜가 이미 있으면 덮어씀 — 최신 파일이 기준)
   const calc = calcState();
   const {memberTotals, grandTotal} = calc;
   const dateVal = state.meta.date || new Date().toISOString().slice(0,10).replace(/-/g,'.');
-  const ym = dateVal.replace(/\./g,'-').slice(0,7);
+  const rawDate = dateVal.replace(/\./g,'-');
+  const ym = rawDate.length >= 10 ? rawDate.slice(0,10) : rawDate.slice(0,7) + '-01';
 
   const snapshots = loadTrendSnapshots();
   const idx = snapshots.findIndex(s => s.ym === ym);
@@ -3964,7 +3995,31 @@ function recalcDrawdown() {
 // ════════════════════════════════════════════════════════
 
 function loadTrendSnapshots() {
-  try { return JSON.parse(localStorage.getItem(TREND_KEY) || '[]'); } catch(e) { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(TREND_KEY) || '[]');
+
+    // 1단계: 구 포맷 YYYY-MM → YYYY-MM-DD 마이그레이션
+    const migrated = raw.map(s => {
+      if (s.ym && s.ym.match(/^\d{4}-\d{2}$/) && s.label) {
+        const newYm = s.label.replace(/\./g, '-');
+        if (newYm.match(/^\d{4}-\d{2}-\d{2}$/)) return Object.assign({}, s, { ym: newYm });
+      }
+      return s;
+    });
+
+    // 2단계: 중복 ym 제거 (나중 항목 우선)
+    const deduped = {};
+    migrated.forEach(s => { deduped[s.ym] = s; });
+
+    // 3단계: ym 기준 오름차순 정렬
+    const sorted = Object.values(deduped).sort((a,b) => a.ym.localeCompare(b.ym));
+
+    // 변경이 있으면 localStorage 재저장
+    const changed = raw.length !== sorted.length || raw.some((s,i) => s.ym !== sorted[i]?.ym);
+    if (changed) localStorage.setItem(TREND_KEY, JSON.stringify(sorted));
+
+    return sorted;
+  } catch(e) { return []; }
 }
 
 
@@ -4012,8 +4067,10 @@ function importTrendFromJSON(event) {
 
         const dateVal = (loaded.meta && loaded.meta.date) || '';
         if (!dateVal) { skipped++; finish(); return; }
-        const ym = dateVal.replace(/\./g,'-').slice(0,7);
-        if (!ym.match(/^\d{4}-\d{2}$/)) { skipped++; finish(); return; }
+        const rawDate = dateVal.replace(/\./g,'-');
+        // support both YYYY-MM-DD and YYYY-MM formats
+        const ym = rawDate.length >= 10 ? rawDate.slice(0,10) : rawDate.slice(0,7) + '-01';
+        if (!ym.match(/^\d{4}-\d{2}-\d{2}$/)) { skipped++; finish(); return; }
 
         const entry = {
           ym,
@@ -4065,12 +4122,13 @@ function importTrendFromJSON(event) {
 function saveTrendSnapshot() {
   const calc = calcState();
   const {memberTotals, grandTotal, catTotals} = calc;
-  const dateVal = document.getElementById('meta-date')?.value || new Date().toISOString().slice(0,7);
-  // use YYYY-MM as key
-  const ym = dateVal.replace(/\./g,'-').slice(0,7);
+  const dateVal = document.getElementById('meta-date')?.value || new Date().toISOString().slice(0,10);
+  // use YYYY-MM-DD as key (weekly granularity)
+  const rawDate = dateVal.replace(/\./g,'-');
+  const ym = rawDate.length >= 10 ? rawDate.slice(0,10) : rawDate.slice(0,7) + '-01';
 
   const snapshots = loadTrendSnapshots();
-  // overwrite if same month exists
+  // overwrite if same date exists
   const idx = snapshots.findIndex(s => s.ym === ym);
   const entry = {
     ym,
@@ -4090,29 +4148,32 @@ function saveTrendSnapshot() {
   if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
   snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
   localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
-  showToast('📸 월별 스냅샷 저장 완료 — ' + ym);
+  showToast('📸 주별 스냅샷 저장 완료 — ' + ym);
   if (currentApaneTab === 'trend') { const calc2 = calcState(); updateAnalysisPane(calc2, validateState()); }
 }
 
 function deleteTrendSnapshot(ym) {
-  if (!confirm(ym + ' 스냅샷을 삭제할까요?')) return;
-  const snapshots = loadTrendSnapshots().filter(s => s.ym !== ym);
+  const snaps = loadTrendSnapshots();
+  const target = snaps.find(s => s.ym === ym);
+  const displayDate = (target && target.label) ? target.label : ym;
+  if (!confirm(displayDate + ' 스냅샷을 삭제할까요?')) return;
+  const snapshots = snaps.filter(s => s.ym !== ym);
   localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
   markDirty();
-  showToast('🗑 ' + ym + ' 삭제 — 💾 JSON 저장으로 파일에도 반영하세요');
+  showToast('🗑 ' + displayDate + ' 삭제 완료');
   const calc = calcState(); updateAnalysisPane(calc, validateState());
 }
 
 function resetTrendData() {
-  if (!confirm('월별추이를 4월 22일 · 5월 2일 데이터로 초기화할까요?\n기존 데이터는 모두 삭제됩니다.')) return;
-  const correct = [{"ym":"2026-04","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  if (!confirm('주별추이를 4월 22일 · 5월 2일 데이터로 초기화할까요?\n기존 데이터는 모두 삭제됩니다.')) return;
+  const correct = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
   localStorage.setItem(TREND_KEY, JSON.stringify(correct));
-  showToast('✅ 월별추이 초기화 완료 — 4월22일·5월2일');
+  showToast('✅ 주별추이 초기화 완료 — 4월22일·5월2일');
   const calc = calcState(); updateAnalysisPane(calc, validateState());
 }
 
 function buildTrendAnalysis(calc) {
-  const snapshots = loadTrendSnapshots();
+  const snapshots = loadTrendSnapshots().sort((a,b) => a.ym.localeCompare(b.ym));
 
   if (snapshots.length === 0) {
     return `<div style="text-align:center;padding:40px 16px;">
@@ -4222,19 +4283,33 @@ function buildTrendAnalysis(calc) {
   const totalChange = prev ? latest.grandTotal - prev.grandTotal : null;
   const changeColor = totalChange === null ? 'var(--muted)' : totalChange >= 0 ? 'var(--green)' : 'var(--red)';
 
-  let html = `
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
-    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">월별 추이 · ${snapshots.length}개월 데이터</div>
+  // ── 스냅샷 목록 (상단 고정, 삭제 버튼 포함) ──
+  let html = `<div style="margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📋 저장된 스냅샷 (${snapshots.length}주) — 삭제할 항목을 선택하세요</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">`;
+  [...snapshots].reverse().forEach(s => {
+    const displayDate = s.label || s.ym;
+    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;display:flex;align-items:center;gap:8px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);font-weight:700;min-width:72px;">${displayDate}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);flex:1;">${fmt(s.grandTotal)}만</span>
+      <span style="font-size:9px;color:var(--muted);flex:2;">${s.members.map(m=>m.icon+' '+m.name).join(' · ')}</span>
+      <button onclick="deleteTrendSnapshot('${s.ym}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#ef4444;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">🗑 삭제</button>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">주별 추이 · ${snapshots.length}주 데이터</div>
   </div>`;
 
   // summary row
   html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
     <div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">최신 총 자산 (${latest.ym})</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">최신 총 자산 (${latest.label || latest.ym})</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:900;color:var(--cyan)">${fmt(latest.grandTotal)}만</div>
     </div>
     ${totalChange !== null ? `<div style="text-align:right;">
-      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">전월 대비</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">전주 대비</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${changeColor}">${totalChange>=0?'+':''}${fmt(Math.round(totalChange))}만</div>
     </div>` : ''}
   </div>`;
@@ -4285,16 +4360,7 @@ function buildTrendAnalysis(calc) {
     </div>`;
   }
 
-  // Snapshot list
-  html += `<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">저장된 스냅샷</div>`;
-  [...snapshots].reverse().forEach(s => {
-    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;margin-bottom:5px;display:flex;align-items:center;gap:8px;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);font-weight:700;">${s.ym}</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);flex:1;">${fmt(s.grandTotal)}만</span>
-      <span style="font-size:9px;color:var(--muted);">${s.members.map(m=>m.icon+m.name).join(' · ')}</span>
-      <button onclick="deleteTrendSnapshot('${s.ym}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;" title="삭제">✕</button>
-    </div>`;
-  });
+
 
   return html;
 }
