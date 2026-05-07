@@ -240,6 +240,15 @@ select{cursor:pointer;}
 .rat-new-fund{background:rgba(16,185,129,.1);color:var(--green);border-color:rgba(16,185,129,.3);}
 .rat-split-buy{background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.3);}
 .rat-hold{background:rgba(100,116,139,.1);color:var(--dim);border-color:rgba(100,116,139,.2);}
+.quick-rebal-box{margin-top:10px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;}
+.quick-rebal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;font-weight:700;color:var(--dim);margin-bottom:7px;}
+.quick-rebal-head label{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.quick-rebal-head input{width:76px;text-align:right;padding:3px 6px;}
+.quick-rebal-row{display:grid;grid-template-columns:96px 1fr 64px;align-items:center;gap:8px;font-size:10px;padding:4px 0;border-top:1px solid rgba(28,45,66,.5);}
+.quick-rebal-row:first-child{border-top:none;}
+.quick-rebal-bar{height:5px;background:rgba(148,163,184,.16);border-radius:3px;overflow:hidden;}
+.quick-rebal-fill{height:100%;border-radius:3px;}
+.quick-rebal-empty{font-size:10px;color:var(--muted);line-height:1.5;}
 
 /* Concentration risk */
 .concentration-section{margin-bottom:12px;}
@@ -850,10 +859,13 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
         <option value="">▾ 이력</option>
       </select>
     </div>
+    <button class="btn btn-secondary btn-sm" onclick="saveSnapshot()" title="현재 상태를 다음 점검 비교 기준으로 저장">📸 <span class="btn-label">비교점</span></button>
+    <button class="btn btn-secondary btn-sm" onclick="saveTrendSnapshot()" title="현재 기준일을 주별추이에 저장">📈 <span class="btn-label">추이 저장</span></button>
     <button class="btn btn-secondary btn-sm" onclick="saveJSON()">💾 <span class="btn-label">JSON 저장</span></button>
     <label class="btn btn-secondary btn-sm" style="cursor:pointer">
       📂 <span class="btn-label">불러오기</span> <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
     </label>
+    <button class="btn btn-danger btn-sm" onclick="resetEditorToDefaultState()" title="내장 기본 데이터로 초기화">↺ <span class="btn-label">초기화</span></button>
     <button id="themeToggleBtn" class="btn btn-secondary btn-sm" onclick="toggleTheme()" title="라이트/다크 모드 전환">☀️ 라이트</button>
     <button class="btn btn-primary" onclick="generateHTML()">⬇️ <span class="btn-label">보고서</span></button>
   </div>
@@ -877,6 +889,16 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
         <div id="catTargetSumRow" style="font-size:10px;font-weight:700;margin-top:8px;text-align:right;"></div>
         <div style="font-size:10px;color:var(--muted);margin-top:4px;">
           목표 비중을 직접 수정하면 리밸런싱 제안이 자동으로 업데이트됩니다.
+        </div>
+        <div class="quick-rebal-box">
+          <div class="quick-rebal-head">
+            <span>신규 자금 배분 계산</span>
+            <label>
+              <input type="number" id="rebal-budget" value="500" min="0" step="10" oninput="renderRebalancePlanner(calcState())">
+              만원
+            </label>
+          </div>
+          <div id="quickRebalResult"></div>
         </div>
       </div>
     </div>
@@ -958,7 +980,7 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
       <div style="color:var(--muted);font-size:11px;text-align:center;padding:40px 0;">데이터를 입력하면 자동 분석됩니다</div>
     </div>
     <div class="storage-bar">
-      <span><span class="auto-save-dot"></span>편집 중 — <strong style="color:var(--yellow)">💾 JSON 저장</strong>으로 파일 백업하세요</span>
+      <span><span class="auto-save-dot"></span>자동저장 활성 — 중요한 변경 후에는 <strong style="color:var(--yellow)">JSON 저장</strong>으로 파일 백업하세요</span>
       <span id="lastSavedLabel" style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--dim);"></span>
     </div>
   </div>
@@ -1007,7 +1029,7 @@ const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 
 const BADGE_OPTIONS = [
   {v:'',l:'배지없음'},{v:'신규',l:'신규'},{v:'실적후판단',l:'실적후판단'},
-  {v:'매도검토',l:'매도검토'},{v:'보유',l:'보유'},{v:'관찰중',l:'관찰중'},
+  {v:'5월판단',l:'5월판단'},{v:'매도검토',l:'매도검토'},{v:'보유',l:'보유'},{v:'관찰중',l:'관찰중'},
 ];
 
 // Entry types
@@ -1142,6 +1164,51 @@ let state = {
 // Snapshot for version comparison
 let snapshot = null;
 
+const STATE_KEY = 'pfeditor_v8_state';
+const LEGACY_STATE_KEYS = ['pfeditor_v7_state', 'pfeditor_v6_state'];
+const SNAPSHOT_KEY = 'pfeditor_v8_snapshot';
+const LEGACY_SNAPSHOT_KEYS = ['pfeditor_v7_snapshot', 'pfeditor_v6_snapshot'];
+
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(value) {
+  return escapeHTML(value);
+}
+
+function escapeJSString(value) {
+  return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '');
+}
+
+function safeJSONStringify(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
+function safeColor(value, fallback = '#3b82f6') {
+  const v = String(value || '').trim();
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v)) return v;
+  if (/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/i.test(v)) return v;
+  if (/^hsla?\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/i.test(v)) return v;
+  return fallback;
+}
+
+function cloneState(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+const DEFAULT_STATE = cloneState(state);
+
 // ════════════════════════════════════════════════════════
 //  VALIDATION ENGINE
 // ════════════════════════════════════════════════════════
@@ -1149,12 +1216,28 @@ function validateState() {
   const errors = [];
   const warnings = [];
 
+  const dateValue = (state.meta && state.meta.date ? state.meta.date : '').trim();
+  if (!dateValue) {
+    errors.push({type:'error', msg:'기준일이 비어 있습니다'});
+  } else if (!/^\d{4}\.\d{2}\.\d{2}$/.test(dateValue)) {
+    warnings.push({type:'warning', msg:'기준일은 YYYY.MM.DD 형식 권장'});
+  }
+
+  const targetSum = Object.values(state.catTargets || {}).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  if (Math.abs(targetSum - 100) > 0.01) {
+    warnings.push({type:'warning', msg:`목표 비중 합계가 ${targetSum.toFixed(1)}%입니다. 리밸런싱 계산은 100%에서 가장 정확합니다`});
+  }
+
   // 1. Ticker/amount checks per member
   const allTickers = {}; // ticker -> [{mi, hi}]
+  const tickerCategories = {};
+  const knownBadges = new Set(BADGE_OPTIONS.map(b => b.v));
   state.members.forEach((m, mi) => {
     m.holdings.forEach((h, hi) => {
       const ticker = normalizeTicker(h.ticker);
       const amount = parseFloat(h.amount) || 0;
+      const cat = h.cat || 'other';
+      const pnl = String(h.pnl || '').trim();
 
       // No ticker but has amount
       if (!ticker && amount > 0) {
@@ -1168,10 +1251,25 @@ function validateState() {
       if (ticker && isNaN(parseFloat(h.amount))) {
         errors.push({type:'error', msg:`${m.name} / ${h.ticker}: 금액이 숫자가 아님`});
       }
+      if (ticker && !CAT_MAP[cat]) {
+        errors.push({type:'error', msg:`${m.name} / ${h.ticker}: 알 수 없는 자산 분류 (${cat})`});
+      }
+      if (pnl && /%%/.test(pnl)) {
+        warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 손익률에 %가 중복 입력됨`});
+      } else if (pnl && !['-', '복수'].includes(pnl) && parsePnlPct(pnl) === null) {
+        warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 손익률 형식을 확인하세요`});
+      }
+      if (h.badge && !knownBadges.has(h.badge)) {
+        warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 사용자 배지 "${h.badge}" 사용 중`});
+      }
       // Track for duplicate check (only single type)
       if (ticker && h.entryType === 'single') {
         if (!allTickers[ticker]) allTickers[ticker] = [];
         allTickers[ticker].push({mi, hi, memberName: m.name});
+      }
+      if (ticker) {
+        if (!tickerCategories[ticker]) tickerCategories[ticker] = new Set();
+        tickerCategories[ticker].add(cat);
       }
     });
     // Empty holdings row
@@ -1192,6 +1290,13 @@ function validateState() {
         warnings.push({type:'warning', msg:`${name}: ${ticker} 중복 입력 (${cnt}행) — 합산 처리됨`});
       }
     });
+  });
+
+  Object.entries(tickerCategories).forEach(([ticker, cats]) => {
+    if (cats.size > 1) {
+      const labels = [...cats].map(cat => CAT_MAP[cat]?.label || cat).join(', ');
+      warnings.push({type:'warning', msg:`${ticker}: 같은 종목에 여러 자산 분류가 사용됨 (${labels})`});
+    }
   });
 
   return {errors, warnings};
@@ -1249,6 +1354,7 @@ function updateCatTarget(catId, val) {
   const calc = calcState();
   updateTargetSumBadge(calc);
   updateCatTargetSumRow();
+  renderRebalancePlanner(calc);
   // 분석 패널 overview 탭이 열려 있으면 실시간 반영
   if (currentApaneTab === 'overview') updateAnalysisPane(calc, validateState());
 }
@@ -1275,6 +1381,80 @@ function updateTargetSumBadge(calc = calcState()) {
   badge.innerHTML = `<span class="target-sum-badge ${cls}">${label}</span>`;
 }
 
+function calculateBuyOnlyAllocation(calc, budget) {
+  const {grandTotal, catTotals} = calc;
+  const targetSum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  if (budget <= 0 || grandTotal <= 0 || Math.abs(targetSum - 100) > 0.01) return [];
+
+  const afterTotal = grandTotal + budget;
+  const needs = CATEGORIES
+    .map(c => {
+      const targetAmt = afterTotal * ((parseFloat(state.catTargets[c.id]) || 0) / 100);
+      const need = Math.max(0, targetAmt - (catTotals[c.id] || 0));
+      return {cat:c, need, targetPct: parseFloat(state.catTargets[c.id]) || 0};
+    })
+    .filter(x => x.need > 0.01);
+
+  const totalNeed = needs.reduce((s,x) => s + x.need, 0);
+  if (totalNeed <= 0) {
+    return CATEGORIES
+      .filter(c => (state.catTargets[c.id] || 0) > 0)
+      .map(c => ({cat:c, amount: budget * ((parseFloat(state.catTargets[c.id]) || 0) / 100)}));
+  }
+
+  let allocation = needs.map(x => ({
+    cat: x.cat,
+    amount: totalNeed > budget ? budget * (x.need / totalNeed) : x.need
+  }));
+
+  const used = allocation.reduce((s,x) => s + x.amount, 0);
+  const leftover = Math.max(0, budget - used);
+  if (leftover > 0.01) {
+    const targetWeightSum = CATEGORIES.reduce((s,c) => s + (parseFloat(state.catTargets[c.id]) || 0), 0);
+    CATEGORIES.forEach(c => {
+      const extra = targetWeightSum > 0 ? leftover * ((parseFloat(state.catTargets[c.id]) || 0) / targetWeightSum) : 0;
+      if (extra <= 0.01) return;
+      const found = allocation.find(x => x.cat.id === c.id);
+      if (found) found.amount += extra;
+      else allocation.push({cat:c, amount:extra});
+    });
+  }
+
+  return allocation.filter(x => x.amount >= 1).sort((a,b) => b.amount - a.amount);
+}
+
+function renderRebalancePlanner(calc = calcState()) {
+  const box = document.getElementById('quickRebalResult');
+  const input = document.getElementById('rebal-budget');
+  if (!box || !input) return;
+  const budget = parseFloat(input.value) || 0;
+  const targetSum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  if (budget <= 0) {
+    box.innerHTML = '<div class="quick-rebal-empty">신규 투자 예정 금액을 입력하면 매수 우선순위를 계산합니다.</div>';
+    return;
+  }
+  if (calc.grandTotal <= 0 || Math.abs(targetSum - 100) > 0.01) {
+    box.innerHTML = '<div class="quick-rebal-empty">총 자산과 목표 비중 합계 100%가 필요합니다.</div>';
+    return;
+  }
+  const allocation = calculateBuyOnlyAllocation(calc, budget);
+  if (allocation.length === 0) {
+    box.innerHTML = '<div class="quick-rebal-empty">현재 비중이 목표에 가깝습니다. 신규 자금은 목표 비중대로 분산하세요.</div>';
+    return;
+  }
+  const maxAmt = Math.max(...allocation.map(x => x.amount), 1);
+  box.innerHTML = allocation.map(x => {
+    const pct = budget > 0 ? x.amount / budget * 100 : 0;
+    const w = Math.max(4, x.amount / maxAmt * 100);
+    return `<div class="quick-rebal-row">
+      <span class="cat-tag cat-${x.cat.id}" style="font-size:8px">${escapeHTML(x.cat.label)}</span>
+      <div class="quick-rebal-bar"><div class="quick-rebal-fill" style="width:${w.toFixed(1)}%;background:${x.cat.color}aa;"></div></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-weight:800;color:${x.cat.color};text-align:right;">${fmt(Math.round(x.amount))}만</span>
+      <span style="grid-column:2 / 4;font-size:9px;color:var(--muted);margin-top:-2px;">신규자금의 ${pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+}
+
 // ════════════════════════════════════════════════════════
 //  RENDER: Validation Panel
 // ════════════════════════════════════════════════════════
@@ -1288,8 +1468,8 @@ function renderValidationPanel(validation) {
   }
   const errColor = errors.length > 0 ? 'var(--red)' : 'var(--yellow)';
   const items = [
-    ...errors.map(e => `<div class="vp-item error"><span class="vi-icon">✕</span><span>${e.msg}</span></div>`),
-    ...warnings.map(w => `<div class="vp-item warning"><span class="vi-icon">⚠</span><span>${w.msg}</span></div>`)
+    ...errors.map(e => `<div class="vp-item error"><span class="vi-icon">✕</span><span>${escapeHTML(e.msg)}</span></div>`),
+    ...warnings.map(w => `<div class="vp-item warning"><span class="vi-icon">⚠</span><span>${escapeHTML(w.msg)}</span></div>`)
   ].join('');
 
   panel.innerHTML = `
@@ -1320,14 +1500,19 @@ function renderMember(m, mi, container) {
   const card = document.createElement('div');
   card.className = 'member-card';
   card.id = `mc-${mi}`;
+  const memberColor = safeColor(m.color, CATEGORIES[mi % CATEGORIES.length]?.color || '#3b82f6');
+  const memberIcon = escapeHTML(m.icon);
+  const memberName = escapeHTML(m.name);
+  const memberRole = escapeHTML(m.role);
+  const deleteMsg = escapeAttr(JSON.stringify(`${m.name} 계좌를 삭제할까요?`));
 
   const headHTML = `
     <div class="member-head" onclick="toggleMember(${mi})">
       <div class="member-head-left">
-        <span class="icon">${m.icon}</span>
+        <span class="icon">${memberIcon}</span>
         <div class="member-name-role">
-          <h2 style="color:${m.color}">${m.name}</h2>
-          <div class="role">${m.role}</div>
+          <h2 style="color:${memberColor}">${memberName}</h2>
+          <div class="role">${memberRole}</div>
         </div>
       </div>
       <div class="member-head-right">
@@ -1338,16 +1523,16 @@ function renderMember(m, mi, container) {
 
   const configHTML = `
     <div class="member-config">
-      <input type="text" value="${m.icon}" placeholder="아이콘" style="width:44px;text-align:center"
+      <input type="text" value="${escapeAttr(m.icon)}" placeholder="아이콘" style="width:44px;text-align:center"
         oninput="state.members[${mi}].icon=this.value;refreshMemberHead(${mi})">
-      <input type="text" value="${m.name}" placeholder="이름" style="width:80px"
+      <input type="text" value="${escapeAttr(m.name)}" placeholder="이름" style="width:80px"
         oninput="state.members[${mi}].name=this.value;refreshMemberHead(${mi})">
-      <input type="text" value="${m.role}" placeholder="역할" style="flex:1"
+      <input type="text" value="${escapeAttr(m.role)}" placeholder="역할" style="flex:1"
         oninput="state.members[${mi}].role=this.value;refreshMemberHead(${mi})">
-      <input type="text" value="${m.color}" placeholder="색상" style="width:90px"
+      <input type="text" value="${escapeAttr(memberColor)}" placeholder="색상" style="width:90px"
         oninput="state.members[${mi}].color=this.value;refreshMemberHead(${mi})">
       <button class="btn btn-danger btn-sm"
-        onclick="if(confirm('${m.name} 계좌를 삭제할까요?')){state.members.splice(${mi},1);renderMembers();recalc();}">삭제</button>
+        onclick="if(confirm(${deleteMsg})){state.members.splice(${mi},1);renderMembers();recalc();}">삭제</button>
     </div>`;
 
   const rowsHTML = m.holdings.map((h, hi) => buildHoldingRow(mi, hi, h)).join('');
@@ -1377,44 +1562,45 @@ function renderMember(m, mi, container) {
 
 function buildHoldingRow(mi, hi, h) {
   const catOptions = CATEGORIES.map(c =>
-    `<option value="${c.id}" ${h.cat===c.id?'selected':''}>${c.label}</option>`
+    `<option value="${escapeAttr(c.id)}" ${h.cat===c.id?'selected':''}>${escapeHTML(c.label)}</option>`
   ).join('');
   const knownBadge = BADGE_OPTIONS.find(b => b.v === (h.badge||''));
   const extraBadge = (!knownBadge && h.badge)
-    ? `<option value="${h.badge}" selected>${h.badge}</option>`
+    ? `<option value="${escapeAttr(h.badge)}" selected>${escapeHTML(h.badge)}</option>`
     : '';
   const badgeOptions = BADGE_OPTIONS.map(b =>
-    `<option value="${b.v}" ${(!extraBadge && h.badge===b.v)?'selected':''}>${b.l}</option>`
+    `<option value="${escapeAttr(b.v)}" ${(!extraBadge && h.badge===b.v)?'selected':''}>${escapeHTML(b.l)}</option>`
   ).join('') + extraBadge;
   const typeOptions = ENTRY_TYPES.map(t =>
-    `<option value="${t.v}" ${(h.entryType||'single')===t.v?'selected':''}>${t.l}</option>`
+    `<option value="${escapeAttr(t.v)}" ${(h.entryType||'single')===t.v?'selected':''}>${escapeHTML(t.l)}</option>`
   ).join('');
 
-  const amount = parseFloat(h.amount)||0;
+  const amountParsed = parseFloat(h.amount);
+  const amount = Number.isFinite(amountParsed) ? amountParsed : 0;
   const ticker = (h.ticker||'').trim();
-  const hasError = (!ticker && amount > 0) || isNaN(parseFloat(h.amount) || 0);
-  const hasWarn = ticker && amount <= 0;
+  const hasError = (!ticker && amount > 0) || (ticker && String(h.amount ?? '').trim() !== '' && !Number.isFinite(amountParsed));
+  const hasWarn = ticker && amount <= 0 && !hasError;
   const rowClass = hasError ? 'row-error' : hasWarn ? 'row-warn' : '';
 
   return `<tr id="row-${mi}-${hi}" class="${rowClass}">
-    <td><input type="text" value="${h.account||''}" placeholder="계좌"
+    <td><input type="text" value="${escapeAttr(h.account)}" placeholder="계좌"
       oninput="updateHolding(${mi},${hi},'account',this.value)"></td>
-    <td><input type="text" value="${h.ticker||''}" placeholder="종목명"
+    <td><input type="text" value="${escapeAttr(h.ticker)}" placeholder="종목명"
       oninput="updateHolding(${mi},${hi},'ticker',this.value.trim().toUpperCase());this.value=this.value.trim().toUpperCase();recalc()"
       style="${!ticker&&amount>0?'border-color:var(--red)':''}"
       ></td>
     <td><select onchange="updateHolding(${mi},${hi},'entryType',this.value)">${typeOptions}</select></td>
-    <td><input type="text" value="${h.qty||''}" placeholder="수량"
+    <td><input type="text" value="${escapeAttr(h.qty)}" placeholder="수량"
       oninput="updateHolding(${mi},${hi},'qty',this.value)"></td>
-    <td><input type="text" value="${h.pnl||''}" placeholder="손익"
+    <td><input type="text" value="${escapeAttr(h.pnl)}" placeholder="손익"
       style="color:${(h.pnl||'').startsWith('-')?'var(--red)':'var(--green)'}"
       oninput="this.style.color=this.value.startsWith('-')?'var(--red)':'var(--green)';updateHolding(${mi},${hi},'pnl',this.value)"></td>
-    <td><input type="number" min="0" step="1" value="${h.amount||''}" placeholder="0"
+    <td><input type="number" min="0" step="1" value="${escapeAttr(h.amount)}" placeholder="0"
       style="color:var(--cyan);text-align:right${ticker&&amount<=0?';border-color:var(--yellow)':''}"
       oninput="updateHolding(${mi},${hi},'amount',parseFloat(this.value)||0);recalc()"></td>
     <td><select class="cat-select" onchange="updateHolding(${mi},${hi},'cat',this.value);recalc()">${catOptions}</select></td>
     <td><select onchange="updateHolding(${mi},${hi},'badge',this.value)">${badgeOptions}</select></td>
-    <td><input type="text" value="${h.note||''}" placeholder="메모"
+    <td><input type="text" value="${escapeAttr(h.note)}" placeholder="메모"
       oninput="updateHolding(${mi},${hi},'note',this.value)"></td>
     <td style="white-space:nowrap">
       <button class="btn-dup" title="행 복사" onclick="dupHolding(${mi},${hi})">⧉</button>
@@ -1578,7 +1764,7 @@ function refreshMemberHead(mi) {
   const card = document.getElementById(`mc-${mi}`);
   if (!card) return;
   card.querySelector('h2').textContent = m.name;
-  card.querySelector('h2').style.color = m.color;
+  card.querySelector('h2').style.color = safeColor(m.color);
   card.querySelector('.icon').textContent = m.icon;
   card.querySelector('.role').textContent = m.role;
   autoSave();
@@ -1637,6 +1823,7 @@ function recalc() {
   const validation = validateState();
   const calc = calcState();
   renderCatTargets(calc);
+  renderRebalancePlanner(calc);
   updateTargetSumBadge(calc);
   renderValidationPanel(validation);
   updateMemberTotals(calc);
@@ -1745,9 +1932,9 @@ function updateAnalysisPane(calc, validation) {
     state.members.forEach((m, mi) => {
       const amt = memberTotals[mi];
       const pct = grandTotal > 0 ? amt/grandTotal*100 : 0;
-      const col = m.color || '#3b82f6';
+      const col = safeColor(m.color);
       body += `<div class="mb-item">
-        <div class="mb-name">${m.icon} ${m.name}</div>
+        <div class="mb-name">${escapeHTML(m.icon)} ${escapeHTML(m.name)}</div>
         <div class="mb-track"><div class="mb-fill" style="width:${pct}%;background:${col}88;"></div></div>
         <div class="mb-amt">${fmt(amt)}만</div>
         <div class="mb-pct">${pct.toFixed(1)}%</div>
@@ -1761,8 +1948,8 @@ function updateAnalysisPane(calc, validation) {
       const isHighConc = t.pct >= 10 && t.entryType === 'single';
       body += `<div class="ta-item">
         <div class="ta-rank">${idx+1}</div>
-        <div class="ta-ticker">${t.ticker}${isHighConc?'<span class="ta-conc-warn"> !</span>':''}</div>
-        <div class="ta-holders">${t.holders.join(', ')}</div>
+        <div class="ta-ticker">${escapeHTML(t.ticker)}${isHighConc?'<span class="ta-conc-warn"> !</span>':''}</div>
+        <div class="ta-holders">${t.holders.map(escapeHTML).join(', ')}</div>
         <div class="ta-amt">${fmt(t.amount)}만</div>
         <div class="ta-pct" style="color:${t.pct>=10&&t.entryType==='single'?'var(--red)':'var(--muted)'}">${t.pct.toFixed(1)}%</div>
       </div>`;
@@ -1879,7 +2066,7 @@ function buildConcentrationRows(top1Pct, top3Pct, over10) {
     </div>
     <div class="conc-item">
       <span class="conc-label">10% 초과 종목</span>
-      <span class="conc-val">${over10.length}개 ${over10.length>0?'('+over10.map(t=>t.ticker).join(', ')+')':''}</span>
+      <span class="conc-val">${over10.length}개 ${over10.length>0?'('+over10.map(t=>escapeHTML(t.ticker)).join(', ')+')':''}</span>
       <span class="conc-risk conc-${over10Risk}">${riskLabel[over10Risk]}</span>
     </div>`;
   return html;
@@ -1914,7 +2101,7 @@ function buildVersionCompareHTML(calc) {
   const dnMovers = movers.filter(m=>m.change<0).slice(0,3);
 
   let html = `<div class="ver-compare">
-    <div class="vc-title">🔄 스냅샷 비교 (${snap.date||'이전'} → 현재)</div>
+    <div class="vc-title">🔄 스냅샷 비교 (${escapeHTML(snap.date || '이전')} → 현재)</div>
     <div class="vc-row">
       <span class="vc-label">총 자산 변화</span>
       <span class="vc-val ${totalChange>=0?'vc-up':'vc-dn'}">${totalChange>=0?'+':''}${fmt(totalChange)}만 (${totalChangePct>=0?'+':''}${totalChangePct.toFixed(1)}%)</span>
@@ -1923,25 +2110,25 @@ function buildVersionCompareHTML(calc) {
   if (newTickers.length > 0) {
     html += `<div class="vc-row">
       <span class="vc-label">신규 종목</span>
-      <span>${newTickers.map(t=>`<span class="vc-new-ticker">${t}</span>`).join('')}</span>
+      <span>${newTickers.map(t=>`<span class="vc-new-ticker">${escapeHTML(t)}</span>`).join('')}</span>
     </div>`;
   }
   if (delTickers.length > 0) {
     html += `<div class="vc-row">
       <span class="vc-label">제거 종목</span>
-      <span>${delTickers.map(t=>`<span class="vc-del-ticker">${t}</span>`).join('')}</span>
+      <span>${delTickers.map(t=>`<span class="vc-del-ticker">${escapeHTML(t)}</span>`).join('')}</span>
     </div>`;
   }
   if (upMovers.length > 0) {
     html += `<div class="vc-row">
       <span class="vc-label">증가 TOP ${upMovers.length}</span>
-      <span class="vc-val vc-up">${upMovers.map(m=>`${m.ticker} +${fmt(m.change)}만`).join(' / ')}</span>
+      <span class="vc-val vc-up">${upMovers.map(m=>`${escapeHTML(m.ticker)} +${fmt(m.change)}만`).join(' / ')}</span>
     </div>`;
   }
   if (dnMovers.length > 0) {
     html += `<div class="vc-row">
       <span class="vc-label">감소 TOP ${dnMovers.length}</span>
-      <span class="vc-val vc-dn">${dnMovers.map(m=>`${m.ticker} ${fmt(m.change)}만`).join(' / ')}</span>
+      <span class="vc-val vc-dn">${dnMovers.map(m=>`${escapeHTML(m.ticker)} ${fmt(m.change)}만`).join(' / ')}</span>
     </div>`;
   }
 
@@ -1966,6 +2153,7 @@ function buildVersionCompareHTML(calc) {
 // ════════════════════════════════════════════════════════
 let saveTimer = null;
 let isDirty = false;   // 미저장 변경 추적
+let autosavePaused = false;
 const TREND_KEY = 'pf_monthly_snapshots';
 
 function markDirty() {
@@ -1976,21 +2164,102 @@ function markDirty() {
   }
 }
 
-function markClean() {
+function markClean(labelText) {
   isDirty = false;
   const now = new Date();
   const lbl = document.getElementById('lastSavedLabel');
-  if (lbl) lbl.textContent =
+  if (lbl) lbl.textContent = labelText ||
     `✓ ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} 저장됨`;
 }
 
+function saveStateNow() {
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    if (snapshot) localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+function readStorageJSON(keys) {
+  for (const key of keys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      return {key, parsed};
+    } catch(e) {}
+  }
+  return null;
+}
+
+function applyStateMigrations(nextState) {
+  if (!nextState || !Array.isArray(nextState.members)) {
+    throw new Error('invalid portfolio state');
+  }
+  nextState.meta = Object.assign({}, DEFAULT_STATE.meta, nextState.meta || {});
+  nextState.catTargets = Object.assign({}, DEFAULT_STATE.catTargets, nextState.catTargets || {});
+  if (!nextState.planConfig || !Array.isArray(nextState.planConfig.periods)) {
+    nextState.planConfig = cloneState(DEFAULT_STATE.planConfig);
+  }
+  nextState.members.forEach((m, mi) => {
+    m.id = m.id || ('m' + mi);
+    m.name = m.name || `구성원 ${mi + 1}`;
+    m.icon = m.icon || '👤';
+    m.role = m.role || '';
+    m.color = safeColor(m.color, DEFAULT_STATE.members[mi]?.color || '#06b6d4');
+    m.holdings = Array.isArray(m.holdings) ? m.holdings : [];
+    m.holdings.forEach(h => {
+      if (!h.entryType) h.entryType = 'single';
+      if (!CAT_MAP[h.cat]) h.cat = 'other';
+      if (h.amount === undefined || h.amount === null || h.amount === '') h.amount = 0;
+      if (h.badge === undefined) h.badge = '';
+      if (h.note === undefined) h.note = '';
+    });
+  });
+  return nextState;
+}
+
+function restoreSavedStateIfAvailable() {
+  const saved = readStorageJSON([STATE_KEY, ...LEGACY_STATE_KEYS]);
+  if (!saved) return false;
+  state = applyStateMigrations(saved.parsed);
+  if (saved.key !== STATE_KEY) saveStateNow();
+  return true;
+}
+
+function restoreSavedSnapshotIfAvailable() {
+  const saved = readStorageJSON([SNAPSHOT_KEY, ...LEGACY_SNAPSHOT_KEYS]);
+  if (!saved) return false;
+  snapshot = saved.parsed;
+  try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot)); } catch(e) {}
+  return true;
+}
+
+function resetEditorToDefaultState() {
+  if (!confirm('내장 기본 데이터로 초기화할까요? 현재 자동저장본은 덮어써집니다. 먼저 JSON 저장을 권장합니다.')) return;
+  state = cloneState(DEFAULT_STATE);
+  snapshot = null;
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    localStorage.removeItem(SNAPSHOT_KEY);
+  } catch(e) {}
+  syncMetaInputs();
+  renderMembers();
+  recalc();
+  markClean('✓ 기본 데이터로 초기화됨');
+  showToast('↺ 기본 데이터로 초기화 완료');
+}
+
 function autoSave() {
+  if (autosavePaused) return;
   clearTimeout(saveTimer);
   markDirty();
   saveTimer = setTimeout(() => {
     try {
-      localStorage.setItem('pfeditor_v7_state', JSON.stringify(state));
-      const snap = localStorage.getItem('pfeditor_v7_snapshot');
+      localStorage.setItem(STATE_KEY, JSON.stringify(state));
+      const snap = localStorage.getItem(SNAPSHOT_KEY);
       if (snap) snapshot = JSON.parse(snap);
       markClean();
       if (typeof currentApaneTab !== 'undefined' && currentApaneTab === 'trend') {
@@ -2047,14 +2316,11 @@ function loadJSON(event) {
 
       // trendSnapshots 키는 state에 포함시키지 않음
       const { trendSnapshots: _ignored, ...stateOnly } = loaded;
-      state = stateOnly;
-      // migrate: add entryType if missing
-      state.members.forEach(m => m.holdings.forEach(h => {
-        if (!h.entryType) h.entryType = 'single';
-      }));
+      state = applyStateMigrations(stateOnly);
       syncMetaInputs();
       renderMembers();
       recalc();
+      saveStateNow();
       const trendCount = loadTrendSnapshots().length;
       markClean();
       showToast('✅ JSON 불러오기 완료 — 주별추이 ' + trendCount + '주 복원됨');
@@ -2156,7 +2422,7 @@ function saveSnapshot() {
   };
   snapshot = snap;
   try {
-    localStorage.setItem('pfeditor_v7_snapshot', JSON.stringify(snap));
+    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snap));
   } catch(e) {}
   showToast(`📸 스냅샷 저장 완료 (${fmt(snap.grandTotal)}만원)`);
   updateAnalysisPane(calc, validateState());
@@ -2194,11 +2460,11 @@ function generateHTML() {
     <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">📋 이번 버전 요약 (자동 생성)</div>
     <div style="margin-bottom:10px;">
       <div style="font-size:9px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">⚠ 주요 리스크</div>
-      ${risks.slice(0,2).map(r=>`<div style="font-size:11px;color:#fbbf24;padding:3px 0;padding-left:10px;border-left:2px solid rgba(245,158,11,.4)">• ${r}</div>`).join('')}
+      ${risks.slice(0,2).map(r=>`<div style="font-size:11px;color:#fbbf24;padding:3px 0;padding-left:10px;border-left:2px solid rgba(245,158,11,.4)">• ${escapeHTML(r)}</div>`).join('')}
     </div>
     <div>
       <div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">✅ 추천 행동</div>
-      ${actions.slice(0,3).map(a=>`<div style="font-size:11px;color:#6ee7b7;padding:3px 0;padding-left:10px;border-left:2px solid rgba(16,185,129,.4)">→ ${a}</div>`).join('')}
+      ${actions.slice(0,3).map(a=>`<div style="font-size:11px;color:#6ee7b7;padding:3px 0;padding-left:10px;border-left:2px solid rgba(16,185,129,.4)">→ ${escapeHTML(a)}</div>`).join('')}
     </div>
   </div>`;
 
@@ -2210,16 +2476,17 @@ function generateHTML() {
       const isNeg = (h.pnl||'').startsWith('-');
       const catInfo = CAT_MAP[h.cat] || CAT_MAP['other'];
       const amtStr = h.amount > 0 ? `${fmt(h.amount)}만` : '-';
-      const badgeHTML = h.badge ? ` <span class="b b-${h.badge==='신규'?'buy':h.badge.includes('판단')?'watch':'hold'}">${h.badge}</span>` : '';
-      const noteHTML = h.note ? `<span class="dim" style="font-size:9px"> (${h.note})</span>` : '';
-      const accountTd = hasAccount ? `<td><span class="dim">${h.account||''}</span></td>` : '';
+      const badgeClass = h.badge==='신규' ? 'buy' : String(h.badge||'').includes('판단') ? 'watch' : 'hold';
+      const badgeHTML = h.badge ? ` <span class="b b-${badgeClass}">${escapeHTML(h.badge)}</span>` : '';
+      const noteHTML = h.note ? `<span class="dim" style="font-size:9px"> (${escapeHTML(h.note)})</span>` : '';
+      const accountTd = hasAccount ? `<td><span class="dim">${escapeHTML(h.account||'')}</span></td>` : '';
       const etBadge = h.entryType && h.entryType!=='single'
         ? `<span class="b" style="background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3)">${h.entryType==='basket'?'묶음':'현금'}</span> ` : '';
       return `<tr>
         ${accountTd}
-        <td>${etBadge}<span class="mono ticker">${h.ticker}</span>${badgeHTML}${noteHTML}</td>
-        <td><span class="mono">${h.qty}</span></td>
-        <td><span class="${isNeg?'r':'g'} mono">${h.pnl}</span></td>
+        <td>${etBadge}<span class="mono ticker">${escapeHTML(h.ticker)}</span>${badgeHTML}${noteHTML}</td>
+        <td><span class="mono">${escapeHTML(h.qty)}</span></td>
+        <td><span class="${isNeg?'r':'g'} mono">${escapeHTML(h.pnl)}</span></td>
         <td class="num-r"><span class="mono amt-cell">${amtStr}</span></td>
         <td><span class="cat-tag cat-${h.cat||'other'}">${catInfo.label}</span></td>
       </tr>`;
@@ -2228,7 +2495,7 @@ function generateHTML() {
     return `
   <div class="sec">
     <div class="sec-head">
-      <h3>${m.icon} ${m.name} — ${m.role}</h3>
+      <h3>${escapeHTML(m.icon)} ${escapeHTML(m.name)} — ${escapeHTML(m.role)}</h3>
       <div style="display:flex;gap:6px;align-items:center">
         <div class="tag tag-cyan">총 ${fmt(total)}만원</div>
         <div class="tag tag-blue">${(grandTotal>0?total/grandTotal*100:0).toFixed(1)}%</div>
@@ -2275,8 +2542,8 @@ function generateHTML() {
     const catInfo = CAT_MAP[t.cat] || CAT_MAP['other'];
     const isHighConc = t.pct >= 10 && t.entryType === 'single';
     return `<tr>
-      <td><span class="mono ticker">${t.ticker}</span>${t.entryType!=='single'?`<span class="b" style="margin-left:4px;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3);font-size:8px">${t.entryType==='basket'?'묶음':'현금'}</span>`:''}</td>
-      <td><span class="dim">${t.holders.join(', ')}</span></td>
+      <td><span class="mono ticker">${escapeHTML(t.ticker)}</span>${t.entryType!=='single'?`<span class="b" style="margin-left:4px;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3);font-size:8px">${t.entryType==='basket'?'묶음':'현금'}</span>`:''}</td>
+      <td><span class="dim">${t.holders.map(escapeHTML).join(', ')}</span></td>
       <td><span class="cat-tag cat-${t.cat||'other'}">${catInfo.label}</span></td>
       <td class="num-r"><span class="mono">${fmt(t.amount)}만</span></td>
       <td class="num-r"><span class="mono ${isHighConc?'r':''}">${t.pct.toFixed(1)}%${isHighConc?' ⚠':''}</span></td>
@@ -2314,7 +2581,7 @@ function generateHTML() {
   const pnlSorted = [...pnlPositions].sort((a,b)=>b.pnl-a.pnl);
 
   // pnlPositions as JSON for report-side sorting
-  const pnlDataJSON = JSON.stringify(pnlPositions.map(p=>({
+  const pnlDataJSON = safeJSONStringify(pnlPositions.map(p=>({
     ticker: p.ticker,
     member: p.member,
     pnl: p.pnl,
@@ -2372,7 +2639,7 @@ function generateHTML() {
 
   // Trend snapshots for report
   const trendSnaps = loadTrendSnapshots();
-  const trendSnapsJSON = JSON.stringify(trendSnaps);
+  const trendSnapsJSON = safeJSONStringify(trendSnaps);
 
   // Weekly status HTML block for report
   const weeklyPanelHTML = `
@@ -2382,7 +2649,7 @@ function generateHTML() {
     <!-- 한 줄 결론 -->
     <div style="padding:14px 16px 10px;border-bottom:1px solid rgba(28,45,66,.6);">
       <div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">🔍 이번 점검 한 줄 결론</div>
-      <div style="font-size:13px;font-weight:700;color:${reportConclusion.color};line-height:1.5;">${reportConclusion.text}</div>
+      <div style="font-size:13px;font-weight:700;color:${reportConclusion.color};line-height:1.5;">${escapeHTML(reportConclusion.text)}</div>
     </div>
 
     <!-- 지난 입력 대비 변화 -->
@@ -2409,7 +2676,7 @@ function generateHTML() {
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
         ${reportRisks.length===0
           ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(16,185,129,.08);color:#10b981;border:1px solid rgba(16,185,129,.25);">✅ 위험 신호 없음</span>`
-          : reportRisks.map(r=>`<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.35);">${r}</span>`).join('')
+          : reportRisks.map(r=>`<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.35);">${escapeHTML(r)}</span>`).join('')
         }
       </div>
     </div>
@@ -2428,7 +2695,7 @@ function generateHTML() {
     <div style="padding:10px 16px 14px;">
       <div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;">📝 이번 점검 메모</div>
       ${weeklyMemo
-        ? `<div style="background:#111d2e;border:1px solid #1c2d42;border-radius:8px;padding:9px 11px;font-size:11px;color:#e2e8f0;line-height:1.7;white-space:pre-wrap;">${weeklyMemo.replace(/</g,'&lt;')}</div>`
+        ? `<div style="background:#111d2e;border:1px solid #1c2d42;border-radius:8px;padding:9px 11px;font-size:11px;color:#e2e8f0;line-height:1.7;white-space:pre-wrap;">${escapeHTML(weeklyMemo)}</div>`
         : `<div style="background:#111d2e;border:1px dashed #1c2d42;border-radius:8px;padding:9px 11px;font-size:11px;color:#475569;font-style:italic;">메모 없음</div>`
       }
     </div>
@@ -2573,7 +2840,7 @@ tr:last-child td{border-bottom:none;}
 
 <div class="header">
   <h1>뀨 가족 포트폴리오</h1>
-  <div class="sub">${date} 기준</div>
+  <div class="sub">${escapeHTML(date)} 기준</div>
 </div>
 
 <div class="tabs">
@@ -2596,21 +2863,21 @@ tr:last-child td{border-bottom:none;}
   <div class="total-banner">
     <div class="tb-label">가족 합산 총 자산</div>
     <div class="tb-amount">${fmt(grandTotal)}<span style="font-size:16px;color:var(--muted)">만원</span></div>
-    <div class="tb-sub">${state.members.length}명 합산 · ${date} 기준</div>
+    <div class="tb-sub">${state.members.length}명 합산 · ${escapeHTML(date)} 기준</div>
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:16px;">
     ${state.members.map((m,mi)=>{
       const amt = memberTotals[mi];
       const pct = grandTotal>0 ? amt/grandTotal*100 : 0;
-      const col = m.color||'#3b82f6';
+      const col = safeColor(m.color);
       return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;">
-        <div style="font-size:11px;font-weight:700;margin-bottom:6px;">${m.icon} ${m.name}</div>
+        <div style="font-size:11px;font-weight:700;margin-bottom:6px;">${escapeHTML(m.icon)} ${escapeHTML(m.name)}</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:900;color:var(--cyan);margin-bottom:4px;">${fmt(amt)}<span style="font-size:10px;color:var(--muted);font-weight:400">만</span></div>
         <div style="background:var(--border);border-radius:3px;height:4px;margin-bottom:4px;overflow:hidden;">
           <div style="width:${pct.toFixed(1)}%;height:100%;border-radius:3px;background:${col}99;"></div>
         </div>
-        <div style="font-size:9px;color:var(--muted);">${pct.toFixed(1)}% · ${m.role}</div>
+        <div style="font-size:9px;color:var(--muted);">${pct.toFixed(1)}% · ${escapeHTML(m.role)}</div>
       </div>`;
     }).join('')}
   </div>
@@ -2632,8 +2899,8 @@ tr:last-child td{border-bottom:none;}
     <table>
       <tbody>
         ${state.members.map((m,mi)=>`<tr>
-          <td style="width:100px">${m.icon} ${m.name}</td>
-          <td><span class="dim">${m.role}</span></td>
+          <td style="width:100px">${escapeHTML(m.icon)} ${escapeHTML(m.name)}</td>
+          <td><span class="dim">${escapeHTML(m.role)}</span></td>
           <td class="num-r"><span class="mono" style="color:var(--cyan)">${fmt(memberTotals[mi])}만</span></td>
           <td class="num-r"><span class="mono dim">${(grandTotal>0?memberTotals[mi]/grandTotal*100:0).toFixed(1)}%</span></td>
         </tr>`).join('')}
@@ -2660,8 +2927,8 @@ tr:last-child td{border-bottom:none;}
         const isHighConc = t.pct>=10&&t.entryType==='single';
         return `<tr>
           <td class="dim mono" style="font-size:10px">${i+1}</td>
-          <td><span class="mono ticker">${t.ticker}</span>${t.entryType!=='single'?'<span class="b" style="margin-left:4px;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3);font-size:8px">'+(t.entryType==='basket'?'묶음':'현금')+'</span>':''}</td>
-          <td><span class="dim">${t.holders.join(', ')}</span></td>
+          <td><span class="mono ticker">${escapeHTML(t.ticker)}</span>${t.entryType!=='single'?'<span class="b" style="margin-left:4px;background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.3);font-size:8px">'+(t.entryType==='basket'?'묶음':'현금')+'</span>':''}</td>
+          <td><span class="dim">${t.holders.map(escapeHTML).join(', ')}</span></td>
           <td><span class="cat-tag cat-${t.cat||'other'}">${catInfo.label}</span></td>
           <td class="num-r"><span class="mono">${fmt(t.amount)}만</span></td>
           <td class="num-r"><span class="mono ${isHighConc?'r':''}">${t.pct.toFixed(1)}%${isHighConc?' ⚠':''}</span></td>
@@ -2688,8 +2955,8 @@ tr:last-child td{border-bottom:none;}
     <table>
       <thead><tr><th>종목</th><th>보유자</th><th style="text-align:right">금액</th><th style="text-align:right">비중</th></tr></thead>
       <tbody>${over10.map(t=>`<tr>
-        <td><span class="mono ticker">${t.ticker}</span></td>
-        <td><span class="dim">${t.holders.join(', ')}</span></td>
+        <td><span class="mono ticker">${escapeHTML(t.ticker)}</span></td>
+        <td><span class="dim">${t.holders.map(escapeHTML).join(', ')}</span></td>
         <td class="num-r"><span class="mono">${fmt(t.amount)}만</span></td>
         <td class="num-r"><span class="mono r">${t.pct.toFixed(1)}% ⚠</span></td>
       </tr>`).join('')}</tbody>
@@ -2758,7 +3025,7 @@ tr:last-child td{border-bottom:none;}
 </div>
 
 <div class="footer">
-  뀨 가족 포트폴리오 · ${date}<br>
+  뀨 가족 포트폴리오 · ${escapeHTML(date)}<br>
   본 자료는 투자 참고용이며 최종 판단은 본인 책임입니다
 </div>
 
@@ -2772,6 +3039,14 @@ let pnlSortDir = 'desc';
 const trendSnapshots = ${trendSnapsJSON};
 
 function fmt(n){ return Math.round(n).toLocaleString('ko-KR'); }
+function esc(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 
 function renderPnlTable() {
   const sorted = [...pnlData].sort((a,b) => {
@@ -2784,8 +3059,8 @@ function renderPnlTable() {
   const tbody = document.getElementById('pnlTbody');
   if (!tbody) return;
   tbody.innerHTML = sorted.map(p => \`<tr>
-    <td><span class="mono ticker">\${p.ticker}</span></td>
-    <td><span class="dim">\${p.member}</span></td>
+    <td><span class="mono ticker">\${esc(p.ticker)}</span></td>
+    <td><span class="dim">\${esc(p.member)}</span></td>
     <td class="num-r"><span class="mono \${p.pnl>=0?'g':'r'}">\${p.pnl>=0?'+':''}\${p.pnl.toFixed(2)}%</span></td>
     <td class="num-r"><span class="mono">\${fmt(p.amount)}만</span></td>
     <td class="num-r"><span class="mono dim">\${fmt(p.cost)}만</span></td>
@@ -2861,7 +3136,7 @@ function renderTrendPanel() {
       svg+=\`<text x="\${PAD.l-4}" y="\${y+3}" text-anchor="end" font-size="8" fill="#475569">\${Math.round(val).toLocaleString()}</text>\`;
     }
     labels.forEach((l,i)=>{
-      svg+=\`<text x="\${xPos(i)}" y="\${H-6}" text-anchor="middle" font-size="8" fill="#475569">\${l}</text>\`;
+      svg+=\`<text x="\${xPos(i)}" y="\${H-6}" text-anchor="middle" font-size="8" fill="#475569">\${esc(l)}</text>\`;
     });
     datasets.forEach(ds=>{
       const pts=ds.data.map((v,i)=>v!=null?\`\${xPos(i)},\${yPos(v)}\`:null).filter(Boolean);
@@ -2871,7 +3146,7 @@ function renderTrendPanel() {
     svg+=\`</svg>\`;
     if(showLegend){
       svg+=\`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">\`;
-      datasets.forEach(ds=>{ svg+=\`<span style="display:flex;align-items:center;gap:4px;font-size:9px;color:#94a3b8;"><span style="width:10px;height:2px;background:\${ds.color};display:inline-block;border-radius:1px;"></span>\${ds.label}</span>\`; });
+      datasets.forEach(ds=>{ svg+=\`<span style="display:flex;align-items:center;gap:4px;font-size:9px;color:#94a3b8;"><span style="width:10px;height:2px;background:\${ds.color};display:inline-block;border-radius:1px;"></span>\${esc(ds.label)}</span>\`; });
       svg+=\`</div>\`;
     }
     return svg;
@@ -2896,7 +3171,7 @@ function renderTrendPanel() {
     const change = (first!=null&&last!=null&&snaps.length>=2)?last-first:null;
     const chColor = change===null?'#475569':change>=0?'#10b981':'#ef4444';
     return \`<tr style="border-bottom:1px solid rgba(28,45,66,.4);">
-      <td style="padding:6px 8px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:\${color};display:inline-block;"></span><span style="font-weight:700;color:#e2e8f0;">\${m.icon} \${m.name}</span></span></td>
+      <td style="padding:6px 8px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:\${color};display:inline-block;"></span><span style="font-weight:700;color:#e2e8f0;">\${esc(m.icon)} \${esc(m.name)}</span></span></td>
       \${vals.map(v=>\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;color:\${v!=null?'#06b6d4':'#475569'};font-size:11px;">\${v!=null?Math.round(v).toLocaleString('ko-KR')+'만':'-'}</td>\`).join('')}
       \${snaps.length>=2?\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-weight:700;color:\${chColor};font-size:11px;">\${change===null?'-':(change>=0?'+':'')+Math.round(change).toLocaleString('ko-KR')+'만'}</td>\`:''}
     </tr>\`;
@@ -2911,7 +3186,7 @@ function renderTrendPanel() {
     const change = (first!=null&&last!=null&&snaps.length>=2)?last-first:null;
     const chColor = change===null?'#475569':change>=0?'#10b981':'#ef4444';
     return \`<tr style="border-bottom:1px solid rgba(28,45,66,.4);">
-      <td style="padding:6px 8px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:\${color};display:inline-block;"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#e2e8f0;font-size:11px;">\${t}</span></span></td>
+      <td style="padding:6px 8px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:\${color};display:inline-block;"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#e2e8f0;font-size:11px;">\${esc(t)}</span></span></td>
       \${vals.map(v=>\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;color:\${v!=null?'#06b6d4':'#475569'};font-size:11px;">\${v!=null?Math.round(v).toLocaleString('ko-KR')+'만':'-'}</td>\`).join('')}
       \${snaps.length>=2?\`<td style="text-align:right;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-weight:700;color:\${chColor};font-size:11px;">\${change===null?'-':(change>=0?'+':'')+Math.round(change).toLocaleString('ko-KR')+'만'}</td>\`:''}
     </tr>\`;
@@ -2928,7 +3203,7 @@ function renderTrendPanel() {
   box.innerHTML = \`
     <div style="background:rgba(28,45,66,.4);border:1px solid #1c2d42;border-radius:9px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div style="font-size:9px;color:#475569;margin-bottom:3px;">최신 총 자산 (\${latest.label||latest.ym})</div>
+        <div style="font-size:9px;color:#475569;margin-bottom:3px;">최신 총 자산 (\${esc(latest.label||latest.ym)})</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:900;color:#06b6d4;">\${Math.round(latest.grandTotal).toLocaleString('ko-KR')}만</div>
       </div>
       \${totalChange!==null?\`<div style="text-align:right;"><div style="font-size:9px;color:#475569;margin-bottom:3px;">전 스냅샷 대비</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:\${chColor2};">\${totalChange>=0?'+':''}\${Math.round(totalChange).toLocaleString('ko-KR')}만</div></div>\`:''}
@@ -2965,9 +3240,9 @@ function renderTrendPanel() {
 
     <div style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">저장된 스냅샷 (\${snaps.length}개)</div>
     \${[...snaps].reverse().map(s=>\`<div style="background:rgba(28,45,66,.3);border:1px solid #1c2d42;border-radius:7px;padding:7px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#06b6d4;font-weight:700;">\${s.label||s.ym}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#06b6d4;font-weight:700;">\${esc(s.label||s.ym)}</span>
       <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#e2e8f0;flex:1;">\${Math.round(s.grandTotal).toLocaleString('ko-KR')}만</span>
-      <span style="font-size:9px;color:#475569;">\${s.members.map(m=>m.icon+m.name).join(' · ')}</span>
+      <span style="font-size:9px;color:#475569;">\${s.members.map(m=>esc(m.icon)+esc(m.name)).join(' · ')}</span>
     </div>\`).join('')}
   \`;
 }
@@ -3014,13 +3289,13 @@ function showToast(msg) {
 //  INIT
 // ════════════════════════════════════════════════════════
 function init() {
+  let restoredState = false;
   try {
-    // ── 파일의 state를 항상 우선 사용 (localStorage state 초기화) ──
-    localStorage.removeItem('pfeditor_v7_state');
-    localStorage.removeItem('pfeditor_v6_state');
-    localStorage.removeItem('pfeditor_v7_snapshot');
-    localStorage.removeItem('pfeditor_v6_snapshot');
-  } catch(e) {}
+    restoredState = restoreSavedStateIfAvailable();
+    restoreSavedSnapshotIfAvailable();
+  } catch(e) {
+    console.warn('Saved portfolio restore failed:', e);
+  }
 
   // ── 미저장 변경 경고 (브라우저 종료·탭 닫기 시) ──
   window.addEventListener('beforeunload', e => {
@@ -3037,9 +3312,13 @@ function init() {
     const btn = document.getElementById('themeToggleBtn');
     if (btn) btn.textContent = '🌙 다크';
   }
+  autosavePaused = true;
   syncMetaInputs();
   renderMembers();
   recalc();
+  autosavePaused = false;
+  markClean(restoredState ? '✓ 자동저장 복구됨' : '✓ 기본 데이터 준비됨');
+  if (restoredState) showToast('자동저장본을 복구했습니다');
 }
 
 // ════════════════════════════════════════════════════════
@@ -3404,8 +3683,8 @@ function buildPnlAnalysis(calc) {
     const col = p.pnl >= 0 ? 'var(--green)' : 'var(--red)';
     html += `<div style="margin-bottom:5px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--cyan)">${p.ticker}</span>
-        <span style="font-size:9px;color:var(--muted)">${p.member}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--cyan)">${escapeHTML(p.ticker)}</span>
+        <span style="font-size:9px;color:var(--muted)">${escapeHTML(p.member)}</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${col}">${p.pnl>=0?'+':''}${p.pnl.toFixed(2)}%</span>
       </div>
       <div style="background:var(--s2);border-radius:3px;height:4px;position:relative;">
@@ -3535,8 +3814,8 @@ function buildSimulator(calc) {
       const pct = t.amount/grandTotal*100;
       const isHigh = pct >= 10;
       html += `<div class="sim-row ${isHigh?'sim-sell':'sim-ok'}">
-        <span class="sim-ticker">${t.ticker}</span>
-        <span style="font-size:9px;color:var(--muted);flex:1">${t.members.join(', ')}</span>
+        <span class="sim-ticker">${escapeHTML(t.ticker)}</span>
+        <span style="font-size:9px;color:var(--muted);flex:1">${t.members.map(escapeHTML).join(', ')}</span>
         <div style="text-align:right">
           <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${isHigh?'var(--red)':'var(--text)'}">${pct.toFixed(1)}%</div>
           <div style="font-size:9px;color:var(--muted)">${fmt(t.amount)}만</div>
@@ -3829,7 +4108,7 @@ function buildWeeklyStatusBoard(calc) {
       <span class="sm-hint">나중에 "왜 그렇게 판단했는지" 남겨두세요</span>
     </div>
     <textarea id="weeklyMemoInput" placeholder="예: 이번 주는 AI 추가매수 중단 / MRVL 비중만 관찰 / 현금 유지"
-      oninput="handleMemoInput(this.value)">${memoVal.replace(/</g,'&lt;')}</textarea>
+      oninput="handleMemoInput(this.value)">${escapeHTML(memoVal)}</textarea>
     <div class="memo-saved-indicator" id="memoSavedDot"></div>
   </div>`;
 
@@ -4158,7 +4437,7 @@ function saveTrendSnapshot() {
       const map = {};
       state.members.forEach(m => m.holdings.forEach(h => {
         const t = (h.ticker||'').trim();
-        if (!t) return;
+        if (!t || h.entryType === 'cash') return;
         map[t] = (map[t]||0) + (parseFloat(h.amount)||0);
       }));
       return map;
@@ -4167,6 +4446,7 @@ function saveTrendSnapshot() {
   if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
   snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
   localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
+  refreshSnapshotPicker();
   showToast('📸 주별 스냅샷 저장 완료 — ' + ym);
   if (currentApaneTab === 'trend') { const calc2 = calcState(); updateAnalysisPane(calc2, validateState()); }
 }
@@ -4255,7 +4535,7 @@ function buildTrendAnalysis(calc) {
       } else if (l && l.match(/^\d{4}-\d{2}$/)) {
         display = l.slice(5) + '-??'; // fallback
       }
-      svg += `<text x="${xPos(i)}" y="${H-6}" text-anchor="middle" font-size="8" fill="#475569">${display}</text>`;
+      svg += `<text x="${xPos(i)}" y="${H-6}" text-anchor="middle" font-size="8" fill="#475569">${escapeHTML(display)}</text>`;
     });
 
     // lines
@@ -4275,7 +4555,7 @@ function buildTrendAnalysis(calc) {
       svg += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">`;
       datasets.forEach(ds => {
         svg += `<span style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--dim);">
-          <span style="width:10px;height:2px;background:${ds.color};display:inline-block;border-radius:1px;"></span>${ds.label}</span>`;
+          <span style="width:10px;height:2px;background:${ds.color};display:inline-block;border-radius:1px;"></span>${escapeHTML(ds.label)}</span>`;
       });
       svg += `</div>`;
     }
@@ -4309,10 +4589,10 @@ function buildTrendAnalysis(calc) {
   [...snapshots].reverse().forEach(s => {
     const displayDate = s.label || s.ym;
     html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;display:flex;align-items:center;gap:8px;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);font-weight:700;min-width:72px;">${displayDate}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);font-weight:700;min-width:72px;">${escapeHTML(displayDate)}</span>
       <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);flex:1;">${fmt(s.grandTotal)}만</span>
-      <span style="font-size:9px;color:var(--muted);flex:2;">${s.members.map(m=>m.icon+' '+m.name).join(' · ')}</span>
-      <button onclick="deleteTrendSnapshot('${s.ym}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#ef4444;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">🗑 삭제</button>
+      <span style="font-size:9px;color:var(--muted);flex:2;">${s.members.map(m=>escapeHTML(m.icon)+' '+escapeHTML(m.name)).join(' · ')}</span>
+      <button onclick="deleteTrendSnapshot('${escapeAttr(escapeJSString(s.ym))}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#ef4444;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">🗑 삭제</button>
     </div>`;
   });
   html += `</div></div>`;
@@ -4324,7 +4604,7 @@ function buildTrendAnalysis(calc) {
   // summary row
   html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
     <div>
-      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">최신 총 자산 (${latest.label || latest.ym})</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">최신 총 자산 (${escapeHTML(latest.label || latest.ym)})</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:900;color:var(--cyan)">${fmt(latest.grandTotal)}만</div>
     </div>
     ${totalChange !== null ? `<div style="text-align:right;">
@@ -4350,7 +4630,7 @@ function buildTrendAnalysis(calc) {
       const change = (first!=null&&last!=null&&snapshots.length>=2) ? last-first : null;
       const chColor = change===null?'#475569':change>=0?'#10b981':'#ef4444';
       return `<tr style="border-bottom:1px solid rgba(28,45,66,.4);">
-        <td style="padding:5px 6px;"><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#e2e8f0;font-size:10px;">${t}</span></span></td>
+        <td style="padding:5px 6px;"><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#e2e8f0;font-size:10px;">${escapeHTML(t)}</span></span></td>
         ${vals.map(v => `<td style="text-align:right;padding:5px 6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:${v!=null?'#06b6d4':'#475569'};">${v!=null?Math.round(v).toLocaleString('ko-KR')+'만':'-'}</td>`).join('')}
         ${snapshots.length>=2 ? `<td style="text-align:right;padding:5px 6px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${chColor};">${change===null?'-':(change>=0?'+':'')+Math.round(change).toLocaleString('ko-KR')+'만'}</td>` : ''}
       </tr>`;
@@ -4363,7 +4643,7 @@ function buildTrendAnalysis(calc) {
             <th style="text-align:left;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">종목</th>
             ${snapshots.map(s => {
               const disp = (s.label||s.ym).slice(5);
-              return `<th style="text-align:right;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">${disp}</th>`;
+              return `<th style="text-align:right;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">${escapeHTML(disp)}</th>`;
             }).join('')}
             ${snapshots.length>=2 ? `<th style="text-align:right;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">변화</th>` : ''}
           </tr>

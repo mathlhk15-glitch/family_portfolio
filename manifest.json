@@ -1,13 +1,14 @@
 {
-  "name": "포트폴리오 편집기 — 뀨 가족",
-  "short_name": "뀨 가족 포트폴리오",
-  "description": "가족 포트폴리오 편집기 및 자산 추적기",
+  "name": "뀨 가족 포트폴리오 편집기",
+  "short_name": "뀨 포트폴리오",
+  "description": "가족 포트폴리오를 편집하고 자산 배분, 수익률, 시나리오, 주별 추이를 점검하는 도구",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#060a12",
   "theme_color": "#3b82f6",
-  "lang": "ko",
+  "lang": "ko-KR",
   "icons": [
     {
       "src": "icon-192.png",
