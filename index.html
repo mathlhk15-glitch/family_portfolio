@@ -764,46 +764,67 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 /* ── 헤더 모바일 ── */
 @media(max-width:640px){
   .app-header{
-    padding:9px 10px;
-    gap:7px;
+    padding:9px 10px 10px;
+    gap:8px;
     flex-wrap:wrap;
     align-items:flex-start;
   }
   .app-header-left{width:100%;}
-  .editor-pane{padding-bottom:92px;}   /* FAB 위 여백 */
+  .editor-pane{padding-bottom:96px;}   /* FAB 위 여백 */
   .holdings-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .card-body{padding:8px 10px;}
   .meta-grid{grid-template-columns:1fr 1fr;}
   .app-header-left .sub{display:none;}
   .app-header-left h1{font-size:13px;}
-  /* 모바일에서는 버튼을 숨기지 않고 가로 스크롤로 모두 접근 */
+
+  /* 모바일에서는 가로 스크롤 대신 3열 버튼판으로 모두 노출 */
   .header-actions{
     width:100%;
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    overflow-y:hidden;
-    justify-content:flex-start;
-    padding-bottom:4px;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:thin;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    overflow:visible;
+    padding-bottom:0;
   }
   .header-actions .btn,
-  .header-actions label.btn,
-  .header-date-box{flex:0 0 auto;}
+  .header-actions label.btn{
+    width:100%;
+    min-width:0;
+    justify-content:center;
+    padding:7px 5px;
+    font-size:11px;
+    line-height:1.15;
+    border-radius:10px;
+  }
+  .header-actions .btn-primary{padding:7px 5px;}
+  .header-date-box{
+    grid-column:1 / -1;
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    justify-content:space-between;
+    padding:7px 9px !important;
+  }
   .btn-label{display:inline;}
-  .btn-sm{padding:6px 9px;font-size:12px;}
-  .header-date-box{padding:4px 8px;}
   .header-date-box span{display:inline;}
-  .header-date-box input{width:78px;}
+  .header-date-box input{width:96px!important;font-size:12px!important;}
+  .header-date-box select{max-width:92px!important;font-size:11px!important;}
+  #themeToggleBtn{font-size:11px;}
+}
+
+@media(max-width:380px){
+  .header-actions{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .header-date-box{grid-column:1 / -1;}
 }
 
 /* ── 태블릿 이하: 드로어 활성화 ── */
 @media(max-width:900px){
   .app-body{
     grid-template-columns:1fr;
-    height:calc(100dvh - 92px);
+    height:auto;
+    min-height:calc(100dvh - 120px);
   }
-  .editor-pane{padding:12px 14px;}
+  .editor-pane{padding:12px 14px;overflow-y:visible;}
   .analysis-pane{display:none;}          /* 데스크탑용 사이드패널 숨김 */
   .mobile-fab{
     display:flex;
