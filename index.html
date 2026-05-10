@@ -2741,7 +2741,7 @@ function buildGoogleSheetPanel() {
     <div class="card-head"><h4>🧾 구글시트 백업</h4><span style="font-size:10px;color:${url ? 'var(--green)' : 'var(--yellow)'};font-weight:700;">${urlLabel}</span></div>
     <div class="card-body">
       <div style="font-size:10px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
-        입력 중에는 브라우저에 자동저장됩니다. 구글시트는 장기 보관용이라 휴대폰에서는 느릴 수 있으니 평소에는 “최근 기록만 불러오기”를 권장합니다.
+        입력 중에는 브라우저에 자동저장됩니다. 구글시트는 장기 보관용이라 휴대폰에서는 전체 불러오기가 느릴 수 있어 3개씩 나눠 받습니다. 평소에는 “최근 기록만 불러오기”를 권장합니다.
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-secondary btn-sm" onclick="setGoogleSheetUrl()">URL 설정</button>
@@ -2807,39 +2807,86 @@ function loadLatestSnapshotFromGoogleSheet() {
   loadSnapshotsFromGoogleSheet(false);
 }
 
-function loadSnapshotsFromGoogleSheet(loadAll = false) {
+function requestGoogleSheetPage(limit, offset, timeoutMs = 25000) {
+  return new Promise((resolve, reject) => {
+    const url = getGoogleSheetUrl();
+    const callbackName = '__pfSheetCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+    const script = document.createElement('script');
+    let done = false;
+    const timer = setTimeout(() => {
+      if (done) return;
+      done = true;
+      cleanup();
+      reject(new Error('응답 시간 초과'));
+    }, timeoutMs);
+    function cleanup() {
+      clearTimeout(timer);
+      try { delete window[callbackName]; } catch(e) { window[callbackName] = undefined; }
+      if (script && script.parentNode) script.remove();
+    }
+    window[callbackName] = function(response) {
+      if (done) return;
+      done = true;
+      cleanup();
+      resolve(response || {});
+    };
+    script.onerror = () => {
+      if (done) return;
+      done = true;
+      cleanup();
+      reject(new Error('연결 실패'));
+    };
+    script.src = url + (url.includes('?') ? '&' : '?')
+      + 'action=list&callback=' + encodeURIComponent(callbackName)
+      + '&limit=' + encodeURIComponent(String(limit || 0))
+      + '&offset=' + encodeURIComponent(String(offset || 0))
+      + '&_=' + Date.now();
+    document.body.appendChild(script);
+  });
+}
+
+async function loadSnapshotsFromGoogleSheet(loadAll = false) {
   const url = getGoogleSheetUrl();
   if (!url) { setGoogleSheetUrl(); return; }
-  const callbackName = '__pfSheetCallback_' + Date.now();
-  const limit = loadAll ? 0 : 1;
-  showToast(loadAll ? '🧾 구글시트 전체 기록 불러오는 중...' : '🧾 최근 기록만 불러오는 중...');
-  updateGoogleSheetPanel(loadAll ? '전체 기록 불러오는 중... 휴대폰에서는 시간이 걸릴 수 있습니다.' : '최근 기록 1개만 불러오는 중...');
-  window[callbackName] = function(response) {
-    try {
-      const rows = Array.isArray(response?.snapshots) ? response.snapshots : [];
-      if (!rows.length) { showToast('구글시트에서 불러올 기록이 없습니다'); return; }
-      const merge = {};
-      loadTrendSnapshots().forEach(s => { merge[s.ym] = s; });
-      rows.map(normalizeTrendSnapshot).filter(Boolean).forEach(s => { merge[s.ym] = s; });
-      delete merge['2026-05-02'];
-      const merged = Object.values(merge).sort((a,b) => a.ym.localeCompare(b.ym));
-      localStorage.setItem(TREND_KEY, JSON.stringify(merged));
-      refreshSnapshotPicker();
-      updateAnalysisPane(calcState(), validateState());
-      updateGoogleSheetPanel('불러오기 완료: ' + rows.length + '개 · ' + new Date().toLocaleString('ko-KR'));
-      showToast('🧾 구글시트 기록 ' + rows.length + '개 불러오기 완료');
-    } catch(e) {
-      showToast('❌ 구글시트 불러오기 실패');
-      updateGoogleSheetPanel('불러오기 실패: ' + (e && e.message ? e.message : e));
-    } finally {
-      delete window[callbackName];
-      script.remove();
+  try {
+    const pageSize = loadAll ? 3 : 1;
+    let offset = 0;
+    let allRows = [];
+    showToast(loadAll ? '🧾 구글시트 전체 기록을 나눠서 불러오는 중...' : '🧾 최근 기록만 불러오는 중...');
+    updateGoogleSheetPanel(loadAll ? '전체 기록 불러오는 중... 1회에 3개씩 나눠서 받습니다.' : '최근 기록 1개만 불러오는 중...');
+
+    while (true) {
+      const response = await requestGoogleSheetPage(pageSize, offset, loadAll ? 30000 : 20000);
+      if (!response.ok) throw new Error(response.error || 'Apps Script 응답 오류');
+      const rows = Array.isArray(response.snapshots) ? response.snapshots : [];
+      allRows = allRows.concat(rows);
+      const total = Number(response.total || 0);
+      const nextOffset = response.nextOffset;
+      updateGoogleSheetPanel(loadAll
+        ? `전체 기록 불러오는 중... ${Math.min(allRows.length, total || allRows.length)}/${total || '?'}개`
+        : '최근 기록 1개만 불러오는 중...');
+      if (!loadAll || !response.hasMore || nextOffset === undefined || nextOffset === null) break;
+      offset = Number(nextOffset || 0);
+      if (!Number.isFinite(offset) || offset < 0) break;
+      if (allRows.length > 200) break; // safety guard
     }
-  };
-  const script = document.createElement('script');
-  script.src = url + (url.includes('?') ? '&' : '?') + 'action=list&callback=' + encodeURIComponent(callbackName) + '&limit=' + encodeURIComponent(String(limit)) + '&_=' + Date.now();
-  script.onerror = () => { showToast('❌ 구글시트 연결 실패'); updateGoogleSheetPanel('연결 실패 — Apps Script URL과 배포 권한을 확인하세요.'); delete window[callbackName]; script.remove(); };
-  document.body.appendChild(script);
+
+    if (!allRows.length) { showToast('구글시트에서 불러올 기록이 없습니다'); updateGoogleSheetPanel('불러올 기록 없음'); return; }
+    const merge = {};
+    loadTrendSnapshots().forEach(s => { merge[s.ym] = s; });
+    allRows.map(normalizeTrendSnapshot).filter(Boolean).forEach(s => { merge[s.ym] = s; });
+    delete merge['2026-05-02'];
+    const merged = Object.values(merge).sort((a,b) => a.ym.localeCompare(b.ym));
+    localStorage.setItem(TREND_KEY, JSON.stringify(merged));
+    refreshSnapshotPicker();
+    updateAnalysisPane(calcState(), validateState());
+    updateGoogleSheetPanel('불러오기 완료: ' + allRows.length + '개 · ' + new Date().toLocaleString('ko-KR'));
+    showToast('🧾 구글시트 기록 ' + allRows.length + '개 불러오기 완료');
+  } catch(e) {
+    const msg = e && e.message ? e.message : String(e);
+    showToast('❌ 구글시트 불러오기 실패');
+    updateGoogleSheetPanel('불러오기 실패: ' + msg + ' · 최근 기록만 불러오기를 먼저 사용하세요.');
+  }
 }
 
 // ════════════════════════════════════════════════════════
