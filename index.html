@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>포트폴리오 편집기 v13 — 뀨 가족</title>
+<title>포트폴리오 편집기 v14 — 뀨 가족</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="뀨 포트폴리오">
-<meta name="theme-color" content="#3b82f6">
+<meta name="theme-color" content="#0b1f3a">
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <script>
@@ -27,19 +27,19 @@ if ('serviceWorker' in navigator) {
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
 :root {
-  --bg:#eaf3ff; --s1:#f7fbff; --s2:#dcecff; --s3:#edf6ff; --border:#b8d4f2;
-  --blue:#2563eb; --cyan:#0891b2; --green:#059669; --red:#dc2626;
-  --yellow:#d97706; --purple:#7c3aed; --orange:#ea580c; --pink:#db2777;
-  --text:#17324d; --muted:#5f7f9f; --dim:#365f85;
-  --cat-core:#3b82f6; --cat-bigtech:#8b5cf6; --cat-ai:#ef4444;
-  --cat-semi:#f59e0b; --cat-defense:#10b981; --cat-growth:#f97316; --cat-domestic:#06b6d4;
+  --bg:#0b1f3a; --s1:#102b4a; --s2:#173b63; --s3:#0f2845; --border:#2b5b86;
+  --blue:#60a5fa; --cyan:#22d3ee; --green:#34d399; --red:#fb7185;
+  --yellow:#fbbf24; --purple:#a78bfa; --orange:#fb923c; --pink:#f472b6;
+  --text:#f1f8ff; --muted:#b6cbe3; --dim:#d8e8f7;
+  --cat-core:#60a5fa; --cat-bigtech:#a78bfa; --cat-ai:#fb7185;
+  --cat-semi:#fbbf24; --cat-defense:#34d399; --cat-growth:#fb923c; --cat-domestic:#22d3ee;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* ── App Header ── */
 .app-header{
-  background:linear-gradient(135deg,#f7fbff,#dcecff);
+  background:linear-gradient(135deg,#071a33,#0b2a4c 55%,#0e3a66);
   border-bottom:1px solid var(--border);
   padding:12px 20px;
   display:flex;align-items:center;justify-content:space-between;
@@ -47,7 +47,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 }
 .app-header-left h1{
   font-size:14px;font-weight:900;
-  background:linear-gradient(135deg,#17324d,#2563eb,#0891b2);
+  background:linear-gradient(135deg,#eaf6ff,#93c5fd,#22d3ee);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .app-header-left .sub{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
@@ -128,7 +128,7 @@ select{cursor:pointer;}
   display:flex;align-items:center;justify-content:space-between;
   cursor:pointer;user-select:none;transition:background .15s;
 }
-.member-head:hover{background:rgba(255,255,255,.02);}
+.member-head:hover{background:rgba(255,255,255,.06);}
 .member-head-left{display:flex;align-items:center;gap:10px;}
 .member-head-left .icon{font-size:16px;}
 .member-name-role h2{font-size:13px;font-weight:700;}
@@ -155,7 +155,7 @@ select{cursor:pointer;}
   white-space:nowrap;
 }
 .holdings-table td{padding:3px 4px;vertical-align:middle;}
-.holdings-table tbody tr:hover td{background:rgba(255,255,255,.015);}
+.holdings-table tbody tr:hover td{background:rgba(255,255,255,.06);}
 .holdings-table tr.row-error td{background:rgba(239,68,68,.04)!important;}
 .holdings-table tr.row-warn td{background:rgba(245,158,11,.03)!important;}
 
@@ -844,7 +844,7 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 
 
 /* ══════════════════════════════════
-   v13 MOBILE WIDTH / READABILITY FIX
+   v14 MOBILE WIDTH / READABILITY + GOOGLE SPEED FIX
    - 화면 넘침 방지
    - 블루 모드 글자 대비 강화
    - 모바일 자동분석 드로어 가시성 강화
@@ -856,15 +856,15 @@ body { background:var(--bg); }
 .status-board, .cat-bar-section, .ticker-agg, .member-breakdown { min-width:0; max-width:100%; }
 * { min-width:0; }
 
-/* 블루 배경에서 회색 글자가 묻히지 않도록 기본 대비 강화 */
+/* 다크 네이비 블루 화면에서 글자 대비 강화 */
 :root {
-  --muted:#416b91;
-  --dim:#234b70;
-  --text:#0f2e4d;
-  --border:#a9cbed;
-  --s1:#f8fbff;
-  --s2:#dcecff;
-  --s3:#eef7ff;
+  --muted:#b6cbe3;
+  --dim:#d8e8f7;
+  --text:#f1f8ff;
+  --border:#2b5b86;
+  --s1:#102b4a;
+  --s2:#173b63;
+  --s3:#0f2845;
 }
 body:not(.light-mode) .ta-title,
 body:not(.light-mode) .mb-title,
@@ -884,7 +884,7 @@ body:not(.light-mode) .ptm-sub,
 body:not(.light-mode) .plan-section-title,
 body:not(.light-mode) .status-no-snapshot,
 body:not(.light-mode) .sm-hint {
-  color:#274f73 !important;
+  color:#b6cbe3 !important;
 }
 body:not(.light-mode) .ta-amt,
 body:not(.light-mode) .mb-name,
@@ -893,7 +893,7 @@ body:not(.light-mode) .scenario-result h5,
 body:not(.light-mode) .goal-card h5,
 body:not(.light-mode) .card,
 body:not(.light-mode) .mobile-drawer-body {
-  color:#0f2e4d !important;
+  color:#f1f8ff !important;
 }
 
 /* 모바일 자동분석 드로어를 화면 위로 확실히 올림 */
@@ -908,7 +908,7 @@ body:not(.light-mode) .mobile-drawer-body {
   position:sticky;
   top:0;
   z-index:2;
-  background:linear-gradient(180deg,var(--s3),rgba(238,247,255,.96));
+  background:linear-gradient(180deg,var(--s3),rgba(15,40,69,.96));
   border-bottom:1px solid var(--border);
   padding:8px 0 10px;
   margin-bottom:10px;
@@ -939,9 +939,9 @@ body:not(.light-mode) .mobile-drawer-body {
   .mb-name,.mb-amt,.mb-pct{width:auto;}
   .ta-item{display:grid;grid-template-columns:18px minmax(70px,1fr) minmax(44px,62px);grid-template-areas:'rank ticker amt' '. holders pct';align-items:center;gap:2px 6px;padding:7px 0;}
   .ta-rank{grid-area:rank;width:auto;}
-  .ta-ticker{grid-area:ticker;width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#0284a8 !important;}
+  .ta-ticker{grid-area:ticker;width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#eaf6ff !important;}
   .ta-holders{grid-area:holders;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
-  .ta-amt{grid-area:amt;width:auto;font-size:10px;color:#0f2e4d !important;}
+  .ta-amt{grid-area:amt;width:auto;font-size:10px;color:#22d3ee !important;}
   .ta-pct{grid-area:pct;width:auto;text-align:right;}
   .sim-row,.sc-row,.dd-row,.goal-result-row,.ptm-item{min-width:0;}
 }
@@ -960,12 +960,18 @@ body:not(.light-mode) .mobile-drawer-body {
 
 </style>
 <script>
-// 4월·5월 추이 시드 데이터 — localStorage가 완전히 비어있을 때만 초기 설정
+// 4월 22일 추이 시드 데이터 — localStorage가 완전히 비어있을 때만 초기 설정
 (function() {
   var KEY = 'pf_monthly_snapshots';
-  var seed = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력핵심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력핵심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  var seed = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력핵심인프라":39,"TSLA":114,"KODEX 코스닥150":154}}];
   try {
     var existing = JSON.parse(localStorage.getItem(KEY) || '[]');
+    var removedMay2 = false;
+    if (Array.isArray(existing)) {
+      var beforeLen = existing.length;
+      existing = existing.filter(function(s){ return s && s.ym !== '2026-05-02' && s.label !== '2026.05.02'; });
+      removedMay2 = existing.length !== beforeLen;
+    }
 
     // ── 마이그레이션: 구 포맷 YYYY-MM → 새 포맷 YYYY-MM-DD, 중복 제거 ──
     var migrated = false;
@@ -983,7 +989,7 @@ body:not(.light-mode) .mobile-drawer-body {
     var deduped = {};
     existing.forEach(function(s){ deduped[s.ym] = s; });
     existing = Object.values(deduped);
-    if (migrated || Object.keys(deduped).length !== existing.length) {
+    if (migrated || removedMay2 || Object.keys(deduped).length !== existing.length) {
       existing.sort(function(a,b){ return a.ym < b.ym ? -1 : 1; });
       localStorage.setItem(KEY, JSON.stringify(existing));
     }
@@ -992,7 +998,7 @@ body:not(.light-mode) .mobile-drawer-body {
       // 완전히 비어있을 때만 시드 데이터로 초기화
       localStorage.setItem(KEY, JSON.stringify(seed));
     } else {
-      // 이미 데이터가 있으면 4·5월 시드가 없는 경우에만 채워줌 (절대 덮어쓰지 않음)
+      // 이미 데이터가 있으면 4월 22일 시드가 없는 경우에만 채워줌 (절대 덮어쓰지 않음)
       var ymSet = {};
       existing.forEach(function(s){ ymSet[s.ym] = true; });
       var needsMerge = false;
@@ -1017,7 +1023,7 @@ body:not(.light-mode) .mobile-drawer-body {
   <div class="header-actions">
     <div class="header-date-box" style="display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:4px 10px;">
       <span style="font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap;">📅 기준일</span>
-      <input type="text" id="meta-date" value="2026.05.02" oninput="state.meta.date=this.value;recalc()"
+      <input type="text" id="meta-date" value="2026.04.22" oninput="state.meta.date=this.value;recalc()"
         style="background:transparent;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;width:80px;padding:0;outline:none;" placeholder="YYYY.MM.DD">
       <select id="snapshot-date-picker" onchange="loadSnapshotByDate(this.value)"
         style="background:transparent;border:none;color:var(--muted);font-size:10px;padding:0;outline:none;cursor:pointer;max-width:70px;"
@@ -2735,13 +2741,14 @@ function buildGoogleSheetPanel() {
     <div class="card-head"><h4>🧾 구글시트 백업</h4><span style="font-size:10px;color:${url ? 'var(--green)' : 'var(--yellow)'};font-weight:700;">${urlLabel}</span></div>
     <div class="card-body">
       <div style="font-size:10px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
-        입력 중에는 브라우저에 자동저장되고, 기준일별 스냅샷은 이 앱에 누적됩니다. 구글시트 백업은 장기 보관·기기 변경 대비용입니다.
+        입력 중에는 브라우저에 자동저장됩니다. 구글시트는 장기 보관용이라 휴대폰에서는 느릴 수 있으니 평소에는 “최근 기록만 불러오기”를 권장합니다.
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-secondary btn-sm" onclick="setGoogleSheetUrl()">URL 설정</button>
         <button class="btn btn-secondary btn-sm" onclick="syncCurrentSnapshotToGoogleSheet()">현재 날짜 백업</button>
         <button class="btn btn-secondary btn-sm" onclick="syncAllSnapshotsToGoogleSheet()">전체 기록 백업</button>
-        <button class="btn btn-secondary btn-sm" onclick="loadSnapshotsFromGoogleSheet()">시트에서 불러오기</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadLatestSnapshotFromGoogleSheet()">최근 기록만 불러오기</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadSnapshotsFromGoogleSheet(true)">전체 불러오기</button>
       </div>
       <div id="googleSheetStatus" style="font-size:10px;color:var(--dim);margin-top:8px;font-family:'JetBrains Mono',monospace;">${url ? escapeHTML(url.slice(0,52)) + '...' : '먼저 google_apps_script.gs를 구글시트 Apps Script에 붙여넣고 배포 URL을 저장하세요.'}</div>
     </div>
@@ -2779,6 +2786,7 @@ function postToGoogleSheet(payload) {
     updateGoogleSheetPanel('마지막 전송: ' + new Date().toLocaleString('ko-KR'));
     setTimeout(() => { form.remove(); iframe.remove(); }, 800);
   };
+  updateGoogleSheetPanel('전송 중... 구글시트는 휴대폰에서 수 초 이상 걸릴 수 있습니다.');
   form.submit();
   return true;
 }
@@ -2795,10 +2803,17 @@ function syncAllSnapshotsToGoogleSheet() {
   postToGoogleSheet({mode:'bulk', snapshots});
 }
 
-function loadSnapshotsFromGoogleSheet() {
+function loadLatestSnapshotFromGoogleSheet() {
+  loadSnapshotsFromGoogleSheet(false);
+}
+
+function loadSnapshotsFromGoogleSheet(loadAll = false) {
   const url = getGoogleSheetUrl();
   if (!url) { setGoogleSheetUrl(); return; }
   const callbackName = '__pfSheetCallback_' + Date.now();
+  const limit = loadAll ? 0 : 1;
+  showToast(loadAll ? '🧾 구글시트 전체 기록 불러오는 중...' : '🧾 최근 기록만 불러오는 중...');
+  updateGoogleSheetPanel(loadAll ? '전체 기록 불러오는 중... 휴대폰에서는 시간이 걸릴 수 있습니다.' : '최근 기록 1개만 불러오는 중...');
   window[callbackName] = function(response) {
     try {
       const rows = Array.isArray(response?.snapshots) ? response.snapshots : [];
@@ -2806,21 +2821,24 @@ function loadSnapshotsFromGoogleSheet() {
       const merge = {};
       loadTrendSnapshots().forEach(s => { merge[s.ym] = s; });
       rows.map(normalizeTrendSnapshot).filter(Boolean).forEach(s => { merge[s.ym] = s; });
+      delete merge['2026-05-02'];
       const merged = Object.values(merge).sort((a,b) => a.ym.localeCompare(b.ym));
       localStorage.setItem(TREND_KEY, JSON.stringify(merged));
       refreshSnapshotPicker();
       updateAnalysisPane(calcState(), validateState());
+      updateGoogleSheetPanel('불러오기 완료: ' + rows.length + '개 · ' + new Date().toLocaleString('ko-KR'));
       showToast('🧾 구글시트 기록 ' + rows.length + '개 불러오기 완료');
     } catch(e) {
       showToast('❌ 구글시트 불러오기 실패');
+      updateGoogleSheetPanel('불러오기 실패: ' + (e && e.message ? e.message : e));
     } finally {
       delete window[callbackName];
       script.remove();
     }
   };
   const script = document.createElement('script');
-  script.src = url + (url.includes('?') ? '&' : '?') + 'action=list&callback=' + encodeURIComponent(callbackName) + '&_=' + Date.now();
-  script.onerror = () => { showToast('❌ 구글시트 연결 실패'); delete window[callbackName]; script.remove(); };
+  script.src = url + (url.includes('?') ? '&' : '?') + 'action=list&callback=' + encodeURIComponent(callbackName) + '&limit=' + encodeURIComponent(String(limit)) + '&_=' + Date.now();
+  script.onerror = () => { showToast('❌ 구글시트 연결 실패'); updateGoogleSheetPanel('연결 실패 — Apps Script URL과 배포 권한을 확인하세요.'); delete window[callbackName]; script.remove(); };
   document.body.appendChild(script);
 }
 
@@ -3109,10 +3127,10 @@ function generateHTML() {
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 :root{
-  --bg:#eaf3ff;--s1:#f7fbff;--s2:#dcecff;--border:#b8d4f2;
-  --blue:#2563eb;--cyan:#0891b2;--green:#059669;--red:#dc2626;
-  --yellow:#d97706;--purple:#7c3aed;
-  --text:#17324d;--muted:#5f7f9f;--dim:#365f85;
+  --bg:#0b1f3a;--s1:#102b4a;--s2:#173b63;--border:#2b5b86;
+  --blue:#60a5fa;--cyan:#22d3ee;--green:#34d399;--red:#fb7185;
+  --yellow:#fbbf24;--purple:#a78bfa;
+  --text:#f1f8ff;--muted:#b6cbe3;--dim:#d8e8f7;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);padding:16px;font-size:13px;line-height:1.6;}
@@ -3232,7 +3250,7 @@ tr:last-child td{border-bottom:none;}
 
 
 /* ══════════════════════════════════
-   v13 MOBILE WIDTH / READABILITY FIX
+   v14 MOBILE WIDTH / READABILITY + GOOGLE SPEED FIX
    - 화면 넘침 방지
    - 블루 모드 글자 대비 강화
    - 모바일 자동분석 드로어 가시성 강화
@@ -3244,15 +3262,15 @@ body { background:var(--bg); }
 .status-board, .cat-bar-section, .ticker-agg, .member-breakdown { min-width:0; max-width:100%; }
 * { min-width:0; }
 
-/* 블루 배경에서 회색 글자가 묻히지 않도록 기본 대비 강화 */
+/* 다크 네이비 블루 화면에서 글자 대비 강화 */
 :root {
-  --muted:#416b91;
-  --dim:#234b70;
-  --text:#0f2e4d;
-  --border:#a9cbed;
-  --s1:#f8fbff;
-  --s2:#dcecff;
-  --s3:#eef7ff;
+  --muted:#b6cbe3;
+  --dim:#d8e8f7;
+  --text:#f1f8ff;
+  --border:#2b5b86;
+  --s1:#102b4a;
+  --s2:#173b63;
+  --s3:#0f2845;
 }
 body:not(.light-mode) .ta-title,
 body:not(.light-mode) .mb-title,
@@ -3272,7 +3290,7 @@ body:not(.light-mode) .ptm-sub,
 body:not(.light-mode) .plan-section-title,
 body:not(.light-mode) .status-no-snapshot,
 body:not(.light-mode) .sm-hint {
-  color:#274f73 !important;
+  color:#b6cbe3 !important;
 }
 body:not(.light-mode) .ta-amt,
 body:not(.light-mode) .mb-name,
@@ -3281,7 +3299,7 @@ body:not(.light-mode) .scenario-result h5,
 body:not(.light-mode) .goal-card h5,
 body:not(.light-mode) .card,
 body:not(.light-mode) .mobile-drawer-body {
-  color:#0f2e4d !important;
+  color:#f1f8ff !important;
 }
 
 /* 모바일 자동분석 드로어를 화면 위로 확실히 올림 */
@@ -3296,7 +3314,7 @@ body:not(.light-mode) .mobile-drawer-body {
   position:sticky;
   top:0;
   z-index:2;
-  background:linear-gradient(180deg,var(--s3),rgba(238,247,255,.96));
+  background:linear-gradient(180deg,var(--s3),rgba(15,40,69,.96));
   border-bottom:1px solid var(--border);
   padding:8px 0 10px;
   margin-bottom:10px;
@@ -3327,9 +3345,9 @@ body:not(.light-mode) .mobile-drawer-body {
   .mb-name,.mb-amt,.mb-pct{width:auto;}
   .ta-item{display:grid;grid-template-columns:18px minmax(70px,1fr) minmax(44px,62px);grid-template-areas:'rank ticker amt' '. holders pct';align-items:center;gap:2px 6px;padding:7px 0;}
   .ta-rank{grid-area:rank;width:auto;}
-  .ta-ticker{grid-area:ticker;width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#0284a8 !important;}
+  .ta-ticker{grid-area:ticker;width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#eaf6ff !important;}
   .ta-holders{grid-area:holders;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
-  .ta-amt{grid-area:amt;width:auto;font-size:10px;color:#0f2e4d !important;}
+  .ta-amt{grid-area:amt;width:auto;font-size:10px;color:#22d3ee !important;}
   .ta-pct{grid-area:pct;width:auto;text-align:right;}
   .sim-row,.sc-row,.dd-row,.goal-result-row,.ptm-item{min-width:0;}
 }
@@ -3705,8 +3723,8 @@ function renderTrendPanel() {
     </tr>\`;
   }).join('');
 
-  const colHeaders = dispLabels.map(l=>\`<th style="text-align:right;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">\${l}</th>\`).join('');
-  const changeHeader = snaps.length>=2?'<th style="text-align:right;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;">변화</th>':'';
+  const colHeaders = dispLabels.map(l=>\`<th style="text-align:right;padding:6px 8px;background:rgba(96,165,250,.18);color:var(--dim);font-size:9px;font-weight:700;white-space:nowrap;">\${l}</th>\`).join('');
+  const changeHeader = snaps.length>=2?'<th style="text-align:right;padding:6px 8px;background:rgba(96,165,250,.18);color:var(--dim);font-size:9px;font-weight:700;">변화</th>':'';
 
   const latest = snaps[snaps.length-1];
   const prev = snaps.length>=2?snaps[snaps.length-2]:null;
@@ -3728,7 +3746,7 @@ function renderTrendPanel() {
       <div style="overflow-x:auto;margin-top:12px;">
         <table style="width:100%;border-collapse:collapse;min-width:280px;">
           <thead><tr>
-            <th style="text-align:left;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;">구성원</th>
+            <th style="text-align:left;padding:6px 8px;background:rgba(96,165,250,.18);color:var(--dim);font-size:9px;font-weight:700;">구성원</th>
             \${colHeaders}\${changeHeader}
           </tr></thead>
           <tbody>\${memberTableRows}</tbody>
@@ -3743,7 +3761,7 @@ function renderTrendPanel() {
       <div style="overflow-x:auto;margin-top:12px;">
         <table style="width:100%;border-collapse:collapse;min-width:280px;">
           <thead><tr>
-            <th style="text-align:left;padding:6px 8px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;">종목</th>
+            <th style="text-align:left;padding:6px 8px;background:rgba(96,165,250,.18);color:var(--dim);font-size:9px;font-weight:700;">종목</th>
             \${colHeaders}\${changeHeader}
           </tr></thead>
           <tbody>\${tickerTableRows}</tbody>
@@ -4987,10 +5005,10 @@ function deleteTrendSnapshot(ym) {
 }
 
 function resetTrendData() {
-  if (!confirm('주별추이를 4월 22일 · 5월 2일 데이터로 초기화할까요?\n기존 데이터는 모두 삭제됩니다.')) return;
-  const correct = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력핵심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력핵심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  if (!confirm('주별추이를 4월 22일 데이터로 초기화할까요?\n기존 데이터는 모두 삭제됩니다.')) return;
+  const correct = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력핵심인프라":39,"TSLA":114,"KODEX 코스닥150":154}}];
   localStorage.setItem(TREND_KEY, JSON.stringify(correct));
-  showToast('✅ 날짜별 추이 초기화 완료 — 4월22일·5월2일');
+  showToast('✅ 날짜별 추이 초기화 완료 — 4월22일');
   const calc = calcState(); updateAnalysisPane(calc, validateState());
 }
 
@@ -5165,12 +5183,12 @@ function buildTrendAnalysis(calc) {
       <table style="width:100%;border-collapse:collapse;min-width:280px;">
         <thead>
           <tr>
-            <th style="text-align:left;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">종목</th>
+            <th style="text-align:left;padding:5px 6px;background:rgba(96,165,250,.18);color:var(--dim);font-size:9px;font-weight:700;white-space:nowrap;">종목</th>
             ${snapshots.map(s => {
               const disp = (s.label||s.ym).slice(5);
-              return `<th style="text-align:right;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">${escapeHTML(disp)}</th>`;
+              return `<th style="text-align:right;padding:5px 6px;background:rgba(96,165,250,.18);color:var(--dim);font-size:9px;font-weight:700;white-space:nowrap;">${escapeHTML(disp)}</th>`;
             }).join('')}
-            ${snapshots.length>=2 ? `<th style="text-align:right;padding:5px 6px;background:rgba(28,45,66,.6);color:#475569;font-size:9px;font-weight:700;white-space:nowrap;">변화</th>` : ''}
+            ${snapshots.length>=2 ? `<th style="text-align:right;padding:5px 6px;background:rgba(96,165,250,.18);color:var(--dim);font-size:9px;font-weight:700;white-space:nowrap;">변화</th>` : ''}
           </tr>
         </thead>
         <tbody>${tickerTableRows}</tbody>
