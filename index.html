@@ -763,31 +763,59 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 
 /* ── 헤더 모바일 ── */
 @media(max-width:640px){
-  .app-header{padding:9px 12px;gap:7px;}
-  .editor-pane{padding-bottom:80px;}   /* FAB 위 여백 */
+  .app-header{
+    padding:9px 10px;
+    gap:7px;
+    flex-wrap:wrap;
+    align-items:flex-start;
+  }
+  .app-header-left{width:100%;}
+  .editor-pane{padding-bottom:92px;}   /* FAB 위 여백 */
   .holdings-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .card-body{padding:8px 10px;}
   .meta-grid{grid-template-columns:1fr 1fr;}
   .app-header-left .sub{display:none;}
   .app-header-left h1{font-size:13px;}
-  /* 버튼 텍스트 숨기고 이모지만 */
-  .btn-label{display:none;}
-  .btn-sm{padding:6px 8px;font-size:13px;}
-  .header-date-box{padding:3px 8px;}
-  .header-date-box span{display:none;}
-  .header-date-box input{width:72px;}
+  /* 모바일에서는 버튼을 숨기지 않고 가로 스크롤로 모두 접근 */
+  .header-actions{
+    width:100%;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    overflow-y:hidden;
+    justify-content:flex-start;
+    padding-bottom:4px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+  }
+  .header-actions .btn,
+  .header-actions label.btn,
+  .header-date-box{flex:0 0 auto;}
+  .btn-label{display:inline;}
+  .btn-sm{padding:6px 9px;font-size:12px;}
+  .header-date-box{padding:4px 8px;}
+  .header-date-box span{display:inline;}
+  .header-date-box input{width:78px;}
 }
 
 /* ── 태블릿 이하: 드로어 활성화 ── */
 @media(max-width:900px){
   .app-body{
     grid-template-columns:1fr;
-    height:calc(100vh - 53px);
+    height:calc(100dvh - 92px);
   }
   .editor-pane{padding:12px 14px;}
   .analysis-pane{display:none;}          /* 데스크탑용 사이드패널 숨김 */
-  .mobile-fab{display:flex;}
-  .mobile-drawer{display:flex;}
+  .mobile-fab{
+    display:flex;
+    left:50%;
+    right:auto;
+    bottom:18px;
+    transform:translateX(-50%);
+    z-index:520;
+  }
+  .mobile-fab:active{transform:translateX(-50%) scale(.95);}
+  .mobile-drawer{display:flex;z-index:510;}
+  .mobile-overlay{z-index:500;}
 }
 
 /* ── 보고서용 프린트 ── */
@@ -1003,7 +1031,7 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 
 <!-- ── Mobile: FAB ── -->
 <button class="mobile-fab" id="mobileFab" onclick="toggleMobileDrawer()">
-  📈 <span>분석 보기</span>
+  📈 <span>자동분석 보기</span>
 </button>
 
 <div class="toast" id="toast"></div>
@@ -3647,7 +3675,7 @@ function closeMobileDrawer() {
   const fab = document.getElementById('mobileFab');
   drawer.classList.remove('open');
   overlay.classList.remove('open');
-  fab.innerHTML = '📈 <span>분석 보기</span>';
+  fab.innerHTML = '📈 <span>자동분석 보기</span>';
   document.body.style.overflow = '';
 }
 
