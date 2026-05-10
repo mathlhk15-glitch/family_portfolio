@@ -2808,7 +2808,7 @@ function loadLatestSnapshotFromGoogleSheet() {
   loadSnapshotsFromGoogleSheet(false);
 }
 
-function requestGoogleSheetPage(limit, offset, timeoutMs = 25000) {
+function requestGoogleSheetPage(limit, offset, timeoutMs = 40000) {
   return new Promise((resolve, reject) => {
     const url = getGoogleSheetUrl();
     const callbackName = '__pfSheetCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
@@ -2818,7 +2818,7 @@ function requestGoogleSheetPage(limit, offset, timeoutMs = 25000) {
       if (done) return;
       done = true;
       cleanup();
-      reject(new Error('응답 시간 초과'));
+      reject(new Error('응답 시간 초과 (모바일 네트워크가 느릴 수 있습니다. 잠시 후 다시 시도해 주세요)'));
     }, timeoutMs);
     function cleanup() {
       clearTimeout(timer);
@@ -2835,7 +2835,7 @@ function requestGoogleSheetPage(limit, offset, timeoutMs = 25000) {
       if (done) return;
       done = true;
       cleanup();
-      reject(new Error('연결 실패'));
+      reject(new Error('연결 실패 (네트워크 오류 또는 Apps Script URL을 확인해 주세요)'));
     };
     script.src = url + (url.includes('?') ? '&' : '?')
       + 'action=list&callback=' + encodeURIComponent(callbackName)
@@ -2844,6 +2844,23 @@ function requestGoogleSheetPage(limit, offset, timeoutMs = 25000) {
       + '&_=' + Date.now();
     document.body.appendChild(script);
   });
+}
+
+// 재시도 포함 JSONP 요청 (모바일 환경 대응)
+async function requestGoogleSheetPageWithRetry(limit, offset, timeoutMs, maxRetries = 2) {
+  let lastErr;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0) {
+        updateGoogleSheetPanel(`연결 재시도 중... (${attempt}/${maxRetries}회)`);
+        await new Promise(r => setTimeout(r, 2000 * attempt));
+      }
+      return await requestGoogleSheetPage(limit, offset, timeoutMs);
+    } catch(e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
 }
 
 async function loadSnapshotsFromGoogleSheet(loadAll = false) {
@@ -2857,7 +2874,7 @@ async function loadSnapshotsFromGoogleSheet(loadAll = false) {
     updateGoogleSheetPanel(loadAll ? '전체 기록 불러오는 중... 1회에 3개씩 나눠서 받습니다.' : '최근 기록 1개만 불러오는 중...');
 
     while (true) {
-      const response = await requestGoogleSheetPage(pageSize, offset, loadAll ? 30000 : 20000);
+      const response = await requestGoogleSheetPageWithRetry(pageSize, offset, loadAll ? 45000 : 30000, loadAll ? 1 : 2);
       if (!response.ok) throw new Error(response.error || 'Apps Script 응답 오류');
       const rows = Array.isArray(response.snapshots) ? response.snapshots : [];
       allRows = allRows.concat(rows);
