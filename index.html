@@ -2766,36 +2766,20 @@ function postToGoogleSheet(payload) {
   const url = getGoogleSheetUrl();
   if (!url) { setGoogleSheetUrl(); return false; }
 
-  // iframe form POST는 Apps Script의 302 리다이렉트로 인해 사용 불가.
-  // GET fetch와 동일하게 CORS가 지원되므로 fetch POST를 사용한다.
-  updateGoogleSheetPanel('전송 중... Apps Script 응답까지 5~15초 소요됩니다.');
-
-  const body = new URLSearchParams();
-  body.append('action', 'save');
-  body.append('payload', JSON.stringify(payload));
+  // Apps Script는 POST CORS를 지원하지 않으므로 mode:'no-cors' + Content-Type:'text/plain' 조합 사용.
+  // text/plain은 CORS simple request라 preflight 없이 전송되고, Apps Script는 e.postData.contents로 읽는다.
+  // no-cors 응답은 opaque(읽기 불가)이므로 성공 여부를 서버에서 확인할 수 없음 → 낙관적 UI 사용.
+  updateGoogleSheetPanel('전송 중... 10~20초 후 구글시트에서 확인하세요.');
 
   fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString()
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'save', payload: payload })
   })
-  .then(r => {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.text();
-  })
-  .then(text => {
-    try {
-      const data = JSON.parse(text);
-      if (data && data.ok) {
-        showToast('🧾 구글시트 전송 완료 (' + (data.saved || 1) + '개)');
-        updateGoogleSheetPanel('마지막 전송: ' + new Date().toLocaleString('ko-KR'));
-      } else {
-        throw new Error(data && data.error ? data.error : '저장 실패');
-      }
-    } catch(parseErr) {
-      showToast('🧾 구글시트 전송 완료');
-      updateGoogleSheetPanel('마지막 전송: ' + new Date().toLocaleString('ko-KR'));
-    }
+  .then(() => {
+    showToast('🧾 구글시트 전송 완료 (구글시트에서 확인하세요)');
+    updateGoogleSheetPanel('전송됨: ' + new Date().toLocaleString('ko-KR') + ' — 구글시트에서 저장 확인 권장');
   })
   .catch(err => {
     const msg = err && err.message ? err.message : String(err);
