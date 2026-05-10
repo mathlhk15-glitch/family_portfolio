@@ -2766,58 +2766,42 @@ function postToGoogleSheet(payload) {
   const url = getGoogleSheetUrl();
   if (!url) { setGoogleSheetUrl(); return false; }
 
-  const iframeName = 'gsync_iframe_' + Date.now();
-  const iframe = document.createElement('iframe');
-  iframe.name = iframeName;
-  iframe.style.display = 'none';
+  // iframe form POST는 Apps Script의 302 리다이렉트로 인해 사용 불가.
+  // GET fetch와 동일하게 CORS가 지원되므로 fetch POST를 사용한다.
+  updateGoogleSheetPanel('전송 중... Apps Script 응답까지 5~15초 소요됩니다.');
 
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = url;
-  form.target = iframeName;
-  form.style.display = 'none';
-  const actionInput = document.createElement('input');
-  actionInput.name = 'action'; actionInput.value = 'save';
-  const dataInput = document.createElement('input');
-  dataInput.name = 'payload'; dataInput.value = JSON.stringify(payload);
-  form.appendChild(actionInput); form.appendChild(dataInput);
+  const body = new URLSearchParams();
+  body.append('action', 'save');
+  body.append('payload', JSON.stringify(payload));
 
-  // ── 핵심 수정 ──────────────────────────────────────────────────────────
-  // iframe을 DOM에 추가하면 브라우저가 about:blank를 로드하며 onload를 즉시 발화.
-  // 이 첫 번째 onload를 이용해 form.submit()을 실행하고,
-  // 이후 교체한 핸들러가 실제 Apps Script 응답(두 번째 onload)을 처리.
-  // ────────────────────────────────────────────────────────────────────────
-  let submitted = false;
-
-  function onFirstLoad() {
-    // about:blank 초기 로드 → 이 시점이 form.submit() 최적 타이밍
-    submitted = true;
-    iframe.onload = onResponse; // 다음 onload는 실제 응답 처리
-    form.submit();
-  }
-
-  function onResponse() {
-    showToast('🧾 구글시트 전송 완료');
-    updateGoogleSheetPanel('마지막 전송: ' + new Date().toLocaleString('ko-KR'));
-    setTimeout(() => {
-      try { form.remove(); } catch(e) {}
-      try { iframe.remove(); } catch(e) {}
-    }, 800);
-  }
-
-  iframe.onload = onFirstLoad;
-  document.body.appendChild(iframe);
-  document.body.appendChild(form);
-  updateGoogleSheetPanel('전송 중... Apps Script 응답까지 수 초 소요됩니다.');
-
-  // 안전장치: 일부 브라우저에서 about:blank onload가 발화 안 될 경우 대비
-  setTimeout(() => {
-    if (!submitted) {
-      submitted = true;
-      iframe.onload = onResponse;
-      form.submit();
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString()
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  })
+  .then(text => {
+    try {
+      const data = JSON.parse(text);
+      if (data && data.ok) {
+        showToast('🧾 구글시트 전송 완료 (' + (data.saved || 1) + '개)');
+        updateGoogleSheetPanel('마지막 전송: ' + new Date().toLocaleString('ko-KR'));
+      } else {
+        throw new Error(data && data.error ? data.error : '저장 실패');
+      }
+    } catch(parseErr) {
+      showToast('🧾 구글시트 전송 완료');
+      updateGoogleSheetPanel('마지막 전송: ' + new Date().toLocaleString('ko-KR'));
     }
-  }, 200);
+  })
+  .catch(err => {
+    const msg = err && err.message ? err.message : String(err);
+    showToast('❌ 구글시트 전송 실패: ' + msg);
+    updateGoogleSheetPanel('전송 실패: ' + msg);
+  });
 
   return true;
 }
