@@ -1,7 +1,8 @@
-const CACHE_NAME = 'family-portfolio-v12';
+const CACHE_NAME = 'family-portfolio-v13';
 const ASSETS = [
   './',
   './index.html',
+  './sw.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'

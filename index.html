@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>포트폴리오 편집기 v8 — 뀨 가족</title>
+<title>포트폴리오 편집기 v13 — 뀨 가족</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -840,6 +840,123 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 }
 
 /* ── 보고서용 프린트 ── */
+
+
+
+/* ══════════════════════════════════
+   v13 MOBILE WIDTH / READABILITY FIX
+   - 화면 넘침 방지
+   - 블루 모드 글자 대비 강화
+   - 모바일 자동분석 드로어 가시성 강화
+══════════════════════════════════ */
+html, body { max-width:100%; overflow-x:hidden; }
+body { background:var(--bg); }
+.app-header, .app-body, .editor-pane, .analysis-pane, .mobile-drawer,
+.card, .card-body, .member-card, .member-body, .quick-rebal-box,
+.status-board, .cat-bar-section, .ticker-agg, .member-breakdown { min-width:0; max-width:100%; }
+* { min-width:0; }
+
+/* 블루 배경에서 회색 글자가 묻히지 않도록 기본 대비 강화 */
+:root {
+  --muted:#416b91;
+  --dim:#234b70;
+  --text:#0f2e4d;
+  --border:#a9cbed;
+  --s1:#f8fbff;
+  --s2:#dcecff;
+  --s3:#eef7ff;
+}
+body:not(.light-mode) .ta-title,
+body:not(.light-mode) .mb-title,
+body:not(.light-mode) .cat-bar-title,
+body:not(.light-mode) .storage-bar,
+body:not(.light-mode) .card-head h4,
+body:not(.light-mode) .quick-rebal-head,
+body:not(.light-mode) .ta-rank,
+body:not(.light-mode) .ta-holders,
+body:not(.light-mode) .ta-pct,
+body:not(.light-mode) .cat-bar-amt,
+body:not(.light-mode) .quick-rebal-empty,
+body:not(.light-mode) .goal-result-label,
+body:not(.light-mode) .dd-label,
+body:not(.light-mode) .sc-label,
+body:not(.light-mode) .ptm-sub,
+body:not(.light-mode) .plan-section-title,
+body:not(.light-mode) .status-no-snapshot,
+body:not(.light-mode) .sm-hint {
+  color:#274f73 !important;
+}
+body:not(.light-mode) .ta-amt,
+body:not(.light-mode) .mb-name,
+body:not(.light-mode) .ptm-title,
+body:not(.light-mode) .scenario-result h5,
+body:not(.light-mode) .goal-card h5,
+body:not(.light-mode) .card,
+body:not(.light-mode) .mobile-drawer-body {
+  color:#0f2e4d !important;
+}
+
+/* 모바일 자동분석 드로어를 화면 위로 확실히 올림 */
+.mobile-drawer{
+  box-shadow:0 -12px 45px rgba(15,46,77,.28);
+}
+.mobile-drawer-body{
+  background:var(--s3);
+  overscroll-behavior:contain;
+}
+.mobile-drawer-tabs{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:linear-gradient(180deg,var(--s3),rgba(238,247,255,.96));
+  border-bottom:1px solid var(--border);
+  padding:8px 0 10px;
+  margin-bottom:10px;
+}
+.mobile-drawer-tabs .apane-tabs{margin-bottom:0;overflow-x:auto;flex-wrap:nowrap;padding:0 2px 3px;-webkit-overflow-scrolling:touch;}
+.mobile-drawer-tabs .apane-tab{flex:0 0 auto;}
+
+@media(max-width:900px){
+  body{overflow-x:hidden;}
+  .app-body{width:100%;overflow-x:hidden;}
+  .editor-pane{width:100%;overflow-x:hidden;padding-left:12px;padding-right:12px;}
+  .card{overflow:hidden;}
+  .card-body{overflow:hidden;}
+  #catTargetGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;}
+  .quick-rebal-box{overflow:hidden;}
+  .quick-rebal-row{grid-template-columns:minmax(88px,112px) minmax(70px,1fr) minmax(48px,62px);gap:6px;}
+  .quick-rebal-bar{width:100%;min-width:0;}
+  .mobile-fab{z-index:3000;bottom:14px;white-space:nowrap;}
+  .mobile-drawer{z-index:2990;max-height:88dvh;height:88dvh;background:var(--s3);}
+  .mobile-overlay{z-index:2980;background:rgba(15,46,77,.32);}
+  .mobile-drawer-body{padding:0 12px 92px;}
+  .analysis-body{overflow-x:hidden;}
+  .total-banner,.cat-bar-section,.rebal-section,.concentration-section,.member-breakdown,.ticker-agg,.scenario-result,.goal-card,.pnl-card,.plan-section,.card{max-width:100%;}
+  .cat-bar-top{align-items:flex-start;gap:6px;}
+  .cat-bar-name{flex:1 1 auto;}
+  .cat-bar-nums{flex:0 0 auto;}
+  .mb-item{display:grid;grid-template-columns:72px minmax(80px,1fr) 64px 38px;gap:6px;}
+  .mb-name,.mb-amt,.mb-pct{width:auto;}
+  .ta-item{display:grid;grid-template-columns:18px minmax(70px,1fr) minmax(44px,62px);grid-template-areas:'rank ticker amt' '. holders pct';align-items:center;gap:2px 6px;padding:7px 0;}
+  .ta-rank{grid-area:rank;width:auto;}
+  .ta-ticker{grid-area:ticker;width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#0284a8 !important;}
+  .ta-holders{grid-area:holders;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
+  .ta-amt{grid-area:amt;width:auto;font-size:10px;color:#0f2e4d !important;}
+  .ta-pct{grid-area:pct;width:auto;text-align:right;}
+  .sim-row,.sc-row,.dd-row,.goal-result-row,.ptm-item{min-width:0;}
+}
+
+@media(max-width:640px){
+  .app-header{width:100%;overflow:hidden;}
+  .header-actions{max-width:100%;}
+  .header-date-box{max-width:100%;}
+  .header-date-box input{min-width:0;}
+  .header-date-box select{min-width:0;}
+  .meta-grid{grid-template-columns:1fr !important;}
+  .goal-input-row{grid-template-columns:1fr !important;}
+  .pnl-summary-grid{grid-template-columns:1fr !important;}
+  .plan-alloc-grid{grid-template-columns:1fr !important;}
+}
 
 </style>
 <script>
@@ -2056,12 +2173,8 @@ function updateAnalysisPane(calc, validation) {
   }
 
   document.getElementById('analysisBody').innerHTML = header + body;
-  // 모바일 드로어가 열려 있으면 내용 동기화
-  const _drawer = document.getElementById('mobileDrawer');
-  if (_drawer && _drawer.classList.contains('open')) {
-    const _dst = document.getElementById('mobileDrawerBody');
-    if (_dst) _dst.innerHTML = header + body;
-  }
+  // 모바일 드로어가 열려 있으면 탭과 본문을 함께 동기화
+  syncMobileDrawerContent();
 }
 
 // ════════════════════════════════════════════════════════
@@ -2602,16 +2715,17 @@ function openGoogleSheetPanel() {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
     if (isMobile) {
       openMobileDrawer();
+      syncMobileDrawerContent();
       setTimeout(() => {
         const drawer = document.getElementById('mobileDrawer');
         const el = drawer ? drawer.querySelector('#googleSheetBox') : null;
         if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
-      }, 80);
+      }, 120);
       return;
     }
     const el = document.getElementById('googleSheetBox');
     if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
-  }, 100);
+  }, 120);
 }
 
 function buildGoogleSheetPanel() {
@@ -3115,6 +3229,123 @@ tr:last-child td{border-bottom:none;}
   .header h1{background:none!important;-webkit-text-fill-color:#1a1a1a!important;}
   *{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
 }
+
+
+/* ══════════════════════════════════
+   v13 MOBILE WIDTH / READABILITY FIX
+   - 화면 넘침 방지
+   - 블루 모드 글자 대비 강화
+   - 모바일 자동분석 드로어 가시성 강화
+══════════════════════════════════ */
+html, body { max-width:100%; overflow-x:hidden; }
+body { background:var(--bg); }
+.app-header, .app-body, .editor-pane, .analysis-pane, .mobile-drawer,
+.card, .card-body, .member-card, .member-body, .quick-rebal-box,
+.status-board, .cat-bar-section, .ticker-agg, .member-breakdown { min-width:0; max-width:100%; }
+* { min-width:0; }
+
+/* 블루 배경에서 회색 글자가 묻히지 않도록 기본 대비 강화 */
+:root {
+  --muted:#416b91;
+  --dim:#234b70;
+  --text:#0f2e4d;
+  --border:#a9cbed;
+  --s1:#f8fbff;
+  --s2:#dcecff;
+  --s3:#eef7ff;
+}
+body:not(.light-mode) .ta-title,
+body:not(.light-mode) .mb-title,
+body:not(.light-mode) .cat-bar-title,
+body:not(.light-mode) .storage-bar,
+body:not(.light-mode) .card-head h4,
+body:not(.light-mode) .quick-rebal-head,
+body:not(.light-mode) .ta-rank,
+body:not(.light-mode) .ta-holders,
+body:not(.light-mode) .ta-pct,
+body:not(.light-mode) .cat-bar-amt,
+body:not(.light-mode) .quick-rebal-empty,
+body:not(.light-mode) .goal-result-label,
+body:not(.light-mode) .dd-label,
+body:not(.light-mode) .sc-label,
+body:not(.light-mode) .ptm-sub,
+body:not(.light-mode) .plan-section-title,
+body:not(.light-mode) .status-no-snapshot,
+body:not(.light-mode) .sm-hint {
+  color:#274f73 !important;
+}
+body:not(.light-mode) .ta-amt,
+body:not(.light-mode) .mb-name,
+body:not(.light-mode) .ptm-title,
+body:not(.light-mode) .scenario-result h5,
+body:not(.light-mode) .goal-card h5,
+body:not(.light-mode) .card,
+body:not(.light-mode) .mobile-drawer-body {
+  color:#0f2e4d !important;
+}
+
+/* 모바일 자동분석 드로어를 화면 위로 확실히 올림 */
+.mobile-drawer{
+  box-shadow:0 -12px 45px rgba(15,46,77,.28);
+}
+.mobile-drawer-body{
+  background:var(--s3);
+  overscroll-behavior:contain;
+}
+.mobile-drawer-tabs{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:linear-gradient(180deg,var(--s3),rgba(238,247,255,.96));
+  border-bottom:1px solid var(--border);
+  padding:8px 0 10px;
+  margin-bottom:10px;
+}
+.mobile-drawer-tabs .apane-tabs{margin-bottom:0;overflow-x:auto;flex-wrap:nowrap;padding:0 2px 3px;-webkit-overflow-scrolling:touch;}
+.mobile-drawer-tabs .apane-tab{flex:0 0 auto;}
+
+@media(max-width:900px){
+  body{overflow-x:hidden;}
+  .app-body{width:100%;overflow-x:hidden;}
+  .editor-pane{width:100%;overflow-x:hidden;padding-left:12px;padding-right:12px;}
+  .card{overflow:hidden;}
+  .card-body{overflow:hidden;}
+  #catTargetGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;}
+  .quick-rebal-box{overflow:hidden;}
+  .quick-rebal-row{grid-template-columns:minmax(88px,112px) minmax(70px,1fr) minmax(48px,62px);gap:6px;}
+  .quick-rebal-bar{width:100%;min-width:0;}
+  .mobile-fab{z-index:3000;bottom:14px;white-space:nowrap;}
+  .mobile-drawer{z-index:2990;max-height:88dvh;height:88dvh;background:var(--s3);}
+  .mobile-overlay{z-index:2980;background:rgba(15,46,77,.32);}
+  .mobile-drawer-body{padding:0 12px 92px;}
+  .analysis-body{overflow-x:hidden;}
+  .total-banner,.cat-bar-section,.rebal-section,.concentration-section,.member-breakdown,.ticker-agg,.scenario-result,.goal-card,.pnl-card,.plan-section,.card{max-width:100%;}
+  .cat-bar-top{align-items:flex-start;gap:6px;}
+  .cat-bar-name{flex:1 1 auto;}
+  .cat-bar-nums{flex:0 0 auto;}
+  .mb-item{display:grid;grid-template-columns:72px minmax(80px,1fr) 64px 38px;gap:6px;}
+  .mb-name,.mb-amt,.mb-pct{width:auto;}
+  .ta-item{display:grid;grid-template-columns:18px minmax(70px,1fr) minmax(44px,62px);grid-template-areas:'rank ticker amt' '. holders pct';align-items:center;gap:2px 6px;padding:7px 0;}
+  .ta-rank{grid-area:rank;width:auto;}
+  .ta-ticker{grid-area:ticker;width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#0284a8 !important;}
+  .ta-holders{grid-area:holders;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
+  .ta-amt{grid-area:amt;width:auto;font-size:10px;color:#0f2e4d !important;}
+  .ta-pct{grid-area:pct;width:auto;text-align:right;}
+  .sim-row,.sc-row,.dd-row,.goal-result-row,.ptm-item{min-width:0;}
+}
+
+@media(max-width:640px){
+  .app-header{width:100%;overflow:hidden;}
+  .header-actions{max-width:100%;}
+  .header-date-box{max-width:100%;}
+  .header-date-box input{min-width:0;}
+  .header-date-box select{min-width:0;}
+  .meta-grid{grid-template-columns:1fr !important;}
+  .goal-input-row{grid-template-columns:1fr !important;}
+  .pnl-summary-grid{grid-template-columns:1fr !important;}
+  .plan-alloc-grid{grid-template-columns:1fr !important;}
+}
+
 </style>
 </head>
 <body>
@@ -3690,17 +3921,28 @@ function toggleMobileDrawer() {
   else openMobileDrawer();
 }
 
+function syncMobileDrawerContent() {
+  const drawer = document.getElementById('mobileDrawer');
+  const dst = document.getElementById('mobileDrawerBody');
+  const src = document.getElementById('analysisBody');
+  if (!drawer || !dst || !src || !drawer.classList.contains('open')) return;
+  const tabs = document.querySelector('.analysis-pane .apane-tabs');
+  const tabsHTML = tabs ? `<div class="mobile-drawer-tabs"><div class="apane-tabs">${tabs.innerHTML}</div></div>` : '';
+  dst.innerHTML = tabsHTML + src.innerHTML;
+}
+
 function openMobileDrawer() {
   const drawer = document.getElementById('mobileDrawer');
   const overlay = document.getElementById('mobileOverlay');
   const fab = document.getElementById('mobileFab');
-  const src = document.getElementById('analysisBody');
-  const dst = document.getElementById('mobileDrawerBody');
-  if (src && dst) dst.innerHTML = src.innerHTML;
+  if (!drawer || !overlay || !fab) return;
   drawer.classList.add('open');
   overlay.classList.add('open');
   fab.innerHTML = '✕ <span>닫기</span>';
   document.body.style.overflow = 'hidden';
+  syncMobileDrawerContent();
+  const dst = document.getElementById('mobileDrawerBody');
+  if (dst) dst.scrollTop = 0;
 }
 
 function closeMobileDrawer() {
