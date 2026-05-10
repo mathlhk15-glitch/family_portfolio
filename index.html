@@ -797,7 +797,7 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
 // 4월·5월 추이 시드 데이터 — localStorage가 완전히 비어있을 때만 초기 설정
 (function() {
   var KEY = 'pf_monthly_snapshots';
-  var seed = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  var seed = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력핵심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력핵심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
   try {
     var existing = JSON.parse(localStorage.getItem(KEY) || '[]');
 
@@ -860,7 +860,8 @@ body.light-mode .validation-panel,.light-mode .total-banner{background:#fff;}
       </select>
     </div>
     <button class="btn btn-secondary btn-sm" onclick="saveSnapshot()" title="현재 상태를 다음 점검 비교 기준으로 저장">📸 <span class="btn-label">비교점</span></button>
-    <button class="btn btn-secondary btn-sm" onclick="saveTrendSnapshot()" title="현재 기준일을 주별추이에 저장">📈 <span class="btn-label">추이 저장</span></button>
+    <button class="btn btn-secondary btn-sm" onclick="saveTrendSnapshot()" title="현재 기준일 포트폴리오 전체를 날짜별 기록에 저장">📈 <span class="btn-label">날짜 저장</span></button>
+    <button class="btn btn-secondary btn-sm" onclick="openGoogleSheetPanel()" title="구글시트 백업 설정 및 동기화">🧾 <span class="btn-label">구글시트</span></button>
     <button class="btn btn-secondary btn-sm" onclick="saveJSON()">💾 <span class="btn-label">JSON 저장</span></button>
     <label class="btn btn-secondary btn-sm" style="cursor:pointer">
       📂 <span class="btn-label">불러오기</span> <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
@@ -1070,7 +1071,7 @@ let state = {
     {
       id:'insuk', name:'임인숙', icon:'🛡', role:'코어 장기복리·은퇴축', color:'#8b5cf6',
       holdings:[
-        {account:'토스',ticker:'MSFT',entryType:'single',qty:'5주',pnl:'-3.2%%',amount:313,cat:'bigtech',badge:'',note:''},
+        {account:'토스',ticker:'MSFT',entryType:'single',qty:'5주',pnl:'-3.2%',amount:313,cat:'bigtech',badge:'',note:''},
         {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+16.2%',amount:256,cat:'growth',badge:'',note:''},
         {account:'종합',ticker:'AVGO',entryType:'single',qty:'3주',pnl:'+2.16%',amount:180,cat:'ai',badge:'5월판단',note:''},
         {account:'종합',ticker:'META',entryType:'single',qty:'3주',pnl:'+0.13%',amount:298,cat:'bigtech',badge:'5월판단',note:''},
@@ -1097,7 +1098,7 @@ let state = {
         {account:'',ticker:'MU',entryType:'single',qty:'5주',pnl:'+8.21%',amount:360,cat:'ai',badge:'신규',note:''},
         {account:'',ticker:'AVGO',entryType:'single',qty:'2주',pnl:'+5.3%',amount:125,cat:'ai',badge:'5월판단',note:'5월실적 시나리오표 적용'},
         {account:'',ticker:'TIGER 미국필라델피아반도체나스닥',entryType:'basket',qty:'33주',pnl:'+22.92',amount:128,cat:'semi',badge:'',note:'군월급 중 남은돈 70% 매달 구매'},
-        {account:'',ticker:'KODEX 미국AI전력햄심인프라',entryType:'basket',qty:'16',pnl:'+19.47%',amount:39,cat:'domestic',badge:'',note:'군월급 중 남은돈 30% 매달 구매'},
+        {account:'',ticker:'KODEX 미국AI전력핵심인프라',entryType:'basket',qty:'16',pnl:'+19.47%',amount:39,cat:'domestic',badge:'',note:'군월급 중 남은돈 30% 매달 구매'},
         {account:'',ticker:'AVGO',entryType:'single',qty:'3.89주',pnl:'+27.84%',amount:243,cat:'ai',badge:'5월판단',note:''},
       ]
     },
@@ -1203,6 +1204,31 @@ function safeColor(value, fallback = '#3b82f6') {
   return fallback;
 }
 
+function toNumber(value, fallback = 0) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : fallback;
+  if (typeof value === 'string') value = value.replace(/,/g, '').trim();
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function toNumberStrict(value) {
+  if (typeof value === 'string') value = value.replace(/,/g, '').trim();
+  if (value === '' || value === null || value === undefined) return NaN;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function normalizeDateKey(dateValue) {
+  const raw = String(dateValue || '').trim().replace(/\./g, '-');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}$/.test(raw)) return raw + '-01';
+  return new Date().toISOString().slice(0, 10);
+}
+
+function displayDateFromKey(key) {
+  return String(key || '').replace(/-/g, '.');
+}
+
 function cloneState(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
@@ -1223,7 +1249,7 @@ function validateState() {
     warnings.push({type:'warning', msg:'기준일은 YYYY.MM.DD 형식 권장'});
   }
 
-  const targetSum = Object.values(state.catTargets || {}).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const targetSum = Object.values(state.catTargets || {}).reduce((a,b) => a + (toNumber(b)), 0);
   if (Math.abs(targetSum - 100) > 0.01) {
     warnings.push({type:'warning', msg:`목표 비중 합계가 ${targetSum.toFixed(1)}%입니다. 리밸런싱 계산은 100%에서 가장 정확합니다`});
   }
@@ -1235,7 +1261,7 @@ function validateState() {
   state.members.forEach((m, mi) => {
     m.holdings.forEach((h, hi) => {
       const ticker = normalizeTicker(h.ticker);
-      const amount = parseFloat(h.amount) || 0;
+      const amount = toNumber(h.amount);
       const cat = h.cat || 'other';
       const pnl = String(h.pnl || '').trim();
 
@@ -1248,7 +1274,7 @@ function validateState() {
         warnings.push({type:'warning', msg:`${m.name} / ${ticker}: 금액 0 또는 음수`});
       }
       // NaN
-      if (ticker && isNaN(parseFloat(h.amount))) {
+      if (ticker && String(h.amount ?? '').trim() !== '' && !Number.isFinite(toNumberStrict(h.amount))) {
         errors.push({type:'error', msg:`${m.name} / ${h.ticker}: 금액이 숫자가 아님`});
       }
       if (ticker && !CAT_MAP[cat]) {
@@ -1273,7 +1299,7 @@ function validateState() {
       }
     });
     // Empty holdings row
-    const emptyRows = m.holdings.filter(h => !h.ticker && !(parseFloat(h.amount)>0));
+    const emptyRows = m.holdings.filter(h => !h.ticker && !(toNumber(h.amount)>0));
     if (emptyRows.length > 0) {
       warnings.push({type:'warning', msg:`${m.name}: 빈 행 ${emptyRows.length}개 존재`});
     }
@@ -1349,7 +1375,7 @@ function renderCatTargets(calc = calcState()) {
 }
 
 function updateCatTarget(catId, val) {
-  state.catTargets[catId] = parseFloat(val) || 0;
+  state.catTargets[catId] = toNumber(val);
   autoSave();
   const calc = calcState();
   updateTargetSumBadge(calc);
@@ -1360,7 +1386,7 @@ function updateCatTarget(catId, val) {
 }
 
 function updateCatTargetSumRow() {
-  const sum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const sum = Object.values(state.catTargets).reduce((a,b) => a + (toNumber(b)), 0);
   const el = document.getElementById('catTargetSumRow');
   if (!el) return;
   const ok = Math.abs(sum - 100) < 0.01;
@@ -1372,7 +1398,7 @@ function updateTargetSumBadge(calc = calcState()) {
   const badge = document.getElementById('targetSumBadge');
   if (!badge) return;
   const {grandTotal} = calc;
-  const tgtSum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const tgtSum = Object.values(state.catTargets).reduce((a,b) => a + (toNumber(b)), 0);
   const tgtOk = Math.abs(tgtSum - 100) < 0.01;
   const cls = grandTotal > 0 && tgtOk ? 'tsb-ok' : !tgtOk ? 'tsb-high' : 'tsb-low';
   const label = grandTotal > 0
@@ -1383,15 +1409,15 @@ function updateTargetSumBadge(calc = calcState()) {
 
 function calculateBuyOnlyAllocation(calc, budget) {
   const {grandTotal, catTotals} = calc;
-  const targetSum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const targetSum = Object.values(state.catTargets).reduce((a,b) => a + (toNumber(b)), 0);
   if (budget <= 0 || grandTotal <= 0 || Math.abs(targetSum - 100) > 0.01) return [];
 
   const afterTotal = grandTotal + budget;
   const needs = CATEGORIES
     .map(c => {
-      const targetAmt = afterTotal * ((parseFloat(state.catTargets[c.id]) || 0) / 100);
+      const targetAmt = afterTotal * ((toNumber(state.catTargets[c.id])) / 100);
       const need = Math.max(0, targetAmt - (catTotals[c.id] || 0));
-      return {cat:c, need, targetPct: parseFloat(state.catTargets[c.id]) || 0};
+      return {cat:c, need, targetPct: toNumber(state.catTargets[c.id])};
     })
     .filter(x => x.need > 0.01);
 
@@ -1399,7 +1425,7 @@ function calculateBuyOnlyAllocation(calc, budget) {
   if (totalNeed <= 0) {
     return CATEGORIES
       .filter(c => (state.catTargets[c.id] || 0) > 0)
-      .map(c => ({cat:c, amount: budget * ((parseFloat(state.catTargets[c.id]) || 0) / 100)}));
+      .map(c => ({cat:c, amount: budget * ((toNumber(state.catTargets[c.id])) / 100)}));
   }
 
   let allocation = needs.map(x => ({
@@ -1410,9 +1436,9 @@ function calculateBuyOnlyAllocation(calc, budget) {
   const used = allocation.reduce((s,x) => s + x.amount, 0);
   const leftover = Math.max(0, budget - used);
   if (leftover > 0.01) {
-    const targetWeightSum = CATEGORIES.reduce((s,c) => s + (parseFloat(state.catTargets[c.id]) || 0), 0);
+    const targetWeightSum = CATEGORIES.reduce((s,c) => s + (toNumber(state.catTargets[c.id])), 0);
     CATEGORIES.forEach(c => {
-      const extra = targetWeightSum > 0 ? leftover * ((parseFloat(state.catTargets[c.id]) || 0) / targetWeightSum) : 0;
+      const extra = targetWeightSum > 0 ? leftover * ((toNumber(state.catTargets[c.id])) / targetWeightSum) : 0;
       if (extra <= 0.01) return;
       const found = allocation.find(x => x.cat.id === c.id);
       if (found) found.amount += extra;
@@ -1427,8 +1453,8 @@ function renderRebalancePlanner(calc = calcState()) {
   const box = document.getElementById('quickRebalResult');
   const input = document.getElementById('rebal-budget');
   if (!box || !input) return;
-  const budget = parseFloat(input.value) || 0;
-  const targetSum = Object.values(state.catTargets).reduce((a,b) => a + (parseFloat(b)||0), 0);
+  const budget = toNumber(input.value);
+  const targetSum = Object.values(state.catTargets).reduce((a,b) => a + (toNumber(b)), 0);
   if (budget <= 0) {
     box.innerHTML = '<div class="quick-rebal-empty">신규 투자 예정 금액을 입력하면 매수 우선순위를 계산합니다.</div>';
     return;
@@ -1532,7 +1558,7 @@ function renderMember(m, mi, container) {
       <input type="text" value="${escapeAttr(memberColor)}" placeholder="색상" style="width:90px"
         oninput="state.members[${mi}].color=this.value;refreshMemberHead(${mi})">
       <button class="btn btn-danger btn-sm"
-        onclick="if(confirm(${deleteMsg})){state.members.splice(${mi},1);renderMembers();recalc();}">삭제</button>
+        onclick="if(confirm(${deleteMsg})){state.members.splice(${mi},1);renderMembers();recalc({rerenderTables:true});}">삭제</button>
     </div>`;
 
   const rowsHTML = m.holdings.map((h, hi) => buildHoldingRow(mi, hi, h)).join('');
@@ -1575,7 +1601,7 @@ function buildHoldingRow(mi, hi, h) {
     `<option value="${escapeAttr(t.v)}" ${(h.entryType||'single')===t.v?'selected':''}>${escapeHTML(t.l)}</option>`
   ).join('');
 
-  const amountParsed = parseFloat(h.amount);
+  const amountParsed = toNumberStrict(h.amount);
   const amount = Number.isFinite(amountParsed) ? amountParsed : 0;
   const ticker = (h.ticker||'').trim();
   const hasError = (!ticker && amount > 0) || (ticker && String(h.amount ?? '').trim() !== '' && !Number.isFinite(amountParsed));
@@ -1597,7 +1623,7 @@ function buildHoldingRow(mi, hi, h) {
       oninput="this.style.color=this.value.startsWith('-')?'var(--red)':'var(--green)';updateHolding(${mi},${hi},'pnl',this.value)"></td>
     <td><input type="number" min="0" step="1" value="${escapeAttr(h.amount)}" placeholder="0"
       style="color:var(--cyan);text-align:right${ticker&&amount<=0?';border-color:var(--yellow)':''}"
-      oninput="updateHolding(${mi},${hi},'amount',parseFloat(this.value)||0);recalc()"></td>
+      oninput="updateHolding(${mi},${hi},'amount',toNumber(this.value));recalc()"></td>
     <td><select class="cat-select" onchange="updateHolding(${mi},${hi},'cat',this.value);recalc()">${catOptions}</select></td>
     <td><select onchange="updateHolding(${mi},${hi},'badge',this.value)">${badgeOptions}</select></td>
     <td><input type="text" value="${escapeAttr(h.note)}" placeholder="메모"
@@ -1619,7 +1645,7 @@ function addHoldingRow(mi) {
   const tbody = document.getElementById(`tbody-${mi}`);
   const hi = state.members[mi].holdings.length - 1;
   tbody.insertAdjacentHTML('beforeend', buildHoldingRow(mi, hi, state.members[mi].holdings[hi]));
-  recalc();
+  recalc({rerenderTables:true});
 }
 
 // ════════════════════════════════════════════════════════
@@ -1671,8 +1697,8 @@ function sortedHoldings(mi) {
   withIdx.sort((a, b) => {
     let va, vb;
     if (key === 'amount') {
-      va = parseFloat(a.h.amount) || 0;
-      vb = parseFloat(b.h.amount) || 0;
+      va = toNumber(a.h.amount);
+      vb = toNumber(b.h.amount);
       return (va - vb) * dir;
     }
     if (key === 'pnl') {
@@ -1736,7 +1762,7 @@ function dupHolding(mi, hi) {
   state.members[mi].holdings.splice(hi+1, 0, clone);
   renderTbody(mi);
   if (sortState[mi]) renderSortIcons(mi, sortState[mi].key, sortState[mi].dir);
-  recalc();
+  recalc({rerenderTables:true});
 }
 
 function delHolding(mi, hi) {
@@ -1744,7 +1770,7 @@ function delHolding(mi, hi) {
   // Clear sort state row indices are now shifted; safest to re-render normally
   renderTbody(mi);
   if (sortState[mi]) renderSortIcons(mi, sortState[mi].key, sortState[mi].dir);
-  recalc();
+  recalc({rerenderTables:true});
 }
 
 function toggleMember(mi) {
@@ -1756,7 +1782,7 @@ function addMember() {
     id:'m'+Date.now(), name:'새 구성원', icon:'👤', role:'역할',
     color:'#06b6d4', holdings:[]
   });
-  renderMembers(); recalc();
+  renderMembers(); recalc({rerenderTables:true});
 }
 
 function refreshMemberHead(mi) {
@@ -1775,7 +1801,7 @@ function refreshMemberHead(mi) {
 // ════════════════════════════════════════════════════════
 function calcState() {
   const memberTotals = state.members.map(m =>
-    m.holdings.reduce((s, h) => s + (parseFloat(h.amount)||0), 0)
+    m.holdings.reduce((s, h) => s + (toNumber(h.amount)), 0)
   );
   const grandTotal = memberTotals.reduce((a,b) => a+b, 0);
 
@@ -1784,7 +1810,7 @@ function calcState() {
   state.members.forEach(m =>
     m.holdings.forEach(h => {
       const cat = h.cat || 'other';
-      catTotals[cat] = (catTotals[cat]||0) + (parseFloat(h.amount)||0);
+      catTotals[cat] = (catTotals[cat]||0) + (toNumber(h.amount));
     })
   );
 
@@ -1799,7 +1825,7 @@ function calcState() {
       if (!raw) return;
       const key = raw.toUpperCase(); // normalized
       if (!tickerMap[key]) tickerMap[key] = {amount:0, holders:[], cat:h.cat, entryType: h.entryType||'single'};
-      tickerMap[key].amount += parseFloat(h.amount)||0;
+      tickerMap[key].amount += toNumber(h.amount);
       if (m.name && !tickerMap[key].holders.includes(m.name))
         tickerMap[key].holders.push(m.name);
     })
@@ -1819,7 +1845,7 @@ function calcState() {
   return {memberTotals, grandTotal, catTotals, catPcts, tickerList, top1Pct, top3Pct, over10};
 }
 
-function recalc() {
+function recalc(options = {}) {
   const validation = validateState();
   const calc = calcState();
   renderCatTargets(calc);
@@ -1830,7 +1856,7 @@ function recalc() {
   updateAnalysisPane(calc, validation);
   recalcGoal();
   recalcDrawdown();
-  rerenderAllTbodies();
+  if (options.rerenderTables) rerenderAllTbodies();
   refreshSnapshotPicker();
   autoSave();
 }
@@ -2155,6 +2181,8 @@ let saveTimer = null;
 let isDirty = false;   // 미저장 변경 추적
 let autosavePaused = false;
 const TREND_KEY = 'pf_monthly_snapshots';
+const GOOGLE_SHEET_URL_KEY = 'pf_google_apps_script_url';
+let autoSnapshotTimer = null;
 
 function markDirty() {
   if (!isDirty) {
@@ -2194,28 +2222,64 @@ function readStorageJSON(keys) {
   return null;
 }
 
+function sanitizePlanConfig(planConfig) {
+  const safe = cloneState(DEFAULT_STATE.planConfig);
+  if (!planConfig || !Array.isArray(planConfig.periods)) return safe;
+  safe.periods = planConfig.periods.map((p, pi) => ({
+    label: String(p.label || DEFAULT_STATE.planConfig.periods[pi]?.label || ''),
+    year: String(p.year || DEFAULT_STATE.planConfig.periods[pi]?.year || ''),
+    color: safeColor(p.color, DEFAULT_STATE.planConfig.periods[pi]?.color || '#3b82f6'),
+    ca: String(p.ca || DEFAULT_STATE.planConfig.periods[pi]?.ca || 'rgba(59,130,246,'),
+    groups: Array.isArray(p.groups) ? p.groups.map(g => ({
+      type: ['invest','cash','event'].includes(g.type) ? g.type : 'event',
+      account: String(g.account || ''),
+      members: String(g.members || ''),
+      label: String(g.label || ''),
+      icon: String(g.icon || ''),
+      note: g.note == null ? null : String(g.note),
+      perPerson: toNumber(g.perPerson),
+      numMembers: Math.max(0, Math.round(toNumber(g.numMembers))),
+      totalAmt: toNumber(g.totalAmt),
+      debt: !!g.debt,
+      items: Array.isArray(g.items) ? g.items.map(item => ({
+        name: String(item.name || ''),
+        pct: toNumber(item.pct)
+      })) : []
+    })) : []
+  }));
+  return safe;
+}
+
 function applyStateMigrations(nextState) {
   if (!nextState || !Array.isArray(nextState.members)) {
     throw new Error('invalid portfolio state');
   }
   nextState.meta = Object.assign({}, DEFAULT_STATE.meta, nextState.meta || {});
   nextState.catTargets = Object.assign({}, DEFAULT_STATE.catTargets, nextState.catTargets || {});
-  if (!nextState.planConfig || !Array.isArray(nextState.planConfig.periods)) {
-    nextState.planConfig = cloneState(DEFAULT_STATE.planConfig);
-  }
+  Object.keys(nextState.catTargets).forEach(k => {
+    nextState.catTargets[k] = toNumber(nextState.catTargets[k]);
+  });
+  nextState.planConfig = sanitizePlanConfig(nextState.planConfig);
   nextState.members.forEach((m, mi) => {
     m.id = m.id || ('m' + mi);
-    m.name = m.name || `구성원 ${mi + 1}`;
-    m.icon = m.icon || '👤';
-    m.role = m.role || '';
+    m.name = String(m.name || `구성원 ${mi + 1}`);
+    m.icon = String(m.icon || '👤');
+    m.role = String(m.role || '');
     m.color = safeColor(m.color, DEFAULT_STATE.members[mi]?.color || '#06b6d4');
     m.holdings = Array.isArray(m.holdings) ? m.holdings : [];
     m.holdings.forEach(h => {
-      if (!h.entryType) h.entryType = 'single';
+      h.account = String(h.account || '');
+      h.ticker = String(h.ticker || '');
+      h.qty = String(h.qty || '');
+      h.pnl = String(h.pnl || '');
+      h.entryType = h.entryType || 'single';
+      if (!ENTRY_TYPES.find(t => t.v === h.entryType)) h.entryType = 'single';
       if (!CAT_MAP[h.cat]) h.cat = 'other';
-      if (h.amount === undefined || h.amount === null || h.amount === '') h.amount = 0;
+      h.amount = toNumber(h.amount);
       if (h.badge === undefined) h.badge = '';
+      h.badge = String(h.badge || '');
       if (h.note === undefined) h.note = '';
+      h.note = String(h.note || '');
     });
   });
   return nextState;
@@ -2247,7 +2311,7 @@ function resetEditorToDefaultState() {
   } catch(e) {}
   syncMetaInputs();
   renderMembers();
-  recalc();
+  recalc({rerenderTables:true});
   markClean('✓ 기본 데이터로 초기화됨');
   showToast('↺ 기본 데이터로 초기화 완료');
 }
@@ -2262,12 +2326,62 @@ function autoSave() {
       const snap = localStorage.getItem(SNAPSHOT_KEY);
       if (snap) snapshot = JSON.parse(snap);
       markClean();
+      scheduleAutoDateSnapshot();
       if (typeof currentApaneTab !== 'undefined' && currentApaneTab === 'trend') {
         updateAnalysisPane(calcState(), validateState());
       }
     } catch(e) {}
   }, 600);
 }
+
+function buildSnapshotEntry() {
+  const calc = calcState();
+  const {memberTotals, grandTotal, catTotals, catPcts} = calc;
+  const dateVal = state.meta.date || new Date().toISOString().slice(0,10).replace(/-/g,'.');
+  const ym = normalizeDateKey(dateVal);
+  const tickers = {};
+  state.members.forEach(m => m.holdings.forEach(h => {
+    const t = (h.ticker||'').trim();
+    if (!t || h.entryType === 'cash') return;
+    tickers[t] = (tickers[t]||0) + toNumber(h.amount);
+  }));
+  return {
+    ym,
+    label: dateVal,
+    savedAt: new Date().toISOString(),
+    grandTotal,
+    catTotals,
+    catPcts,
+    members: state.members.map((m,mi) => ({name:m.name, icon:m.icon, total:memberTotals[mi]})),
+    tickers,
+    state: cloneState(state)
+  };
+}
+
+function upsertTrendSnapshot(entry) {
+  if (!entry || !entry.ym) return [];
+  const snapshots = loadTrendSnapshots();
+  const idx = snapshots.findIndex(s => s.ym === entry.ym);
+  if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
+  snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
+  localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
+  refreshSnapshotPicker();
+  return snapshots;
+}
+
+function scheduleAutoDateSnapshot() {
+  clearTimeout(autoSnapshotTimer);
+  autoSnapshotTimer = setTimeout(() => {
+    try {
+      const entry = buildSnapshotEntry();
+      upsertTrendSnapshot(entry);
+      if (typeof currentApaneTab !== 'undefined' && currentApaneTab === 'trend') {
+        updateAnalysisPane(calcState(), validateState());
+      }
+    } catch(e) {}
+  }, 1800);
+}
+
 
 function saveJSON() {
   // 현재 추이 스냅샷을 먼저 최신화한 뒤 파일에 함께 포함
@@ -2319,7 +2433,7 @@ function loadJSON(event) {
       state = applyStateMigrations(stateOnly);
       syncMetaInputs();
       renderMembers();
-      recalc();
+      recalc({rerenderTables:true});
       saveStateNow();
       const trendCount = loadTrendSnapshots().length;
       markClean();
@@ -2333,35 +2447,9 @@ function loadJSON(event) {
 }
 
 function autoSaveTrendSnapshot() {
-  // JSON 불러올 때 해당 날짜 스냅샷을 주별추이에 자동 추가
-  // (같은 날짜가 이미 있으면 덮어씀 — 최신 파일이 기준)
-  const calc = calcState();
-  const {memberTotals, grandTotal} = calc;
-  const dateVal = state.meta.date || new Date().toISOString().slice(0,10).replace(/-/g,'.');
-  const rawDate = dateVal.replace(/\./g,'-');
-  const ym = rawDate.length >= 10 ? rawDate.slice(0,10) : rawDate.slice(0,7) + '-01';
-
-  const snapshots = loadTrendSnapshots();
-  const idx = snapshots.findIndex(s => s.ym === ym);
-  const entry = {
-    ym,
-    label: dateVal,
-    grandTotal,
-    members: state.members.map((m,mi) => ({name:m.name, icon:m.icon, total:memberTotals[mi]})),
-    tickers: (() => {
-      const map = {};
-      state.members.forEach(m => m.holdings.forEach(h => {
-        const t = (h.ticker||'').trim();
-        if (!t || h.entryType === 'cash') return;
-        map[t] = (map[t]||0) + (parseFloat(h.amount)||0);
-      }));
-      return map;
-    })()
-  };
-  if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
-  snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
-  try { localStorage.setItem(TREND_KEY, JSON.stringify(snapshots)); } catch(e) {}
+  upsertTrendSnapshot(buildSnapshotEntry());
 }
+
 
 function syncMetaInputs() {
   document.getElementById('meta-date').value = state.meta.date || '';
@@ -2394,23 +2482,32 @@ function loadSnapshotByDate(ym) {
   const snapshots = loadTrendSnapshots();
   const snap = snapshots.find(s => s.ym === ym);
   if (!snap) return;
+  const label = snap.label || displayDateFromKey(ym);
 
-  // state의 날짜만 해당 스냅샷 label로 바꾸고 recalc
-  // (보유 데이터는 건드리지 않고 기준일만 변경 — 날짜 조회용)
-  const label = snap.label || ym.replace('-', '.');
-  state.meta.date = label;
-  document.getElementById('meta-date').value = label;
+  if (snap.state && confirm(label + ' 저장본 전체를 현재 화면으로 복원할까요?\n\n확인: 전체 복원\n취소: 기준일만 변경')) {
+    try {
+      state = applyStateMigrations(cloneState(snap.state));
+      syncMetaInputs();
+      renderMembers();
+      recalc({rerenderTables:true});
+      saveStateNow();
+      showToast('↩ ' + label + ' 저장본 복원 완료');
+    } catch(e) {
+      showToast('❌ 저장본 복원 실패');
+    }
+  } else {
+    state.meta.date = label;
+    document.getElementById('meta-date').value = label;
+    recalc();
+    showToast('📅 ' + label + ' 기준일만 설정됨');
+  }
 
-  // 월별추이 탭으로 전환해서 해당 시점 차트 강조
-  recalc();
-  showToast('📅 ' + label + ' 기준으로 설정됨');
-
-  // 드롭다운 선택 해제 (재선택 가능하도록)
   setTimeout(() => {
     const sel = document.getElementById('snapshot-date-picker');
     if (sel) sel.value = '';
   }, 100);
 }
+
 
 function saveSnapshot() {
   const calc = calcState();
@@ -2426,6 +2523,130 @@ function saveSnapshot() {
   } catch(e) {}
   showToast(`📸 스냅샷 저장 완료 (${fmt(snap.grandTotal)}만원)`);
   updateAnalysisPane(calc, validateState());
+}
+
+
+// ════════════════════════════════════════════════════════
+//  GOOGLE SHEETS BACKUP
+// ════════════════════════════════════════════════════════
+function getGoogleSheetUrl() {
+  return (localStorage.getItem(GOOGLE_SHEET_URL_KEY) || '').trim();
+}
+
+function setGoogleSheetUrl() {
+  const current = getGoogleSheetUrl();
+  const url = prompt('Google Apps Script Web App URL을 붙여넣으세요.\n예: https://script.google.com/macros/s/.../exec', current);
+  if (url === null) return;
+  const clean = url.trim();
+  if (clean && !/^https:\/\/script\.google\.com\/macros\//.test(clean)) {
+    showToast('⚠ Apps Script Web App URL 형식을 확인하세요');
+    return;
+  }
+  localStorage.setItem(GOOGLE_SHEET_URL_KEY, clean);
+  showToast(clean ? '🧾 구글시트 URL 저장 완료' : '🧾 구글시트 URL 삭제 완료');
+  updateGoogleSheetPanel();
+}
+
+function openGoogleSheetPanel() {
+  switchApaneTab('trend');
+  setTimeout(() => {
+    const el = document.getElementById('googleSheetBox');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
+}
+
+function buildGoogleSheetPanel() {
+  const url = getGoogleSheetUrl();
+  const urlLabel = url ? '연결됨' : '미설정';
+  return `<div class="card" id="googleSheetBox" style="margin-bottom:12px;border-color:${url ? 'rgba(16,185,129,.35)' : 'rgba(245,158,11,.35)'};">
+    <div class="card-head"><h4>🧾 구글시트 백업</h4><span style="font-size:10px;color:${url ? 'var(--green)' : 'var(--yellow)'};font-weight:700;">${urlLabel}</span></div>
+    <div class="card-body">
+      <div style="font-size:10px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
+        입력 중에는 브라우저에 자동저장되고, 기준일별 스냅샷은 이 앱에 누적됩니다. 구글시트 백업은 장기 보관·기기 변경 대비용입니다.
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="setGoogleSheetUrl()">URL 설정</button>
+        <button class="btn btn-secondary btn-sm" onclick="syncCurrentSnapshotToGoogleSheet()">현재 날짜 백업</button>
+        <button class="btn btn-secondary btn-sm" onclick="syncAllSnapshotsToGoogleSheet()">전체 기록 백업</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadSnapshotsFromGoogleSheet()">시트에서 불러오기</button>
+      </div>
+      <div id="googleSheetStatus" style="font-size:10px;color:var(--dim);margin-top:8px;font-family:'JetBrains Mono',monospace;">${url ? escapeHTML(url.slice(0,52)) + '...' : '먼저 google_apps_script.gs를 구글시트 Apps Script에 붙여넣고 배포 URL을 저장하세요.'}</div>
+    </div>
+  </div>`;
+}
+
+function updateGoogleSheetPanel(msg) {
+  const box = document.getElementById('googleSheetStatus');
+  if (box && msg) box.textContent = msg;
+}
+
+function postToGoogleSheet(payload) {
+  const url = getGoogleSheetUrl();
+  if (!url) { setGoogleSheetUrl(); return false; }
+  const iframeName = 'gsync_iframe_' + Date.now();
+  const iframe = document.createElement('iframe');
+  iframe.name = iframeName;
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = url;
+  form.target = iframeName;
+  form.style.display = 'none';
+  const action = document.createElement('input');
+  action.name = 'action'; action.value = 'save';
+  const data = document.createElement('input');
+  data.name = 'payload'; data.value = JSON.stringify(payload);
+  form.appendChild(action); form.appendChild(data);
+  document.body.appendChild(form);
+  iframe.onload = () => {
+    showToast('🧾 구글시트 전송 완료');
+    updateGoogleSheetPanel('마지막 전송: ' + new Date().toLocaleString('ko-KR'));
+    setTimeout(() => { form.remove(); iframe.remove(); }, 800);
+  };
+  form.submit();
+  return true;
+}
+
+function syncCurrentSnapshotToGoogleSheet() {
+  const entry = buildSnapshotEntry();
+  upsertTrendSnapshot(entry);
+  postToGoogleSheet({mode:'single', snapshots:[entry]});
+}
+
+function syncAllSnapshotsToGoogleSheet() {
+  const snapshots = loadTrendSnapshots();
+  if (snapshots.length === 0) { showToast('백업할 날짜별 기록이 없습니다'); return; }
+  postToGoogleSheet({mode:'bulk', snapshots});
+}
+
+function loadSnapshotsFromGoogleSheet() {
+  const url = getGoogleSheetUrl();
+  if (!url) { setGoogleSheetUrl(); return; }
+  const callbackName = '__pfSheetCallback_' + Date.now();
+  window[callbackName] = function(response) {
+    try {
+      const rows = Array.isArray(response?.snapshots) ? response.snapshots : [];
+      if (!rows.length) { showToast('구글시트에서 불러올 기록이 없습니다'); return; }
+      const merge = {};
+      loadTrendSnapshots().forEach(s => { merge[s.ym] = s; });
+      rows.map(normalizeTrendSnapshot).filter(Boolean).forEach(s => { merge[s.ym] = s; });
+      const merged = Object.values(merge).sort((a,b) => a.ym.localeCompare(b.ym));
+      localStorage.setItem(TREND_KEY, JSON.stringify(merged));
+      refreshSnapshotPicker();
+      updateAnalysisPane(calcState(), validateState());
+      showToast('🧾 구글시트 기록 ' + rows.length + '개 불러오기 완료');
+    } catch(e) {
+      showToast('❌ 구글시트 불러오기 실패');
+    } finally {
+      delete window[callbackName];
+      script.remove();
+    }
+  };
+  const script = document.createElement('script');
+  script.src = url + (url.includes('?') ? '&' : '?') + 'action=list&callback=' + encodeURIComponent(callbackName) + '&_=' + Date.now();
+  script.onerror = () => { showToast('❌ 구글시트 연결 실패'); delete window[callbackName]; script.remove(); };
+  document.body.appendChild(script);
 }
 
 // ════════════════════════════════════════════════════════
@@ -2569,7 +2790,7 @@ function generateHTML() {
     m.holdings.forEach(h => {
       if (h.entryType === 'cash') return;
       const pct = parsePnlPct(h.pnl);
-      const amt = parseFloat(h.amount)||0;
+      const amt = toNumber(h.amount);
       if (pct === null || amt <= 0) return;
       const cost = amt / (1 + pct/100);
       pnlTotalCost += cost; pnlTotalVal += amt;
@@ -3315,7 +3536,7 @@ function init() {
   autosavePaused = true;
   syncMetaInputs();
   renderMembers();
-  recalc();
+  recalc({rerenderTables:true});
   autosavePaused = false;
   markClean(restoredState ? '✓ 자동저장 복구됨' : '✓ 기본 데이터 준비됨');
   if (restoredState) showToast('자동저장본을 복구했습니다');
@@ -3340,7 +3561,7 @@ function switchApaneTab(tab) {
 // ════════════════════════════════════════════════════════
 function updatePlan(pidx, gidx, field, iidx, value) {
   const g = state.planConfig.periods[pidx].groups[gidx];
-  const v = parseFloat(value) || 0;
+  const v = toNumber(value);
   if (iidx !== null && iidx !== undefined) {
     g.items[iidx][field] = v;
   } else {
@@ -3354,7 +3575,7 @@ function updatePlan(pidx, gidx, field, iidx, value) {
 function validatePlanPct(pidx, gidx) {
   const g = state.planConfig.periods[pidx].groups[gidx];
   if (!g || g.type !== 'invest') return;
-  const total = (g.items || []).reduce((s, item) => s + (parseFloat(item.pct) || 0), 0);
+  const total = (g.items || []).reduce((s, item) => s + (toNumber(item.pct)), 0);
   const warnId = `plan-pct-warn-${pidx}-${gidx}`;
   let warn = document.getElementById(warnId);
   if (Math.abs(total - 100) > 0.01) {
@@ -3464,7 +3685,7 @@ function buildExecutionPlan() {
       <div style="flex:1;padding-bottom:${isLast ? '4' : '20'}px;">`;
 
     html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-        <span style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;background:${period.ca}.15);color:${period.color};border:1px solid ${period.ca}.3);">${period.year} · ${period.label}</span>
+        <span style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;background:${period.ca}.15);color:${period.color};border:1px solid ${period.ca}.3);">${escapeHTML(period.year)} · ${escapeHTML(period.label)}</span>
         <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:900;color:${period.color};">총 ${fmt(periodTotal)}만</span>
       </div>`;
 
@@ -3473,13 +3694,13 @@ function buildExecutionPlan() {
         const grpTotal = (g.perPerson || 0) * (g.numMembers || 2);
         html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden;">
           <div style="padding:6px 10px;background:rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span style="font-size:10px;font-weight:700;color:var(--text);">${g.account}</span>
-            <span style="font-size:9px;color:var(--muted);">${g.members} 각자</span>
+            <span style="font-size:10px;font-weight:700;color:var(--text);">${escapeHTML(g.account)}</span>
+            <span style="font-size:9px;color:var(--muted);">${escapeHTML(g.members)} 각자</span>
             <input type="number" class="plan-input plan-input-amt" value="${g.perPerson}"
               oninput="updatePlan(${pidx},${gidx},'perPerson',null,this.value)"
               onblur="refreshPlan()" title="1인당 금액(만원)">
             <span style="font-size:9px;color:var(--muted);">만</span>
-            ${g.note ? `<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.3);">${g.note}</span>` : ''}
+            ${g.note ? `<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.3);">${escapeHTML(g.note)}</span>` : ''}
             <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--cyan);">합계 ${fmt(grpTotal)}만</span>
           </div>
           <table style="width:100%;border-collapse:collapse;">
@@ -3495,7 +3716,7 @@ function buildExecutionPlan() {
           html += `<tr style="border-top:1px solid var(--border);">
               <td style="padding:4px 8px;">
                 <div style="display:flex;align-items:center;gap:5px;">
-                  <span style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;">${item.name}</span>
+                  <span style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;">${escapeHTML(item.name)}</span>
                   <div style="height:3px;background:rgba(255,255,255,.06);border-radius:2px;flex:1;overflow:hidden;min-width:8px;">
                     <div style="width:${item.pct}%;height:100%;border-radius:2px;background:${period.color}77;"></div>
                   </div>
@@ -3520,7 +3741,7 @@ function buildExecutionPlan() {
         const ic = g.debt ? '💸' : '🏦';
         html += `<div style="background:${bg};border:1px solid ${bd};border-radius:8px;padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:7px;">
           <span style="font-size:11px;">${ic}</span>
-          <span style="font-size:10px;color:${fc};flex:1;">${g.account ? `<span style="color:var(--muted);font-size:9px;">${g.account} · </span>` : ''}${g.label}</span>
+          <span style="font-size:10px;color:${fc};flex:1;">${g.account ? `<span style="color:var(--muted);font-size:9px;">${escapeHTML(g.account)} · </span>` : ''}${escapeHTML(g.label)}</span>
           <input type="number" class="plan-input plan-input-amt" value="${g.totalAmt}"
             oninput="updatePlan(${pidx},${gidx},'totalAmt',null,this.value)"
             onblur="refreshPlan()" style="color:${fc};">
@@ -3529,8 +3750,8 @@ function buildExecutionPlan() {
 
       } else if (g.type === 'event') {
         html += `<div style="background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.25);border-radius:8px;padding:6px 10px;margin-bottom:6px;display:flex;align-items:center;gap:7px;">
-          <span style="font-size:11px;">${g.icon}</span>
-          <span style="font-size:10px;color:var(--purple);">${g.label}</span>
+          <span style="font-size:11px;">${escapeHTML(g.icon)}</span>
+          <span style="font-size:10px;color:var(--purple);">${escapeHTML(g.label)}</span>
         </div>`;
       }
     });
@@ -3561,7 +3782,7 @@ function buildPlanStaticHTML(cfg) {
       </div>
       <div style="flex:1;padding-bottom:${isLast?'4':'18'}px;">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-          <span style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;background:${period.ca}.15);color:${period.color};border:1px solid ${period.ca}.3);">${period.year} · ${period.label}</span>
+          <span style="font-size:9px;font-weight:700;padding:2px 9px;border-radius:10px;background:${period.ca}.15);color:${period.color};border:1px solid ${period.ca}.3);">${escapeHTML(period.year)} · ${escapeHTML(period.label)}</span>
           <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:900;color:${period.color};">총 ${fmtN(periodTotal)}만</span>
         </div>`;
     period.groups.forEach(g => {
@@ -3569,9 +3790,9 @@ function buildPlanStaticHTML(cfg) {
         const grpTotal = (g.perPerson||0)*(g.numMembers||2);
         html += `<div class="plan-static-grp">
           <div class="plan-static-head">
-            <span class="acc">${g.account}</span>
-            <span class="mem">${g.members} 각자 ${fmtN(g.perPerson)}만</span>
-            ${g.note ? `<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);">${g.note}</span>` : ''}
+            <span class="acc">${escapeHTML(g.account)}</span>
+            <span class="mem">${escapeHTML(g.members)} 각자 ${fmtN(g.perPerson)}만</span>
+            ${g.note ? `<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);">${escapeHTML(g.note)}</span>` : ''}
             <span class="tot">합계 ${fmtN(grpTotal)}만</span>
           </div>
           <table style="width:100%;border-collapse:collapse;">
@@ -3587,7 +3808,7 @@ function buildPlanStaticHTML(cfg) {
           html += `<tr style="border-top:1px solid var(--border);">
             <td style="padding:5px 8px;">
               <div style="display:flex;align-items:center;gap:5px;">
-                <span style="font-size:10px;font-weight:700;">${item.name}</span>
+                <span style="font-size:10px;font-weight:700;">${escapeHTML(item.name)}</span>
                 <div style="height:3px;background:rgba(255,255,255,.06);border-radius:2px;flex:1;overflow:hidden;min-width:8px;">
                   <div style="width:${item.pct}%;height:100%;border-radius:2px;background:${period.color}77;"></div>
                 </div>
@@ -3605,11 +3826,11 @@ function buildPlanStaticHTML(cfg) {
         const bd = g.debt ? 'rgba(239,68,68,.2)' : 'var(--border)';
         html += `<div class="plan-row-cash" style="background:${bg};border:1px solid ${bd};">
           <span>${g.debt?'💸':'🏦'}</span>
-          <span style="flex:1;color:${fc};">${g.account?`<span style="color:var(--muted);font-size:9px;">${g.account} · </span>`:''}${g.label}</span>
+          <span style="flex:1;color:${fc};">${g.account?`<span style="color:var(--muted);font-size:9px;">${escapeHTML(g.account)} · </span>`:''}${escapeHTML(g.label)}</span>
           <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${fc};">${fmtN(g.totalAmt)}만</span>
         </div>`;
       } else if (g.type === 'event') {
-        html += `<div class="plan-row-event"><span>${g.icon}</span><span>${g.label}</span></div>`;
+        html += `<div class="plan-row-event"><span>${escapeHTML(g.icon)}</span><span>${escapeHTML(g.label)}</span></div>`;
       }
     });
     html += `</div></div>`;
@@ -3623,7 +3844,7 @@ function buildPlanStaticHTML(cfg) {
 function parsePnlPct(pnlStr) {
   if (!pnlStr || pnlStr === '-' || pnlStr === '복수') return null;
   const m = pnlStr.match(/([-+]?\d+\.?\d*)/);
-  return m ? parseFloat(m[1]) : null;
+  return m ? toNumber(m[1]) : null;
 }
 
 function buildPnlAnalysis(calc) {
@@ -3637,7 +3858,7 @@ function buildPnlAnalysis(calc) {
     m.holdings.forEach(h => {
       if (h.entryType !== 'single' && h.entryType !== 'basket') return;
       const pct = parsePnlPct(h.pnl);
-      const amt = parseFloat(h.amount) || 0;
+      const amt = toNumber(h.amount);
       if (pct === null || amt <= 0) return;
       const cost = amt / (1 + pct/100);
       totalCost += cost;
@@ -3793,7 +4014,7 @@ function buildSimulator(calc) {
   state.members.forEach(m => {
     m.holdings.forEach(h => {
       if (h.entryType !== 'single') return;
-      const amt = parseFloat(h.amount)||0;
+      const amt = toNumber(h.amount);
       if (amt <= 0) return;
       singleHoldings.push({ticker:h.ticker||'?', amount:amt, member:m.name, cat:h.cat});
     });
@@ -4148,9 +4369,9 @@ function selectScenario(key) {
 function recalcGoal() {
   const calc = calcState();
   const current = calc.grandTotal;
-  const target = parseFloat(document.getElementById('goal-target').value) || 0;
-  const years = parseFloat(document.getElementById('goal-years').value) || 1;
-  const monthly = parseFloat(document.getElementById('goal-monthly').value) || 0;
+  const target = toNumber(document.getElementById('goal-target').value);
+  const years = toNumber(document.getElementById('goal-years').value, 1);
+  const monthly = toNumber(document.getElementById('goal-monthly').value);
   const box = document.getElementById('goalResultBox');
   if (!box) return;
 
@@ -4232,7 +4453,7 @@ function recalcDrawdown() {
 
   const do20 = document.getElementById('dd-20') && document.getElementById('dd-20').checked;
   const do40 = document.getElementById('dd-40') && document.getElementById('dd-40').checked;
-  const monthlyExpense = parseFloat(document.getElementById('dd-monthly-expense')?.value)||0;
+  const monthlyExpense = toNumber(document.getElementById('dd-monthly-expense')?.value);
 
   // 카테고리별 하락 가정 (방어자산·현금은 유지)
   const dropMap20 = {ai:-0.20,semi:-0.20,bigtech:-0.18,core:-0.15,growth:-0.20,defense:0,domestic:-0.12,other:-0.10};
@@ -4292,32 +4513,55 @@ function recalcDrawdown() {
 //  월별추이: SNAPSHOT & TREND
 // ════════════════════════════════════════════════════════
 
+function normalizeTrendSnapshot(s) {
+  if (!s || typeof s !== 'object') return null;
+  const ym = normalizeDateKey(s.ym || s.label || s.date);
+  const label = s.label || displayDateFromKey(ym);
+  return Object.assign({}, s, {
+    ym,
+    label,
+    grandTotal: toNumber(s.grandTotal),
+    members: Array.isArray(s.members) ? s.members.map(m => ({
+      name: String(m.name || ''),
+      icon: String(m.icon || ''),
+      total: toNumber(m.total)
+    })) : [],
+    tickers: s.tickers && typeof s.tickers === 'object' ? Object.fromEntries(
+      Object.entries(s.tickers).map(([k,v]) => [String(k), toNumber(v)])
+    ) : {}
+  });
+}
+
 function loadTrendSnapshots() {
   try {
     const raw = JSON.parse(localStorage.getItem(TREND_KEY) || '[]');
-
-    // 1단계: 구 포맷 YYYY-MM → YYYY-MM-DD 마이그레이션
-    const migrated = raw.map(s => {
-      if (s.ym && s.ym.match(/^\d{4}-\d{2}$/) && s.label) {
-        const newYm = s.label.replace(/\./g, '-');
-        if (newYm.match(/^\d{4}-\d{2}-\d{2}$/)) return Object.assign({}, s, { ym: newYm });
-      }
-      return s;
-    });
-
-    // 2단계: 중복 ym 제거 (나중 항목 우선)
+    const migrated = raw.map(normalizeTrendSnapshot).filter(Boolean);
     const deduped = {};
     migrated.forEach(s => { deduped[s.ym] = s; });
-
-    // 3단계: ym 기준 오름차순 정렬
     const sorted = Object.values(deduped).sort((a,b) => a.ym.localeCompare(b.ym));
-
-    // 변경이 있으면 localStorage 재저장
     const changed = raw.length !== sorted.length || raw.some((s,i) => s.ym !== sorted[i]?.ym);
     if (changed) localStorage.setItem(TREND_KEY, JSON.stringify(sorted));
-
     return sorted;
   } catch(e) { return []; }
+}
+
+function restoreSnapshotState(ym) {
+  const snap = loadTrendSnapshots().find(s => s.ym === ym);
+  if (!snap || !snap.state) { showToast('복원 가능한 전체 저장본이 없습니다'); return; }
+  state = applyStateMigrations(cloneState(snap.state));
+  syncMetaInputs();
+  renderMembers();
+  recalc({rerenderTables:true});
+  saveStateNow();
+  showToast('↩ ' + (snap.label || ym) + ' 복원 완료');
+}
+
+function compareSnapshotWithCurrent(ym) {
+  const snap = loadTrendSnapshots().find(s => s.ym === ym);
+  if (!snap) return '';
+  const now = calcState();
+  const diff = now.grandTotal - toNumber(snap.grandTotal);
+  return `${snap.label || ym} 대비 ${diff >= 0 ? '+' : ''}${fmt(diff)}만원`;
 }
 
 
@@ -4358,7 +4602,7 @@ function importTrendFromJSON(event) {
 
         let grandTotal = 0;
         const memberTotals = (loaded.members||[]).map(m => {
-          const t = (m.holdings||[]).reduce((s,h) => s + (parseFloat(h.amount)||0), 0);
+          const t = (m.holdings||[]).reduce((s,h) => s + (toNumber(h.amount)), 0);
           grandTotal += t;
           return t;
         });
@@ -4382,7 +4626,7 @@ function importTrendFromJSON(event) {
             (loaded.members||[]).forEach(m => (m.holdings||[]).forEach(h => {
               const t = (h.ticker||'').trim();
               if (!t || h.entryType === 'cash') return;
-              map[t] = (map[t]||0) + (parseFloat(h.amount)||0);
+              map[t] = (map[t]||0) + (toNumber(h.amount));
             }));
             return map;
           })()
@@ -4418,38 +4662,13 @@ function importTrendFromJSON(event) {
 }
 
 function saveTrendSnapshot() {
-  const calc = calcState();
-  const {memberTotals, grandTotal, catTotals} = calc;
-  const dateVal = document.getElementById('meta-date')?.value || new Date().toISOString().slice(0,10);
-  // use YYYY-MM-DD as key (weekly granularity)
-  const rawDate = dateVal.replace(/\./g,'-');
-  const ym = rawDate.length >= 10 ? rawDate.slice(0,10) : rawDate.slice(0,7) + '-01';
-
-  const snapshots = loadTrendSnapshots();
-  // overwrite if same date exists
-  const idx = snapshots.findIndex(s => s.ym === ym);
-  const entry = {
-    ym,
-    label: dateVal,
-    grandTotal,
-    members: state.members.map((m,mi) => ({name:m.name, icon:m.icon, total:memberTotals[mi]})),
-    tickers: (() => {
-      const map = {};
-      state.members.forEach(m => m.holdings.forEach(h => {
-        const t = (h.ticker||'').trim();
-        if (!t || h.entryType === 'cash') return;
-        map[t] = (map[t]||0) + (parseFloat(h.amount)||0);
-      }));
-      return map;
-    })()
-  };
-  if (idx >= 0) snapshots[idx] = entry; else snapshots.push(entry);
-  snapshots.sort((a,b) => a.ym.localeCompare(b.ym));
-  localStorage.setItem(TREND_KEY, JSON.stringify(snapshots));
-  refreshSnapshotPicker();
-  showToast('📸 주별 스냅샷 저장 완료 — ' + ym);
+  const entry = buildSnapshotEntry();
+  upsertTrendSnapshot(entry);
+  markClean('✓ ' + entry.label + ' 날짜별 기록 저장됨');
+  showToast('📸 날짜별 스냅샷 저장 완료 — ' + entry.label);
   if (currentApaneTab === 'trend') { const calc2 = calcState(); updateAnalysisPane(calc2, validateState()); }
 }
+
 
 function deleteTrendSnapshot(ym) {
   const snaps = loadTrendSnapshots();
@@ -4465,21 +4684,22 @@ function deleteTrendSnapshot(ym) {
 
 function resetTrendData() {
   if (!confirm('주별추이를 4월 22일 · 5월 2일 데이터로 초기화할까요?\n기존 데이터는 모두 삭제됩니다.')) return;
-  const correct = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력햄심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력햄심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
+  const correct = [{"ym":"2026-04-22","label":"2026.04.22","grandTotal":20571,"members":[{"name":"이현규","icon":"⚡","total":5650},{"name":"임인숙","icon":"🛡","total":4792},{"name":"이재현","icon":"🚀","total":5504},{"name":"이재연","icon":"✨","total":4625}],"tickers":{"VRT":314,"ONTO":306,"MRVL":2112,"OII":119,"BWXT":193,"TEM":98,"ALAB":114,"TechnipFMC":53,"KODEX 미국나스닥100":2698,"TIGER 미국S&P500":1966,"소수점 포트폴리오":127,"TIGER 미국테크 TOP10 INDXX":600,"KODEX 미국반도체":1222,"MSFT":1538,"UNH":256,"AVGO":685,"META":298,"GRID":163,"GOOGL":2802,"NVDA":1481,"QQQ":90,"TSM":1343,"MU":864,"TIGER 미국필라델피아반도체나스닥":128,"KODEX 미국AI전력핵심인프라":39,"TSLA":114,"KODEX 코스닥150":154}},{"ym":"2026-05-02","label":"2026.05.02","grandTotal":21319,"members":[{"name":"이현규","icon":"⚡","total":5801},{"name":"임인숙","icon":"🛡","total":4889},{"name":"이재현","icon":"🚀","total":5745},{"name":"이재연","icon":"✨","total":4884}],"tickers":{"VRT":339,"ONTO":303,"MRVL":2210,"OII":115,"BWXT":192,"TEM":114,"ALAB":120,"TechnipFMC":56,"KODEX 미국나스닥100":2749,"TIGER 미국S&P500":1975,"소수점 포트폴리오":135,"TIGER 미국테크 TOP10 INDXX":614,"KODEX 미국반도체":1296,"MSFT":1474,"UNH":271,"AVGO":688,"META":270,"GRID":169,"GOOGL":3177,"NVDA":1460,"QQQ":97,"TSM":1404,"MU":957,"TIGER 미국필라델피아반도체나스닥":131,"KODEX 미국AI전력핵심인프라":39,"TSLA":115,"KODEX 코스닥150":155}}];
   localStorage.setItem(TREND_KEY, JSON.stringify(correct));
-  showToast('✅ 주별추이 초기화 완료 — 4월22일·5월2일');
+  showToast('✅ 날짜별 추이 초기화 완료 — 4월22일·5월2일');
   const calc = calcState(); updateAnalysisPane(calc, validateState());
 }
 
 function buildTrendAnalysis(calc) {
   const snapshots = loadTrendSnapshots().sort((a,b) => a.ym.localeCompare(b.ym));
+  const googlePanel = buildGoogleSheetPanel();
 
   if (snapshots.length === 0) {
-    return `<div style="text-align:center;padding:40px 16px;">
+    return googlePanel + `<div style="text-align:center;padding:40px 16px;">
       <div style="font-size:28px;margin-bottom:12px;">📈</div>
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">월별 추이 데이터 없음</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">날짜별 추이 데이터 없음</div>
       <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:16px;">
-        매월 아래 버튼을 눌러 스냅샷을 저장하세요.<br>
+        입력 후 상단의 날짜 저장 버튼을 누르거나 자동저장을 기다리면 기준일별 스냅샷이 저장됩니다.<br>
         저장된 데이터로 구성원별·종목별<br>월별 변화를 자동으로 차트로 보여드립니다.
       </div>
       <label class="btn btn-secondary" style="margin:4px auto 0;cursor:pointer;">
@@ -4583,8 +4803,8 @@ function buildTrendAnalysis(calc) {
   const changeColor = totalChange === null ? 'var(--muted)' : totalChange >= 0 ? 'var(--green)' : 'var(--red)';
 
   // ── 스냅샷 목록 (상단 고정, 삭제 버튼 포함) ──
-  let html = `<div style="margin-bottom:12px;">
-    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📋 저장된 스냅샷 (${snapshots.length}주) — 삭제할 항목을 선택하세요</div>
+  let html = googlePanel + `<div style="margin-bottom:12px;">
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📋 저장된 날짜별 기록 (${snapshots.length}개) — 복원·삭제할 항목을 선택하세요</div>
     <div style="display:flex;flex-direction:column;gap:4px;">`;
   [...snapshots].reverse().forEach(s => {
     const displayDate = s.label || s.ym;
@@ -4592,13 +4812,14 @@ function buildTrendAnalysis(calc) {
       <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);font-weight:700;min-width:72px;">${escapeHTML(displayDate)}</span>
       <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);flex:1;">${fmt(s.grandTotal)}만</span>
       <span style="font-size:9px;color:var(--muted);flex:2;">${s.members.map(m=>escapeHTML(m.icon)+' '+escapeHTML(m.name)).join(' · ')}</span>
+      <button onclick="restoreSnapshotState('${escapeAttr(escapeJSString(s.ym))}')" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);color:#3b82f6;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">↩ 복원</button>
       <button onclick="deleteTrendSnapshot('${escapeAttr(escapeJSString(s.ym))}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#ef4444;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">🗑 삭제</button>
     </div>`;
   });
   html += `</div></div>`;
 
   html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
-    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">주별 추이 · ${snapshots.length}주 데이터</div>
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">날짜별 추이 · ${snapshots.length}개 기록</div>
   </div>`;
 
   // summary row
