@@ -2741,7 +2741,7 @@ function buildGoogleSheetPanel() {
     <div class="card-head"><h4>🧾 구글시트 백업</h4><span style="font-size:10px;color:${url ? 'var(--green)' : 'var(--yellow)'};font-weight:700;">${urlLabel}</span></div>
     <div class="card-body">
       <div style="font-size:10px;color:var(--muted);line-height:1.7;margin-bottom:10px;">
-        입력 중에는 브라우저에 자동저장됩니다. 구글시트는 장기 보관용이라 휴대폰에서는 전체 불러오기가 느릴 수 있어 3개씩 나눠 받습니다. 평소에는 “최근 기록만 불러오기”를 권장합니다.
+        입력 중에는 브라우저에 자동저장됩니다. 이 기기에 URL이 저장되어 있으면 [날짜 저장] 때 해당 날짜가 구글시트에도 자동 백업됩니다. 컴퓨터와 휴대폰은 URL 설정을 각각 한 번씩 해야 합니다. 평소에는 “최근 기록만 불러오기”를 권장합니다.
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-secondary btn-sm" onclick="setGoogleSheetUrl()">URL 설정</button>
@@ -5034,7 +5034,17 @@ function saveTrendSnapshot() {
   const entry = buildSnapshotEntry();
   upsertTrendSnapshot(entry);
   markClean('✓ ' + entry.label + ' 날짜별 기록 저장됨');
-  showToast('📸 날짜별 스냅샷 저장 완료 — ' + entry.label);
+
+  // 날짜 저장과 구글시트 백업을 분리해 두면, 앱 이력에는 보이지만 시트에는 없는 상황이 생깁니다.
+  // 이 기기에 Apps Script URL이 저장되어 있으면 날짜 저장과 동시에 같은 스냅샷을 시트에도 보냅니다.
+  if (getGoogleSheetUrl()) {
+    showToast('📸 날짜 저장 완료 — 구글시트 백업도 전송 중');
+    postToGoogleSheet({mode:'single', snapshots:[entry]});
+  } else {
+    showToast('📸 날짜별 스냅샷 저장 완료 — 구글시트 URL은 이 기기에 미설정');
+    updateGoogleSheetPanel('이 기기에는 구글시트 URL이 저장되어 있지 않습니다. 컴퓨터와 휴대폰은 URL 설정을 각각 한 번씩 해야 합니다.');
+  }
+
   if (currentApaneTab === 'trend') { const calc2 = calcState(); updateAnalysisPane(calc2, validateState()); }
 }
 
