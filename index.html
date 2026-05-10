@@ -2599,6 +2599,16 @@ function setGoogleSheetUrl() {
 function openGoogleSheetPanel() {
   switchApaneTab('trend');
   setTimeout(() => {
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+    if (isMobile) {
+      openMobileDrawer();
+      setTimeout(() => {
+        const drawer = document.getElementById('mobileDrawer');
+        const el = drawer ? drawer.querySelector('#googleSheetBox') : null;
+        if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+      }, 80);
+      return;
+    }
     const el = document.getElementById('googleSheetBox');
     if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
   }, 100);
@@ -2625,8 +2635,10 @@ function buildGoogleSheetPanel() {
 }
 
 function updateGoogleSheetPanel(msg) {
-  const box = document.getElementById('googleSheetStatus');
-  if (box && msg) box.textContent = msg;
+  if (!msg) return;
+  document.querySelectorAll('#googleSheetStatus').forEach(box => {
+    box.textContent = msg;
+  });
 }
 
 function postToGoogleSheet(payload) {
@@ -3673,21 +3685,22 @@ function refreshPlan() {
 // ════════════════════════════════════════════════════════
 function toggleMobileDrawer() {
   const drawer = document.getElementById('mobileDrawer');
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) closeMobileDrawer();
+  else openMobileDrawer();
+}
+
+function openMobileDrawer() {
+  const drawer = document.getElementById('mobileDrawer');
   const overlay = document.getElementById('mobileOverlay');
   const fab = document.getElementById('mobileFab');
-  const isOpen = drawer.classList.contains('open');
-  if (isOpen) {
-    closeMobileDrawer();
-  } else {
-    // Sync content from analysis pane
-    const src = document.getElementById('analysisBody');
-    const dst = document.getElementById('mobileDrawerBody');
-    if (src && dst) dst.innerHTML = src.innerHTML;
-    drawer.classList.add('open');
-    overlay.classList.add('open');
-    fab.innerHTML = '✕ <span>닫기</span>';
-    document.body.style.overflow = 'hidden';
-  }
+  const src = document.getElementById('analysisBody');
+  const dst = document.getElementById('mobileDrawerBody');
+  if (src && dst) dst.innerHTML = src.innerHTML;
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+  fab.innerHTML = '✕ <span>닫기</span>';
+  document.body.style.overflow = 'hidden';
 }
 
 function closeMobileDrawer() {
