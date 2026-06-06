@@ -1086,7 +1086,7 @@ function renderStatusTab(){
   // 직전 스냅샷 (비교용): TREND_KEY에서 현재 기준일 제외 최신 1건
   const allSnaps = loadTrendSnapshots();
   const curYm = normalizeDateKey(state.meta.date||'');
-  const prevSnap = allSnaps.filter(s=>s.ym!==curYm).slice(-1)[0]||null;
+  const prevSnap = allSnaps.filter(s=>s.ym<curYm).slice(-1)[0]||null;
 
   const totalDiff = prevSnap ? grandTotal - prevSnap.grandTotal : null;
   const totalDiffPct = prevSnap&&prevSnap.grandTotal>0 ? totalDiff/prevSnap.grandTotal*100 : null;
@@ -1348,7 +1348,7 @@ function generateReport(){
   // 직전 스냅샷 (비교용)
   const allSnaps = loadTrendSnapshots();
   const curYm = normalizeDateKey(state.meta.date);
-  const prevSnap = allSnaps.filter(s => s.ym !== curYm).slice(-1)[0] || null;
+  const prevSnap = allSnaps.filter(s => s.ym < curYm).slice(-1)[0] || null;
 
   const html = buildReportHTML(calc, prevSnap);
 
