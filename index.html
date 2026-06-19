@@ -300,6 +300,7 @@ select{cursor:pointer;}
 .vc-neutral{color:var(--cyan);}
 .vc-new-ticker{display:inline-block;font-size:9px;font-weight:700;background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:1px 5px;margin:1px;}
 .vc-del-ticker{display:inline-block;font-size:9px;font-weight:700;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:4px;padding:1px 5px;margin:1px;}
+.vc-note{font-size:10px;color:var(--yellow);font-style:italic;max-width:60%;text-align:right;}
 
 /* Toast */
 .toast{
@@ -1191,6 +1192,13 @@ let currentApaneTab = 'weekly';
 
 // ── 정렬 상태 (memberIndex → {key, dir})
 let sortState = {}; // { mi: { key: 'account'|'ticker'|'entryType'|'qty'|'pnl'|'amount'|'cat'|'badge', dir: 1|-1 } }
+
+// 계좌 기본 정렬 순서
+const ACCOUNT_ORDER = ['일반','일반계좌','종합','ISA','연금저축','연금','토스','CMA (현규)','CMA (인숙)','현금',''];
+function accountSortKey(acc) {
+  const idx = ACCOUNT_ORDER.indexOf(acc || '');
+  return idx === -1 ? ACCOUNT_ORDER.length : idx;
+}
 const CATEGORIES = [
   { id:'core',     label:'코어 ETF',      color:'#3b82f6', colorAlpha:'rgba(59,130,246,'  },
   { id:'bigtech',  label:'빅테크·플랫폼', color:'#8b5cf6', colorAlpha:'rgba(139,92,246,'  },
@@ -1225,72 +1233,72 @@ let state = {
     {
       id:'hyunkyu', name:'이현규', icon:'⚡', role:'전술·현금·기회포착', color:'#3b82f6',
       holdings:[
-        {account:'일반',ticker:'VRT',entryType:'single',qty:'7주',pnl:'+48.46%',amount:314,cat:'ai',badge:'',note:'매일 2천원 구매'},
-        {account:'일반',ticker:'ONTO',entryType:'single',qty:'7주',pnl:'+37.49%',amount:306,cat:'ai',badge:'',note:''},
-        {account:'일반',ticker:'MRVL',entryType:'single',qty:'13주',pnl:'+8.23%',amount:301,cat:'ai',badge:'신규',note:''},
-        {account:'일반',ticker:'OII',entryType:'single',qty:'21주',pnl:'13.73%',amount:119,cat:'growth',badge:'',note:'매일 2천원 구매'},
-        {account:'일반',ticker:'BWXT',entryType:'single',qty:'6주',pnl:'+9.43%',amount:193,cat:'growth',badge:'',note:'매일 2천원 구매'},
-        {account:'일반',ticker:'TEM',entryType:'single',qty:'12주',pnl:'-1.24%',amount:98,cat:'growth',badge:'',note:'매일 2천원 구매'},
-        {account:'일반',ticker:'ALAB',entryType:'single',qty:'4주',pnl:'+22%',amount:114,cat:'ai',badge:'',note:'매일 2천원 구매'},
-        {account:'일반',ticker:'TechnipFMC',entryType:'single',qty:'5주',pnl:'+18.64%',amount:53,cat:'growth',badge:'',note:''},
-        {account:'ISA',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'390주',pnl:'+13.16%',amount:1020,cat:'core',badge:'',note:''},
-        {account:'연금',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'227',pnl:'+9.39%',amount:591,cat:'core',badge:'',note:''},
-        {account:'토스',ticker:'소수점 포트폴리오',entryType:'basket',qty:'8종',pnl:'+32.4%',amount:127,cat:'other',badge:'',note:'LRCX·ONTO·VRT 등'},
-        {account:'현금',ticker:'폭락 대기 현금',entryType:'cash',qty:'-',pnl:'+0.1%',amount:694,cat:'defense',badge:'',note:'절대 건드리지 말 것'},
-        {account:'ISA',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'85주',pnl:'+9.28%',amount:221,cat:'core',badge:'',note:''},
-        {account:'ISA',ticker:'TIGER 미국테크 TOP10 INDXX',entryType:'basket',qty:'109주',pnl:'+16.06%',amount:346,cat:'core',badge:'',note:''},
-        {account:'ISA',ticker:'KODEX 미국반도체',entryType:'basket',qty:'158',pnl:'+25.16%',amount:748,cat:'semi',badge:'',note:''},
-        {account:'연금',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'155',pnl:'+13.08%',amount:405,cat:'core',badge:'',note:''},
+        {account:'일반',ticker:'VRT',entryType:'single',qty:'7주',pnl:'+48.46%',cost:212,amount:314,cat:'ai',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'ONTO',entryType:'single',qty:'7주',pnl:'+37.49%',cost:223,amount:306,cat:'ai',badge:'',note:''},
+        {account:'일반',ticker:'MRVL',entryType:'single',qty:'13주',pnl:'+8.23%',cost:278,amount:301,cat:'ai',badge:'신규',note:''},
+        {account:'일반',ticker:'OII',entryType:'single',qty:'21주',pnl:'13.73%',cost:105,amount:119,cat:'growth',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'BWXT',entryType:'single',qty:'6주',pnl:'+9.43%',cost:176,amount:193,cat:'growth',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'TEM',entryType:'single',qty:'12주',pnl:'-1.24%',cost:99,amount:98,cat:'growth',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'ALAB',entryType:'single',qty:'4주',pnl:'+22%',cost:93,amount:114,cat:'ai',badge:'',note:'매일 2천원 구매'},
+        {account:'일반',ticker:'TechnipFMC',entryType:'single',qty:'5주',pnl:'+18.64%',cost:45,amount:53,cat:'growth',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'390주',pnl:'+13.16%',cost:901,amount:1020,cat:'core',badge:'',note:''},
+        {account:'연금',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'227',pnl:'+9.39%',cost:540,amount:591,cat:'core',badge:'',note:''},
+        {account:'토스',ticker:'소수점 포트폴리오',entryType:'basket',qty:'8종',pnl:'+32.4%',cost:96,amount:127,cat:'other',badge:'',note:'LRCX·ONTO·VRT 등'},
+        {account:'현금',ticker:'폭락 대기 현금',entryType:'cash',qty:'-',pnl:'+0.1%',cost:693,amount:694,cat:'defense',badge:'',note:'절대 건드리지 말 것'},
+        {account:'ISA',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'85주',pnl:'+9.28%',cost:202,amount:221,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'TIGER 미국테크 TOP10 INDXX',entryType:'basket',qty:'109주',pnl:'+16.06%',cost:298,amount:346,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국반도체',entryType:'basket',qty:'158',pnl:'+25.16%',cost:598,amount:748,cat:'semi',badge:'',note:''},
+        {account:'연금',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'155',pnl:'+13.08%',cost:358,amount:405,cat:'core',badge:'',note:''},
       ]
     },
     {
       id:'insuk', name:'임인숙', icon:'🛡', role:'코어 장기복리·은퇴축', color:'#8b5cf6',
       holdings:[
-        {account:'토스',ticker:'MSFT',entryType:'single',qty:'5주',pnl:'-3.2%',amount:313,cat:'bigtech',badge:'',note:''},
-        {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+16.2%',amount:256,cat:'growth',badge:'',note:''},
-        {account:'종합',ticker:'AVGO',entryType:'single',qty:'3주',pnl:'+2.16%',amount:180,cat:'ai',badge:'5월판단',note:''},
-        {account:'종합',ticker:'META',entryType:'single',qty:'3주',pnl:'+0.13%',amount:298,cat:'bigtech',badge:'5월판단',note:''},
-        {account:'종합',ticker:'GRID',entryType:'basket',qty:'6주',pnl:'+11%',amount:163,cat:'domestic',badge:'',note:'미국 ETF'},
-        {account:'ISA',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'243주',pnl:'+5.82%',amount:633,cat:'core',badge:'',note:''},
-        {account:'연금',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'168주',pnl:'+8.47%',amount:439,cat:'core',badge:'',note:''},
-        {account:'토스',ticker:'GOOGL',entryType:'single',qty:'5주',pnl:'+10.7%',amount:248,cat:'bigtech',badge:'',note:''},
-        {account:'토스',ticker:'NVDA',entryType:'single',qty:'3.02주',pnl:'+63.6%',amount:89,cat:'ai',badge:'',note:''},
-        {account:'토스',ticker:'QQQ',entryType:'single',qty:'0.94주',pnl:'+8.9%',amount:90,cat:'domestic',badge:'',note:''},
-        {account:'연금',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'200',pnl:'+5.64%',amount:521,cat:'core',badge:'',note:''},
-        {account:'ISA',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'319주',pnl:'+8.62%',amount:834,cat:'core',badge:'',note:''},
-        {account:'ISA',ticker:'TIGER 미국테크 TOP10 INDXX',entryType:'basket',qty:'80',pnl:'+10.8%',amount:254,cat:'core',badge:'',note:''},
-        {account:'ISA',ticker:'KODEX 미국반도체',entryType:'basket',qty:'100',pnl:'+17.17%',amount:474,cat:'semi',badge:'',note:''},
+        {account:'토스',ticker:'MSFT',entryType:'single',qty:'5주',pnl:'-3.2%',cost:323,amount:313,cat:'bigtech',badge:'',note:''},
+        {account:'토스',ticker:'UNH',entryType:'single',qty:'5주',pnl:'+16.2%',cost:220,amount:256,cat:'growth',badge:'',note:''},
+        {account:'종합',ticker:'AVGO',entryType:'single',qty:'3주',pnl:'+2.16%',cost:176,amount:180,cat:'ai',badge:'5월판단',note:''},
+        {account:'종합',ticker:'META',entryType:'single',qty:'3주',pnl:'+0.13%',cost:298,amount:298,cat:'bigtech',badge:'5월판단',note:''},
+        {account:'종합',ticker:'GRID',entryType:'basket',qty:'6주',pnl:'+11%',cost:147,amount:163,cat:'domestic',badge:'',note:'미국 ETF'},
+        {account:'ISA',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'243주',pnl:'+5.82%',cost:598,amount:633,cat:'core',badge:'',note:''},
+        {account:'연금',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'168주',pnl:'+8.47%',cost:405,amount:439,cat:'core',badge:'',note:''},
+        {account:'토스',ticker:'GOOGL',entryType:'single',qty:'5주',pnl:'+10.7%',cost:224,amount:248,cat:'bigtech',badge:'',note:''},
+        {account:'토스',ticker:'NVDA',entryType:'single',qty:'3.02주',pnl:'+63.6%',cost:54,amount:89,cat:'ai',badge:'',note:''},
+        {account:'토스',ticker:'QQQ',entryType:'single',qty:'0.94주',pnl:'+8.9%',cost:83,amount:90,cat:'domestic',badge:'',note:''},
+        {account:'연금',ticker:'TIGER 미국S&P500',entryType:'basket',qty:'200',pnl:'+5.64%',cost:493,amount:521,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국나스닥100',entryType:'basket',qty:'319주',pnl:'+8.62%',cost:768,amount:834,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'TIGER 미국테크 TOP10 INDXX',entryType:'basket',qty:'80',pnl:'+10.8%',cost:229,amount:254,cat:'core',badge:'',note:''},
+        {account:'ISA',ticker:'KODEX 미국반도체',entryType:'basket',qty:'100',pnl:'+17.17%',cost:405,amount:474,cat:'semi',badge:'',note:''},
       ]
     },
     {
       id:'jaehyun', name:'이재현', icon:'🚀', role:'공격 성장 엔진', color:'#10b981',
       holdings:[
-        {account:'',ticker:'GOOGL',entryType:'single',qty:'26주',pnl:'+46.14%',amount:1302,cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'MRVL',entryType:'single',qty:'52주',pnl:'+64.66%',amount:1207,cat:'ai',badge:'',note:'구글협력 논의 중'},
-        {account:'',ticker:'NVDA',entryType:'single',qty:'24주',pnl:'+67.35%',amount:711,cat:'ai',badge:'',note:''},
-        {account:'',ticker:'MSFT',entryType:'single',qty:'11주',pnl:'+5.82%',amount:703,cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'TSM',entryType:'single',qty:'12주',pnl:'+10.54%',amount:686,cat:'ai',badge:'',note:''},
-        {account:'',ticker:'MU',entryType:'single',qty:'5주',pnl:'+8.21%',amount:360,cat:'ai',badge:'신규',note:''},
-        {account:'',ticker:'AVGO',entryType:'single',qty:'2주',pnl:'+5.3%',amount:125,cat:'ai',badge:'5월판단',note:'5월실적 시나리오표 적용'},
-        {account:'',ticker:'TIGER 미국필라델피아반도체나스닥',entryType:'basket',qty:'33주',pnl:'+22.92',amount:128,cat:'semi',badge:'',note:'군월급 중 남은돈 70% 매달 구매'},
-        {account:'',ticker:'KODEX 미국AI전력핵심인프라',entryType:'basket',qty:'16',pnl:'+19.47%',amount:39,cat:'domestic',badge:'',note:'군월급 중 남은돈 30% 매달 구매'},
-        {account:'',ticker:'AVGO',entryType:'single',qty:'3.89주',pnl:'+27.84%',amount:243,cat:'ai',badge:'5월판단',note:''},
+        {account:'',ticker:'GOOGL',entryType:'single',qty:'26주',pnl:'+46.14%',cost:891,amount:1302,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MRVL',entryType:'single',qty:'52주',pnl:'+64.66%',cost:733,amount:1207,cat:'ai',badge:'',note:'구글협력 논의 중'},
+        {account:'',ticker:'NVDA',entryType:'single',qty:'24주',pnl:'+67.35%',cost:425,amount:711,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MSFT',entryType:'single',qty:'11주',pnl:'+5.82%',cost:664,amount:703,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'TSM',entryType:'single',qty:'12주',pnl:'+10.54%',cost:621,amount:686,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MU',entryType:'single',qty:'5주',pnl:'+8.21%',cost:333,amount:360,cat:'ai',badge:'신규',note:''},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'2주',pnl:'+5.3%',cost:119,amount:125,cat:'ai',badge:'5월판단',note:'5월실적 시나리오표 적용'},
+        {account:'',ticker:'TIGER 미국필라델피아반도체나스닥',entryType:'basket',qty:'33주',pnl:'+22.92',cost:104,amount:128,cat:'semi',badge:'',note:'군월급 중 남은돈 70% 매달 구매'},
+        {account:'',ticker:'KODEX 미국AI전력핵심인프라',entryType:'basket',qty:'16',pnl:'+19.47%',cost:33,amount:39,cat:'domestic',badge:'',note:'군월급 중 남은돈 30% 매달 구매'},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'3.89주',pnl:'+27.84%',cost:190,amount:243,cat:'ai',badge:'5월판단',note:''},
       ]
     },
     {
       id:'jaeyeon', name:'이재연', icon:'✨', role:'성장 + 구조개선', color:'#f97316',
       holdings:[
-        {account:'',ticker:'GOOGL',entryType:'single',qty:'25주',pnl:'+44.01%',amount:1252,cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'NVDA',entryType:'single',qty:'23주',pnl:'+67.12%',amount:681,cat:'ai',badge:'',note:''},
-        {account:'',ticker:'MRVL',entryType:'single',qty:'26주',pnl:'+70.45%',amount:604,cat:'ai',badge:'',note:''},
-        {account:'',ticker:'TSM',entryType:'single',qty:'12주',pnl:'+5.56%',amount:657,cat:'ai',badge:'',note:''},
-        {account:'',ticker:'MSFT',entryType:'single',qty:'8주',pnl:'-9.31%',amount:511,cat:'bigtech',badge:'',note:''},
-        {account:'',ticker:'MU',entryType:'single',qty:'7주',pnl:'+9.16%',amount:504,cat:'ai',badge:'신규',note:''},
-        {account:'',ticker:'AVGO',entryType:'single',qty:'2주',pnl:'+5.23%',amount:125,cat:'ai',badge:'5월판단',note:''},
-        {account:'',ticker:'TSLA',entryType:'single',qty:'2주',pnl:'+2.57%',amount:114,cat:'growth',badge:'',note:'비중 0.3% — 모니터링 불필요'},
-        {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.87%',amount:154,cat:'domestic',badge:'',note:''},
-        {account:'',ticker:'AVGO',entryType:'single',qty:'0.2주',pnl:'+5.65%',amount:12,cat:'ai',badge:'',note:''},
-        {account:'',ticker:'MSFT',entryType:'single',qty:'0.17주',pnl:'-0.99%',amount:11,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'GOOGL',entryType:'single',qty:'25주',pnl:'+44.01%',cost:869,amount:1252,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'NVDA',entryType:'single',qty:'23주',pnl:'+67.12%',cost:407,amount:681,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MRVL',entryType:'single',qty:'26주',pnl:'+70.45%',cost:354,amount:604,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'TSM',entryType:'single',qty:'12주',pnl:'+5.56%',cost:622,amount:657,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MSFT',entryType:'single',qty:'8주',pnl:'-9.31%',cost:563,amount:511,cat:'bigtech',badge:'',note:''},
+        {account:'',ticker:'MU',entryType:'single',qty:'7주',pnl:'+9.16%',cost:462,amount:504,cat:'ai',badge:'신규',note:''},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'2주',pnl:'+5.23%',cost:119,amount:125,cat:'ai',badge:'5월판단',note:''},
+        {account:'',ticker:'TSLA',entryType:'single',qty:'2주',pnl:'+2.57%',cost:111,amount:114,cat:'growth',badge:'',note:'비중 0.3% — 모니터링 불필요'},
+        {account:'',ticker:'KODEX 코스닥150',entryType:'basket',qty:'78주',pnl:'-2.87%',cost:159,amount:154,cat:'domestic',badge:'',note:''},
+        {account:'',ticker:'AVGO',entryType:'single',qty:'0.2주',pnl:'+5.65%',cost:11,amount:12,cat:'ai',badge:'',note:''},
+        {account:'',ticker:'MSFT',entryType:'single',qty:'0.17주',pnl:'-0.99%',cost:11,amount:11,cat:'bigtech',badge:'',note:''},
       ]
     },
   ],
@@ -1456,9 +1464,13 @@ function validateState() {
         errors.push({type:'error', msg:`${m.name} / ${h.ticker}: 알 수 없는 자산 분류 (${cat})`});
       }
       if (pnl && /%%/.test(pnl)) {
-        warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 손익률에 %가 중복 입력됨`});
-      } else if (pnl && !['-', '복수'].includes(pnl) && parsePnlPct(pnl) === null) {
-        warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 손익률 형식을 확인하세요`});
+        // pnl은 이제 자동계산 값이므로 %% 중복은 발생하지 않지만, 레거시 데이터 대비 유지
+        warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 손익률 형식 오류 (자동 재계산됩니다)`});
+      }
+      // cost 유효성 검증 (STEP04 추가)
+      const cost = toNumber(h.cost);
+      if (ticker && cost < 0) {
+        warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 매입금액이 음수입니다`});
       }
       if (h.badge && !knownBadges.has(h.badge)) {
         warnings.push({type:'warning', msg:`${m.name} / ${h.ticker}: 사용자 배지 "${h.badge}" 사용 중`});
@@ -1745,8 +1757,9 @@ function renderMember(m, mi, container) {
         <th style="min-width:120px" class="sortable-th" id="th-${mi}-ticker" onclick="sortHoldings(${mi},'ticker')">종목<span class="sort-icon">⇅</span></th>
         <th style="width:78px" class="sortable-th" id="th-${mi}-entryType" onclick="sortHoldings(${mi},'entryType')">유형<span class="sort-icon">⇅</span></th>
         <th style="width:60px" class="sortable-th" id="th-${mi}-qty" onclick="sortHoldings(${mi},'qty')">수량<span class="sort-icon">⇅</span></th>
-        <th style="width:68px" class="sortable-th" id="th-${mi}-pnl" onclick="sortHoldings(${mi},'pnl')">손익<span class="sort-icon">⇅</span></th>
-        <th style="width:88px" class="sortable-th" id="th-${mi}-amount" onclick="sortHoldings(${mi},'amount')">금액(만원)<span class="sort-icon">⇅</span></th>
+        <th style="width:80px" class="sortable-th" id="th-${mi}-cost" onclick="sortHoldings(${mi},'cost')">매입금액(만원)<span class="sort-icon">⇅</span></th>
+        <th style="width:88px" class="sortable-th" id="th-${mi}-amount" onclick="sortHoldings(${mi},'amount')">평가금액(만원)<span class="sort-icon">⇅</span></th>
+        <th style="width:68px" class="sortable-th" id="th-${mi}-pnl" onclick="sortHoldings(${mi},'pnl')">손익(자동)<span class="sort-icon">⇅</span></th>
         <th style="width:88px" class="sortable-th" id="th-${mi}-cat" onclick="sortHoldings(${mi},'cat')">자산 분류<span class="sort-icon">⇅</span></th>
         <th style="width:70px" class="sortable-th" id="th-${mi}-badge" onclick="sortHoldings(${mi},'badge')">배지<span class="sort-icon">⇅</span></th>
         <th style="min-width:80px">메모</th>
@@ -1778,10 +1791,17 @@ function buildHoldingRow(mi, hi, h) {
 
   const amountParsed = toNumberStrict(h.amount);
   const amount = Number.isFinite(amountParsed) ? amountParsed : 0;
+  const costParsed = toNumberStrict(h.cost);
+  const cost = Number.isFinite(costParsed) ? costParsed : 0;
   const ticker = (h.ticker||'').trim();
   const hasError = (!ticker && amount > 0) || (ticker && String(h.amount ?? '').trim() !== '' && !Number.isFinite(amountParsed));
   const hasWarn = ticker && amount <= 0 && !hasError;
   const rowClass = hasError ? 'row-error' : hasWarn ? 'row-warn' : '';
+
+  // 손익은 매입금액(cost)/평가금액(amount)로부터 자동 계산되는 읽기전용 표시값입니다.
+  // h.pnl 문자열 자체는 recomputePnlField()가 갱신하므로 여기서는 그 결과를 그대로 보여주기만 합니다.
+  const pnlDisplay = (h.pnl && h.pnl !== '-') ? h.pnl : '-';
+  const pnlIsNeg = (h.pnl||'').toString().startsWith('-');
 
   return `<tr id="row-${mi}-${hi}" class="${rowClass}">
     <td><input type="text" value="${escapeAttr(h.account)}" placeholder="계좌"
@@ -1793,12 +1813,13 @@ function buildHoldingRow(mi, hi, h) {
     <td><select onchange="updateHolding(${mi},${hi},'entryType',this.value)">${typeOptions}</select></td>
     <td><input type="text" value="${escapeAttr(h.qty)}" placeholder="수량"
       oninput="updateHolding(${mi},${hi},'qty',this.value)"></td>
-    <td><input type="text" value="${escapeAttr(h.pnl)}" placeholder="손익"
-      style="color:${(h.pnl||'').startsWith('-')?'var(--red)':'var(--green)'}"
-      oninput="this.style.color=this.value.startsWith('-')?'var(--red)':'var(--green)';updateHolding(${mi},${hi},'pnl',this.value)"></td>
+    <td><input type="number" min="0" step="1" value="${escapeAttr(h.cost)}" placeholder="0"
+      style="color:var(--dim);text-align:right"
+      oninput="updateHolding(${mi},${hi},'cost',toNumber(this.value));recalc()"></td>
     <td><input type="number" min="0" step="1" value="${escapeAttr(h.amount)}" placeholder="0"
       style="color:var(--cyan);text-align:right${ticker&&amount<=0?';border-color:var(--yellow)':''}"
       oninput="updateHolding(${mi},${hi},'amount',toNumber(this.value));recalc()"></td>
+    <td><span class="pnl-auto" style="color:${pnlIsNeg?'var(--red)':'var(--green)'};font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700" title="매입금액/평가금액으로 자동 계산됩니다">${escapeHTML(pnlDisplay)}</span></td>
     <td><select class="cat-select" onchange="updateHolding(${mi},${hi},'cat',this.value);recalc()">${catOptions}</select></td>
     <td><select onchange="updateHolding(${mi},${hi},'badge',this.value)">${badgeOptions}</select></td>
     <td><input type="text" value="${escapeAttr(h.note)}" placeholder="메모"
@@ -1810,13 +1831,45 @@ function buildHoldingRow(mi, hi, h) {
   </tr>`;
 }
 
+// 매입금액(cost)/평가금액(amount)로부터 손익(h.pnl 문자열)을 자동 계산해 갱신합니다.
+// 기존 코드 전반(정렬/검증/리포트 등)이 h.pnl 텍스트 형식('+12.34%' 또는 '-')을 그대로
+// 참조하므로, 이 헬퍼가 그 형식을 계속 만들어줌으로써 다운스트림 호환성을 유지합니다.
+function recomputePnlField(h) {
+  const cost = toNumber(h.cost);
+  const amount = toNumber(h.amount);
+  if (!(cost > 0)) {
+    h.pnl = '-';
+    return;
+  }
+  const pct = (amount - cost) / cost * 100;
+  const sign = pct >= 0 ? '+' : '';
+  h.pnl = `${sign}${pct.toFixed(2)}%`;
+}
+
 function updateHolding(mi, hi, key, val) {
-  state.members[mi].holdings[hi][key] = val;
+  const h = state.members[mi].holdings[hi];
+  h[key] = val;
+  if (key === 'cost' || key === 'amount') {
+    recomputePnlField(h);
+    updatePnlCellDOM(mi, hi, h);
+  }
   autoSave();
 }
 
+// tbody 전체를 재렌더하지 않고, 손익 표시 셀(span)만 가볍게 갱신합니다.
+// (cost/amount 입력 시마다 행 전체를 다시 그리면 입력 포커스가 끊기므로 피합니다.)
+function updatePnlCellDOM(mi, hi, h) {
+  const row = document.getElementById(`row-${mi}-${hi}`);
+  if (!row) return;
+  const span = row.querySelector('.pnl-auto');
+  if (!span) return;
+  const pnlIsNeg = (h.pnl||'').toString().startsWith('-');
+  span.textContent = (h.pnl && h.pnl !== '-') ? h.pnl : '-';
+  span.style.color = pnlIsNeg ? 'var(--red)' : 'var(--green)';
+}
+
 function addHoldingRow(mi) {
-  state.members[mi].holdings.push({account:'',ticker:'',entryType:'single',qty:'',pnl:'',amount:0,cat:'other',badge:'',note:''});
+  state.members[mi].holdings.push({account:'',ticker:'',entryType:'single',qty:'',pnl:'-',cost:0,amount:0,cat:'other',badge:'',note:''});
   const tbody = document.getElementById(`tbody-${mi}`);
   const hi = state.members[mi].holdings.length - 1;
   tbody.insertAdjacentHTML('beforeend', buildHoldingRow(mi, hi, state.members[mi].holdings[hi]));
@@ -1864,7 +1917,16 @@ function parsePnl(pnl) {
 function sortedHoldings(mi) {
   const ss = sortState[mi];
   const arr = state.members[mi].holdings.slice(); // shallow copy, keeps original indices
-  if (!ss) return arr.map((h,i) => ({h, origIdx:i}));
+  // 정렬 상태 없으면 기본: 계좌순 → 종목명 순
+  if (!ss) {
+    return arr
+      .map((h, i) => ({h, origIdx: i}))
+      .sort((a, b) => {
+        const accDiff = accountSortKey(a.h.account) - accountSortKey(b.h.account);
+        if (accDiff !== 0) return accDiff;
+        return (a.h.ticker || '').localeCompare(b.h.ticker || '', 'ko');
+      });
+  }
 
   const withIdx = arr.map((h, i) => ({h, origIdx: i}));
   const {key, dir} = ss;
@@ -1874,6 +1936,11 @@ function sortedHoldings(mi) {
     if (key === 'amount') {
       va = toNumber(a.h.amount);
       vb = toNumber(b.h.amount);
+      return (va - vb) * dir;
+    }
+    if (key === 'cost') {
+      va = toNumber(a.h.cost);
+      vb = toNumber(b.h.cost);
       return (va - vb) * dir;
     }
     if (key === 'pnl') {
@@ -2282,6 +2349,13 @@ function buildVersionCompareHTML(calc) {
   const totalChange = grandTotal - snap.grandTotal;
   const totalChangePct = snap.grandTotal > 0 ? totalChange/snap.grandTotal*100 : 0;
 
+  // Net investment / market return (순투입 추정치 / 시장수익)
+  let curTotalCost = 0;
+  state.members.forEach(m => m.holdings.forEach(h => { curTotalCost += toNumber(h.cost); }));
+  const snapHasCost = snap.totalCost != null;
+  const netInvest   = snapHasCost ? curTotalCost - snap.totalCost : null;
+  const marketReturn = snapHasCost ? totalChange - netInvest : null;
+
   // Ticker sets
   const curTickers = new Set(tickerList.filter(t=>t.entryType==='single').map(t=>t.ticker));
   const snapTickers = new Set((snap.tickerList||[]).filter(t=>t.entryType==='single').map(t=>t.ticker));
@@ -2300,11 +2374,38 @@ function buildVersionCompareHTML(calc) {
   const dnMovers = movers.filter(m=>m.change<0).slice(0,3);
 
   let html = `<div class="ver-compare">
-    <div class="vc-title">🔄 스냅샷 비교 (${escapeHTML(snap.date || '이전')} → 현재)</div>
-    <div class="vc-row">
+    <div class="vc-title">🔄 스냅샷 비교 (${escapeHTML(snap.date || '이전')} → 현재)</div>`;
+
+  // 메모(note) 표시
+  if (snap.note) {
+    html += `<div class="vc-row">
+      <span class="vc-label">📝 메모</span>
+      <span class="vc-note">${escapeHTML(snap.note)}</span>
+    </div>`;
+  }
+
+  html += `<div class="vc-row">
       <span class="vc-label">총 자산 변화</span>
       <span class="vc-val ${totalChange>=0?'vc-up':'vc-dn'}">${totalChange>=0?'+':''}${fmt(totalChange)}만 (${totalChangePct>=0?'+':''}${totalChangePct.toFixed(1)}%)</span>
     </div>`;
+
+  if (snapHasCost) {
+    const niSign = netInvest >= 0 ? '+' : '';
+    const mrSign = marketReturn >= 0 ? '+' : '';
+    html += `<div class="vc-row">
+      <span class="vc-label">순투입 추정치</span>
+      <span class="vc-val ${netInvest>=0?'vc-up':'vc-dn'}">${niSign}${fmt(Math.round(netInvest))}만</span>
+    </div>
+    <div class="vc-row">
+      <span class="vc-label">시장수익(평가손익 변화)</span>
+      <span class="vc-val ${marketReturn>=0?'vc-up':'vc-dn'}">${mrSign}${fmt(Math.round(marketReturn))}만</span>
+    </div>`;
+  } else {
+    html += `<div class="vc-row">
+      <span class="vc-label">순투입 추정치</span>
+      <span class="vc-val" style="color:var(--muted);font-size:10px">이전 스냅샷에 매입금액 데이터 없음</span>
+    </div>`;
+  }
 
   if (newTickers.length > 0) {
     html += `<div class="vc-row">
@@ -2453,6 +2554,15 @@ function applyStateMigrations(nextState) {
       h.badge = String(h.badge || '');
       if (h.note === undefined) h.note = '';
       h.note = String(h.note || '');
+      // STEP03: cost 마이그레이션 — cost가 없거나 0이고 pnl이 파싱 가능하면 역산
+      h.cost = toNumber(h.cost);
+      if (h.cost <= 0 && h.amount > 0) {
+        const pnlStr = String(h.pnl || '').trim().replace(/%$/, '');
+        const pct = parseFloat(pnlStr);
+        if (isFinite(pct)) {
+          h.cost = Math.round(h.amount / (1 + pct / 100));
+        }
+      }
     });
   });
   return nextState;
@@ -2507,7 +2617,7 @@ function autoSave() {
   }, 600);
 }
 
-function buildSnapshotEntry() {
+function buildSnapshotEntry(note) {
   const calc = calcState();
   const {memberTotals, grandTotal, catTotals, catPcts} = calc;
   const dateVal = state.meta.date || new Date().toISOString().slice(0,10).replace(/-/g,'.');
@@ -2518,6 +2628,10 @@ function buildSnapshotEntry() {
     if (!t || h.entryType === 'cash') return;
     tickers[t] = (tickers[t]||0) + toNumber(h.amount);
   }));
+  let totalCost = 0;
+  state.members.forEach(m =>
+    m.holdings.forEach(h => { totalCost += toNumber(h.cost); })
+  );
   return {
     ym,
     label: dateVal,
@@ -2527,6 +2641,8 @@ function buildSnapshotEntry() {
     catPcts,
     members: state.members.map((m,mi) => ({name:m.name, icon:m.icon, total:memberTotals[mi]})),
     tickers,
+    totalCost,
+    note: (note || '').trim(),
     state: cloneState(state)
   };
 }
@@ -2684,11 +2800,19 @@ function loadSnapshotByDate(ym) {
 
 function saveSnapshot() {
   const calc = calcState();
+  let totalCost = 0;
+  state.members.forEach(m =>
+    m.holdings.forEach(h => { totalCost += toNumber(h.cost); })
+  );
+  const noteInput = prompt('이번 기간 특이사항 (선택, 비워두면 생략 가능)', '');
+  const note = (noteInput || '').trim();
   const snap = {
     date: state.meta.date,
     grandTotal: calc.grandTotal,
     catPcts: {...calc.catPcts},
-    tickerList: calc.tickerList.map(t=>({ticker:t.ticker, amount:t.amount, entryType:t.entryType, pct:t.pct}))
+    tickerList: calc.tickerList.map(t=>({ticker:t.ticker, amount:t.amount, entryType:t.entryType, pct:t.pct})),
+    totalCost,
+    note
   };
   snapshot = snap;
   try {
@@ -3030,23 +3154,23 @@ function generateHTML() {
   // ── 6. Concentration ──
   const concHTML = buildConcentrationRows(top1Pct, top3Pct, over10);
 
-  // ── 7. PnL Summary for report ──
+  // ── 7. PnL Summary for report (cost 직접사용, STEP10 변경) ──
   let pnlTotalCost = 0, pnlTotalVal = 0;
   const pnlPositions = [];
   state.members.forEach(m => {
     m.holdings.forEach(h => {
       if (h.entryType === 'cash') return;
-      const pct = parsePnlPct(h.pnl);
       const amt = toNumber(h.amount);
-      if (pct === null || amt <= 0) return;
-      const cost = amt / (1 + pct/100);
+      const cost = toNumber(h.cost);
+      if (amt <= 0) return;
+      const pct = cost > 0 ? (amt - cost) / cost * 100 : null;
       pnlTotalCost += cost; pnlTotalVal += amt;
-      pnlPositions.push({ticker:h.ticker, pnl:pct, amount:amt, member:m.name, cat:h.cat});
+      pnlPositions.push({ticker:h.ticker, pnl:pct, amount:amt, cost:cost, member:m.name, cat:h.cat});
     });
   });
   const pnlUnrealized = pnlTotalVal - pnlTotalCost;
   const pnlPct = pnlTotalCost > 0 ? pnlUnrealized/pnlTotalCost*100 : 0;
-  const pnlSorted = [...pnlPositions].sort((a,b)=>b.pnl-a.pnl);
+  const pnlSorted = [...pnlPositions].sort((a,b)=>(b.pnl??-Infinity)-(a.pnl??-Infinity));
 
   // pnlPositions as JSON for report-side sorting
   const pnlDataJSON = safeJSONStringify(pnlPositions.map(p=>({
@@ -3054,7 +3178,7 @@ function generateHTML() {
     member: p.member,
     pnl: p.pnl,
     amount: p.amount,
-    cost: Math.round(p.amount/(1+p.pnl/100)),
+    cost: Math.round(p.cost),
     cat: p.cat
   })));
 
@@ -3105,6 +3229,17 @@ function generateHTML() {
   const weeklyMemo = loadWeeklyMemo();
   const planReportHTML = buildPlanStaticHTML(state.planConfig);
 
+  // ── 순투입/시장수익 계산 (STEP10) ──
+  const reportSnapHasCost = hasSnap && snap.totalCost != null;
+  let reportNetInvest = null, reportMarketReturn = null;
+  if (reportSnapHasCost) {
+    let _reportCurCost = 0;
+    state.members.forEach(m => m.holdings.forEach(h => { _reportCurCost += toNumber(h.cost); }));
+    reportNetInvest = _reportCurCost - toNumber(snap.totalCost);
+    reportMarketReturn = (totalChange || 0) - reportNetInvest;
+  }
+  const reportSnapNote = hasSnap ? (snap.note || '') : '';
+
   // Trend snapshots for report
   const trendSnaps = loadTrendSnapshots();
   const trendSnapsJSON = safeJSONStringify(trendSnaps);
@@ -3135,7 +3270,17 @@ function generateHTML() {
           <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${item.color};">${item.val}</span>
         </div>`).join('')}
       </div>
-      ${hasSnap?`<div style="font-size:9px;color:#475569;margin-top:6px;">기준: ${snap.date||''} · ${fmt(snap.grandTotal)}만원</div>`:''}
+      ${hasSnap?`<div style="font-size:9px;color:#475569;margin-top:6px;">기준: ${snap.date||''} · ${fmt(snap.grandTotal)}만원${reportSnapNote ? ` · 📝 ${escapeHTML(reportSnapNote)}` : ''}</div>`:''} 
+      ${reportSnapHasCost ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+        <div style="background:#111d2e;border:1px solid #1c2d42;border-radius:8px;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:10px;color:#94a3b8;">순투입(추정)</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${reportNetInvest>=0?'#06b6d4':'#f59e0b'};">${reportNetInvest>=0?'+':''}${fmt(Math.round(reportNetInvest))}만</span>
+        </div>
+        <div style="background:#111d2e;border:1px solid #1c2d42;border-radius:8px;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:10px;color:#94a3b8;">시장수익</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${reportMarketReturn>=0?'#10b981':'#fb7185'};">${reportMarketReturn>=0?'+':''}${fmt(Math.round(reportMarketReturn))}만</span>
+        </div>
+      </div>` : (hasSnap ? `<div style="font-size:9px;color:#475569;margin-top:4px;font-style:italic;">이전 스냅샷에 매입금액 데이터 없음 (순투입/시장수익 표시 불가)</div>` : '')}
     </div>
 
     <!-- 위험 신호 -->
@@ -4233,10 +4378,10 @@ function buildPnlAnalysis(calc) {
   state.members.forEach((m, mi) => {
     m.holdings.forEach(h => {
       if (h.entryType !== 'single' && h.entryType !== 'basket') return;
-      const pct = parsePnlPct(h.pnl);
       const amt = toNumber(h.amount);
-      if (pct === null || amt <= 0) return;
-      const cost = amt / (1 + pct/100);
+      const cost = toNumber(h.cost);
+      if (cost <= 0 || amt <= 0) return;
+      const pct = (amt - cost) / cost * 100;
       totalCost += cost;
       totalVal += amt;
       positions.push({
@@ -4253,12 +4398,12 @@ function buildPnlAnalysis(calc) {
     <div class="pnl-card">
       <div class="pc-label">추정 매입원가</div>
       <div class="pc-val" style="color:var(--dim)">${fmt(Math.round(totalCost))}만</div>
-      <div class="pc-sub">pnl% 역산 기준</div>
+      <div class="pc-sub">실제 매입금액 기준</div>
     </div>
     <div class="pnl-card">
       <div class="pc-label">평가 총액</div>
       <div class="pc-val" style="color:var(--cyan)">${fmt(Math.round(totalVal))}만</div>
-      <div class="pc-sub">pnl% 있는 종목 합산</div>
+      <div class="pc-sub">매입금액 있는 종목 합산</div>
     </div>
     <div class="pnl-card">
       <div class="pc-label">미실현 손익</div>
@@ -4897,6 +5042,8 @@ function normalizeTrendSnapshot(s) {
     ym,
     label,
     grandTotal: toNumber(s.grandTotal),
+    totalCost: s.totalCost != null ? toNumber(s.totalCost) : null,
+    note: typeof s.note === 'string' ? s.note : '',
     members: Array.isArray(s.members) ? s.members.map(m => ({
       name: String(m.name || ''),
       icon: String(m.icon || ''),
@@ -4937,6 +5084,16 @@ function compareSnapshotWithCurrent(ym) {
   if (!snap) return '';
   const now = calcState();
   const diff = now.grandTotal - toNumber(snap.grandTotal);
+  const snapHasCost = snap.totalCost != null;
+  if (snapHasCost) {
+    let curTotalCost = 0;
+    state.members.forEach(m => m.holdings.forEach(h => { curTotalCost += toNumber(h.cost); }));
+    const netInvest = curTotalCost - toNumber(snap.totalCost);
+    const marketReturn = diff - netInvest;
+    const mSign = marketReturn >= 0 ? '+' : '';
+    const nSign = netInvest >= 0 ? '+' : '';
+    return `${snap.label || ym} 대비 총변화 ${diff >= 0 ? '+' : ''}${fmt(diff)}만 (순투입 ${nSign}${fmt(Math.round(netInvest))}만 / 시장수익 ${mSign}${fmt(Math.round(marketReturn))}만)`;
+  }
   return `${snap.label || ym} 대비 ${diff >= 0 ? '+' : ''}${fmt(diff)}만원`;
 }
 
@@ -5038,7 +5195,9 @@ function importTrendFromJSON(event) {
 }
 
 function saveTrendSnapshot() {
-  const entry = buildSnapshotEntry();
+  const noteInput = prompt('이번 기간 특이사항 (선택, 비워두면 생략 가능)', '');
+  const note = (noteInput || '').trim();
+  const entry = buildSnapshotEntry(note);
   upsertTrendSnapshot(entry);
   markClean('✓ ' + entry.label + ' 날짜별 기록 저장됨');
 
@@ -5192,14 +5351,34 @@ function buildTrendAnalysis(calc) {
   let html = googlePanel + `<div style="margin-bottom:12px;">
     <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📋 저장된 날짜별 기록 (${snapshots.length}개) — 복원·삭제할 항목을 선택하세요</div>
     <div style="display:flex;flex-direction:column;gap:4px;">`;
+  // 현재 totalCost (현재→직전 비교용)
+  let _curTotalCostTrend = 0;
+  state.members.forEach(m => m.holdings.forEach(h => { _curTotalCostTrend += toNumber(h.cost); }));
+  const _nowGrandTotal = calc.grandTotal;
+
   [...snapshots].reverse().forEach(s => {
     const displayDate = s.label || s.ym;
-    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;display:flex;align-items:center;gap:8px;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);font-weight:700;min-width:72px;">${escapeHTML(displayDate)}</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);flex:1;">${fmt(s.grandTotal)}만</span>
-      <span style="font-size:9px;color:var(--muted);flex:2;">${s.members.map(m=>escapeHTML(m.icon)+' '+escapeHTML(m.name)).join(' · ')}</span>
-      <button onclick="restoreSnapshotState('${escapeAttr(escapeJSString(s.ym))}')" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);color:#3b82f6;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">↩ 복원</button>
-      <button onclick="deleteTrendSnapshot('${escapeAttr(escapeJSString(s.ym))}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#ef4444;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">🗑 삭제</button>
+    const noteHTML = s.note ? `<span style="font-size:9px;color:var(--yellow);font-style:italic;margin-left:4px;">📝 ${escapeHTML(s.note)}</span>` : '';
+    // 순투입/시장수익: 이 스냅샷 → 현재 비교
+    const snapHasCost = s.totalCost != null;
+    let netInvestStr = '';
+    if (snapHasCost) {
+      const diff = _nowGrandTotal - toNumber(s.grandTotal);
+      const netInvest = _curTotalCostTrend - toNumber(s.totalCost);
+      const mktReturn = diff - netInvest;
+      const nSign = netInvest >= 0 ? '+' : '';
+      const mSign = mktReturn >= 0 ? '+' : '';
+      netInvestStr = `<span style="font-size:8px;color:var(--muted);margin-left:6px;">현재기준 순투입 ${nSign}${fmt(Math.round(netInvest))}만 / 시장수익 ${mSign}${fmt(Math.round(mktReturn))}만</span>`;
+    }
+    const extraRow = (noteHTML || netInvestStr) ? `<div style="display:flex;align-items:center;gap:4px;padding-left:2px;">${noteHTML}${netInvestStr}</div>` : '';
+    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;display:flex;flex-direction:column;gap:3px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);font-weight:700;min-width:72px;">${escapeHTML(displayDate)}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text);flex:1;">${fmt(s.grandTotal)}만</span>
+        <span style="font-size:9px;color:var(--muted);flex:2;">${s.members.map(m=>escapeHTML(m.icon)+' '+escapeHTML(m.name)).join(' · ')}</span>
+        <button onclick="restoreSnapshotState('${escapeAttr(escapeJSString(s.ym))}')" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);color:#3b82f6;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">↩ 복원</button>
+        <button onclick="deleteTrendSnapshot('${escapeAttr(escapeJSString(s.ym))}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#ef4444;cursor:pointer;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;">🗑 삭제</button>
+      </div>${extraRow}
     </div>`;
   });
   html += `</div></div>`;
@@ -5287,9 +5466,144 @@ function buildTrendAnalysis(calc) {
     </div>`;
   }
 
-
+  // ── 월별 증감분해 ──
+  html += buildMonthlyBreakdownSection(snapshots);
 
   return html;
+}
+
+// ════════════════════════════════════════════════════════
+//  월별 증감분해
+// ════════════════════════════════════════════════════════
+const DEPOSIT_KEY = 'pf_monthly_deposits';
+
+function loadDeposits() {
+  try { return JSON.parse(localStorage.getItem(DEPOSIT_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveDeposit(ym, deposit, memo) {
+  const d = loadDeposits();
+  d[ym] = { deposit: Number(deposit) || 0, memo: memo || '' };
+  localStorage.setItem(DEPOSIT_KEY, JSON.stringify(d));
+}
+
+function deleteDeposit(ym) {
+  const d = loadDeposits();
+  delete d[ym];
+  localStorage.setItem(DEPOSIT_KEY, JSON.stringify(d));
+}
+
+function fmtBreakdown(value) {
+  const sign = value > 0 ? '+' : '';
+  const abs = Math.abs(value);
+  if (abs >= 100000000) return sign + (value < 0 ? '-' : '') + (abs / 100000000).toFixed(1) + '억';
+  if (abs >= 10000)     return sign + Math.round(value / 10000).toLocaleString('ko-KR') + '만';
+  return sign + Math.round(value).toLocaleString('ko-KR') + '원';
+}
+
+function getMonthlyComment(totalChange, deposit, profitLoss) {
+  if (totalChange > 0 && profitLoss > 0) return '신규투입 + 평가이익 모두 기여';
+  if (totalChange > 0 && profitLoss < 0) return '신규투입으로 증가, 평가손익은 부진';
+  if (totalChange < 0 && profitLoss < 0) return '시장 하락으로 총자산 감소';
+  if (totalChange < 0 && profitLoss > 0) return '평가이익에도 불구, 인출·이동 영향';
+  return '변동 미미';
+}
+
+function buildMonthlyBreakdownSection(snapshots) {
+  if (snapshots.length < 2) return '';
+
+  const deposits = loadDeposits();
+  const rows = [];
+  let cumDeposit = 0, cumProfitLoss = 0, cumChange = 0;
+
+  for (let i = 1; i < snapshots.length; i++) {
+    const prev = snapshots[i - 1];
+    const cur  = snapshots[i];
+    const totalChange = (cur.grandTotal || 0) - (prev.grandTotal || 0);
+    const dep = deposits[cur.ym] || {};
+    const deposit    = dep.deposit || 0;
+    const memo       = dep.memo    || '';
+    const profitLoss = totalChange - deposit;
+    cumDeposit    += deposit;
+    cumProfitLoss += profitLoss;
+    cumChange     += totalChange;
+    const autoComment = getMonthlyComment(totalChange, deposit, profitLoss);
+    rows.push({ ym: cur.ym, label: cur.label || cur.ym, totalChange, deposit, profitLoss, memo, autoComment });
+  }
+
+  // summary cards
+  const summaryHTML = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+    <div style="background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);border-radius:8px;padding:8px 10px;text-align:center;">
+      <div style="font-size:9px;color:var(--muted);margin-bottom:4px;">누적 총자산 변화</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:800;color:${cumChange>=0?'var(--green)':'var(--red)'};">${fmtBreakdown(cumChange)}</div>
+    </div>
+    <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:8px 10px;text-align:center;">
+      <div style="font-size:9px;color:var(--muted);margin-bottom:4px;">누적 신규투입</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:800;color:var(--blue);">${fmtBreakdown(cumDeposit)}</div>
+    </div>
+    <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:8px;padding:8px 10px;text-align:center;">
+      <div style="font-size:9px;color:var(--muted);margin-bottom:4px;">누적 평가손익</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:800;color:${cumProfitLoss>=0?'var(--green)':'var(--red)'};">${fmtBreakdown(cumProfitLoss)}</div>
+    </div>
+  </div>`;
+
+  // table rows (newest first)
+  const tableRows = [...rows].reverse().map(r => {
+    const inputId = 'dep-' + r.ym.replace(/[^a-z0-9]/gi,'_');
+    const memoId  = 'mem-' + r.ym.replace(/[^a-z0-9]/gi,'_');
+    const hasDeposit = r.deposit !== 0;
+    return `<tr style="border-bottom:1px solid rgba(28,45,66,.5);">
+      <td style="padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);white-space:nowrap;">${escapeHTML(r.label.slice(5) || r.label)}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${r.totalChange>=0?'var(--green)':'var(--red)'};">${fmtBreakdown(r.totalChange)}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:${r.deposit>0?'var(--blue)':'var(--muted)'};">${r.deposit>0?fmtBreakdown(r.deposit):'—'}</td>
+      <td style="padding:5px 7px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${r.profitLoss>=0?'var(--green)':'var(--red)'};">${hasDeposit?fmtBreakdown(r.profitLoss):'?'}</td>
+      <td style="padding:4px 6px;min-width:130px;">
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input id="${inputId}" type="number" placeholder="신규투입(만)" value="${r.deposit||''}"
+            style="width:90px;font-size:10px;padding:3px 6px;text-align:right;"
+            onchange="saveDeposit('${escapeAttr(r.ym)}', Number(this.value)*10000, document.getElementById('${memoId}').value); updateMonthlyBreakdown();">
+          <input id="${memoId}" type="text" placeholder="메모" value="${escapeAttr(r.memo)}"
+            style="width:90px;font-size:10px;padding:3px 6px;"
+            onchange="saveDeposit('${escapeAttr(r.ym)}', Number(document.getElementById('${inputId}').value)*10000, this.value); updateMonthlyBreakdown();">
+        </div>
+      </td>
+      <td style="padding:5px 7px;font-size:9px;color:var(--muted);">${escapeHTML(r.memo || (hasDeposit ? r.autoComment : '신규투입 입력 후 분해'))}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div id="monthlyBreakdownSection" style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">📐 월별 증감분해 — 신규투입 vs 평가손익</div>
+      <div style="font-size:9px;color:var(--muted);">투입(만원 단위로 입력)</div>
+    </div>
+    ${summaryHTML}
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:500px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:5px 7px;background:rgba(96,165,250,.12);color:var(--dim);font-size:9px;font-weight:700;white-space:nowrap;">날짜</th>
+            <th style="text-align:right;padding:5px 7px;background:rgba(96,165,250,.12);color:var(--dim);font-size:9px;font-weight:700;">총자산 변화</th>
+            <th style="text-align:right;padding:5px 7px;background:rgba(96,165,250,.12);color:var(--dim);font-size:9px;font-weight:700;">신규투입</th>
+            <th style="text-align:right;padding:5px 7px;background:rgba(96,165,250,.12);color:var(--dim);font-size:9px;font-weight:700;">평가손익</th>
+            <th style="padding:5px 7px;background:rgba(96,165,250,.12);color:var(--dim);font-size:9px;font-weight:700;">투입액 입력 / 메모</th>
+            <th style="padding:5px 7px;background:rgba(96,165,250,.12);color:var(--dim);font-size:9px;font-weight:700;">설명</th>
+          </tr>
+        </thead>
+        <tbody id="mbTableBody">${tableRows}</tbody>
+      </table>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-top:8px;line-height:1.6;">
+      💡 <strong>평가손익 = 총자산 변화 − 신규투입</strong> · 신규투입 입력 전에는 평가손익이 <span style="color:var(--yellow);">?</span>로 표시됩니다 · 입력값은 자동 저장됩니다
+    </div>
+  </div>`;
+}
+
+function updateMonthlyBreakdown() {
+  if (currentApaneTab === 'trend') {
+    const calc = calcState();
+    updateAnalysisPane(calc, validateState());
+  }
 }
 
 // ════════════════════════════════════════════════════════
