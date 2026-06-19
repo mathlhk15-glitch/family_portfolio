@@ -1149,6 +1149,7 @@ body:not(.light-mode) .mobile-drawer-body {
         <div class="apane-tab" onclick="switchApaneTab('pnl')">💹 수익률</div>
         <div class="apane-tab" onclick="switchApaneTab('plan')">📅 집행플랜</div>
         <div class="apane-tab" onclick="switchApaneTab('trend')">📈 월별추이</div>
+        <div class="apane-tab" onclick="switchApaneTab('ai')">🤖 AI 코치</div>
       </div>
     </div>
     <div class="analysis-body" id="analysisBody">
@@ -2178,6 +2179,8 @@ function updateAnalysisPane(calc, validation) {
     body += buildExecutionPlan(calc);
   } else if (currentApaneTab === 'trend') {
     body += buildTrendAnalysis(calc);
+  } else if (currentApaneTab === 'ai') {
+    body += buildAiCoach(calc);
   }
 
   document.getElementById('analysisBody').innerHTML = header + body;
@@ -3908,7 +3911,7 @@ function init() {
 // ════════════════════════════════════════════════════════
 function switchApaneTab(tab) {
   currentApaneTab = tab;
-  const tabs = ['weekly','overview','simulator','scenario','pnl','plan','trend'];
+  const tabs = ['weekly','overview','simulator','scenario','pnl','plan','trend','ai'];
   document.querySelectorAll('.apane-tab').forEach((el, i) => {
     el.classList.toggle('active', tabs[i] === tab);
   });
@@ -5217,10 +5220,31 @@ function buildTrendAnalysis(calc) {
     </div>` : ''}
   </div>`;
 
-  // Member chart
+  // Member chart + table
+  const memberTableRows2 = allMembers.map((m, i) => {
+    const color = memberColors[i % memberColors.length];
+    const vals = snapshots.map(s => { const f = s.members.find(x => x.name === m.name); return f ? f.total : null; });
+    const first = vals.find(v => v != null);
+    const last = [...vals].reverse().find(v => v != null);
+    const change = (first != null && last != null && snapshots.length >= 2) ? last - first : null;
+    const chColor = change === null ? 'var(--muted)' : change >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<tr style="border-bottom:1px solid rgba(28,45,66,.4);">
+      <td style="padding:5px 7px;white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span><span style="font-weight:700;color:var(--text);font-size:10px;">${escapeHTML(m.icon)} ${escapeHTML(m.name)}</span></span></td>
+      ${vals.map(v => `<td style="text-align:right;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:10px;color:${v != null ? 'var(--cyan)' : 'var(--muted)'};">${v != null ? Math.round(v).toLocaleString('ko-KR') + '만' : '-'}</td>`).join('')}
+      ${snapshots.length >= 2 ? `<td style="text-align:right;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${chColor};">${change === null ? '-' : (change >= 0 ? '+' : '') + Math.round(change).toLocaleString('ko-KR') + '만'}</td>` : ''}
+    </tr>`;
+  }).join('');
+  const memberColHeaders2 = snapshots.map(s => {
+    const disp = (s.label || s.ym).slice(5);
+    return `<th style="text-align:right;padding:5px 7px;background:rgba(96,165,250,.15);color:var(--dim);font-size:9px;font-weight:700;white-space:nowrap;">${escapeHTML(disp)}</th>`;
+  }).join('');
+  const memberChangeHeader2 = snapshots.length >= 2 ? `<th style="text-align:right;padding:5px 7px;background:rgba(96,165,250,.15);color:var(--dim);font-size:9px;font-weight:700;white-space:nowrap;">변화</th>` : '';
+  const memberTableHTML2 = `<div style="overflow-x:auto;margin-top:10px;"><table style="width:100%;border-collapse:collapse;min-width:280px;"><thead><tr><th style="text-align:left;padding:5px 7px;background:rgba(96,165,250,.15);color:var(--dim);font-size:9px;font-weight:700;">구성원</th>${memberColHeaders2}${memberChangeHeader2}</tr></thead><tbody>${memberTableRows2}</tbody></table></div>`;
+
   html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:10px;">
     <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">👨‍👩‍👧‍👦 구성원별 자산 변화</div>
     ${miniLineChart(memberDatasets, displayLabels, 130, true)}
+    ${memberTableHTML2}
   </div>`;
 
   // Ticker chart
@@ -5266,6 +5290,338 @@ function buildTrendAnalysis(calc) {
 
 
   return html;
+}
+
+// ════════════════════════════════════════════════════════
+//  🤖 AI 코치 (claude.ai 복사-붙여넣기 연동, API 키 불필요·무료)
+// ════════════════════════════════════════════════════════
+const AI_INDICATORS_STORAGE = 'pfeditor_ai_indicators';
+const AI_RESULT_STORAGE = 'pfeditor_ai_last_result';
+
+function loadAiIndicators() {
+  try {
+    return JSON.parse(localStorage.getItem(AI_INDICATORS_STORAGE) || 'null') || {
+      dram: '상승중', rate: 0, vix: '', oil: '', war: '혼재', capex: '중립'
+    };
+  } catch (e) {
+    return { dram: '상승중', rate: 0, vix: '', oil: '', war: '혼재', capex: '중립' };
+  }
+}
+function saveAiIndicators(ind) {
+  localStorage.setItem(AI_INDICATORS_STORAGE, JSON.stringify(ind));
+}
+
+function loadAiResult() {
+  try { return JSON.parse(localStorage.getItem(AI_RESULT_STORAGE) || 'null'); }
+  catch (e) { return null; }
+}
+function saveAiResult(result) {
+  localStorage.setItem(AI_RESULT_STORAGE, JSON.stringify({ result, at: Date.now() }));
+}
+
+const AI_SIGNAL_META = {
+  blue:   { label: '기회', color: '#60a5fa', desc: '공격적으로 담을 구간' },
+  green:  { label: '양호', color: '#34d399', desc: '계획대로 순항 중' },
+  yellow: { label: '주의', color: '#fbbf24', desc: '속도를 늦출 타이밍' },
+  orange: { label: '과열', color: '#fb923c', desc: '일부는 식혀줄 때' },
+  red:    { label: '위험', color: '#fb7185', desc: '방어가 우선' },
+};
+
+function buildAiCoach(calc) {
+  const ind = loadAiIndicators();
+  const saved = loadAiResult();
+
+  let html = `<div id="aiCoachRoot">`;
+
+  // ── 어깨 프로젝트 바로가기 ──
+  html += `<a href="https://shoulder-project.vercel.app/" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(59,130,246,.1));border:1px solid rgba(139,92,246,.4);border-radius:10px;padding:10px 14px;margin-bottom:12px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(139,92,246,.8)'" onmouseout="this.style.borderColor='rgba(139,92,246,.4)'">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">🦴</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#c4b5fd;">어깨 프로젝트</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px;">shoulder-project.vercel.app</div>
+      </div>
+    </div>
+    <span style="font-size:14px;color:#a78bfa;">↗</span>
+  </a>`;
+
+  // ── 안내 ──
+  html += `<div style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:10.5px;color:var(--dim);line-height:1.7;">
+    💡 <strong style="color:var(--cyan)">무료로 사용하는 방법</strong> — API 키 없이, claude.ai 채팅창을 그대로 활용해요.<br>
+    ① 아래 지표 입력 → <strong>② "프롬프트 복사"</strong> → ③ claude.ai 새 채팅에 붙여넣기 → ④ 받은 답변(JSON) 전체 복사 → <strong>⑤ 아래 칸에 붙여넣고 "결과 적용"</strong>
+  </div>`;
+
+  // ── 오늘의 지표 입력 ──
+  html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 오늘의 지표</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">DRAM 방향</div>
+        <select id="aiInd-dram" onchange="updateAiIndicatorField('dram', this.value)" style="${aiSelectStyle()}">
+          ${['상승중','둔화','하락전환'].map(o => `<option value="${o}" ${ind.dram===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">전쟁 리스크</div>
+        <select id="aiInd-war" onchange="updateAiIndicatorField('war', this.value)" style="${aiSelectStyle()}">
+          ${['완화','혼재','고조'].map(o => `<option value="${o}" ${ind.war===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">CAPEX 뉴스</div>
+        <select id="aiInd-capex" onchange="updateAiIndicatorField('capex', this.value)" style="${aiSelectStyle()}">
+          ${['긍정','중립','부정'].map(o => `<option value="${o}" ${ind.capex===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">금리 점수 (-15~15)</div>
+        <input type="number" id="aiInd-rate" value="${ind.rate}" oninput="updateAiIndicatorField('rate', this.value)" style="${aiInputStyle()}">
+      </div>
+      <div>
+        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">VIX 지수</div>
+        <input type="number" step="0.01" id="aiInd-vix" value="${ind.vix}" oninput="updateAiIndicatorField('vix', this.value)" placeholder="예: 17.1" style="${aiInputStyle()}">
+      </div>
+      <div>
+        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">WTI 유가 ($)</div>
+        <input type="number" step="0.01" id="aiInd-oil" value="${ind.oil}" oninput="updateAiIndicatorField('oil', this.value)" placeholder="예: 74.3" style="${aiInputStyle()}">
+      </div>
+    </div>
+  </div>`;
+
+  // ── 프롬프트 복사 버튼 ──
+  html += `<button class="btn btn-primary" id="aiCopyBtn" onclick="copyAiPrompt()" style="width:100%;justify-content:center;padding:10px;font-size:12.5px;margin-bottom:10px;">
+    📋 프롬프트 복사하기
+  </button>`;
+
+  html += `<div style="font-size:9.5px;color:var(--muted);text-align:center;margin-bottom:14px;">
+    복사 후 <span style="color:var(--cyan);">claude.ai</span> 새 채팅에 붙여넣고, 받은 답변(JSON 전체)을 복사해서 아래에 붙여넣어 주세요.
+  </div>`;
+
+  // ── 결과 붙여넣기 ──
+  html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📥 AI 답변 붙여넣기</div>
+    <textarea id="aiPasteArea" placeholder='claude.ai에서 받은 JSON 답변을 여기에 붙여넣으세요. 예: {"signal": "green", "headline": "...", ...}' style="width:100%;min-height:90px;background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:8px 9px;font-size:10.5px;color:var(--text);font-family:'JetBrains Mono',monospace;resize:vertical;"></textarea>
+    <button class="btn btn-primary btn-sm" onclick="applyAiPastedResult()" style="width:100%;justify-content:center;margin-top:8px;">결과 적용</button>
+    <div id="aiPasteError"></div>
+  </div>`;
+
+  html += `<div id="aiCoachResultArea">`;
+  html += renderAiResultBlock(saved);
+  html += `</div>`;
+
+  html += `</div>`;
+  return html;
+}
+
+function aiSelectStyle() {
+  return 'width:100%;background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:11px;color:var(--text);font-family:"Noto Sans KR",sans-serif;';
+}
+function aiInputStyle() {
+  return 'width:100%;background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:11px;color:var(--text);font-family:"JetBrains Mono",monospace;';
+}
+
+function renderAiResultBlock(saved) {
+  if (!saved || !saved.result) {
+    return `<div style="text-align:center;font-size:10.5px;color:var(--muted);padding:16px 0;">
+      위 지표를 확인하고 프롬프트를 복사해서 claude.ai에 물어본 뒤, 답변을 붙여넣으면 신호·종목별 행동·할 일이 여기에 정리됩니다.
+    </div>`;
+  }
+  const r = saved.result;
+  const meta = AI_SIGNAL_META[r.signal] || AI_SIGNAL_META.yellow;
+  const atStr = saved.at ? new Date(saved.at).toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+
+  let html = `<div style="background:linear-gradient(135deg, ${meta.color}22, transparent);border:1px solid ${meta.color}55;border-radius:10px;padding:12px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="font-size:11px;font-weight:800;color:${meta.color};background:${meta.color}25;padding:2px 9px;border-radius:999px;">● ${esc(meta.label)}</span>
+      <span style="font-size:10px;color:var(--muted);">${esc(meta.desc)}</span>
+    </div>
+    <div style="font-size:14px;font-weight:700;color:var(--text);line-height:1.4;">${esc(r.headline || '')}</div>
+    ${atStr ? `<div style="font-size:9px;color:var(--muted);margin-top:6px;text-align:right;">${atStr} 분석</div>` : ''}
+  </div>`;
+
+  if (Array.isArray(r.actions) && r.actions.length > 0) {
+    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📌 종목별 행동</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${r.actions.map(a => {
+          const actionColor = a.action === '일부익절검토' ? 'var(--red)' : a.action === '추가매수보류' ? 'var(--yellow)' : 'var(--green)';
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--s1);border-radius:7px;">
+            <span style="font-size:11px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;">${esc(a.ticker || '')}</span>
+            <span style="font-size:9px;color:var(--muted);flex:1;text-align:right;margin-right:4px;">${esc(a.reason || '')}</span>
+            <span style="font-size:9.5px;font-weight:700;color:${actionColor};white-space:nowrap;">${esc(a.action || '')}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  if (Array.isArray(r.todos) && r.todos.length > 0) {
+    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">✅ 오늘 할 일</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        ${r.todos.map(t => `<div style="font-size:11px;color:var(--dim);display:flex;gap:6px;"><span style="color:var(--cyan);">○</span>${esc(t)}</div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  if (r.summary) {
+    html += `<div style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;">
+      <div style="font-size:9.5px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">💬 해설</div>
+      <div style="font-size:11px;color:var(--dim);line-height:1.7;">${esc(r.summary)}</div>
+    </div>`;
+  }
+
+  return html;
+}
+
+function updateAiIndicatorField(field, value) {
+  const ind = loadAiIndicators();
+  ind[field] = (field === 'rate' || field === 'vix' || field === 'oil') ? value : value;
+  saveAiIndicators(ind);
+}
+
+function refreshAiCoach() {
+  const calc = calcState();
+  const validation = validateState();
+  updateAnalysisPane(calc, validation);
+}
+
+const AI_COACH_SYSTEM_PROMPT = `당신은 가족의 전담 AI 투자 코치입니다.
+
+사용자가 오늘의 지표(DRAM 방향, 금리 점수, VIX, WTI 유가, 전쟁 리스크, CAPEX 뉴스)와 가족의 실제 보유 종목 목록(종목별 합산 금액, 비중, 보유자)을 전달하면, 이를 분석해 아래 스키마의 JSON만 출력하세요. 다른 텍스트, 설명, 마크다운 코드블록 없이 순수 JSON 객체 하나만 반환합니다.
+
+스키마:
+{
+  "signal": "blue" | "green" | "yellow" | "orange" | "red",
+  "headline": "오늘의 한 줄 결론 (30자 이내, 한국어)",
+  "actions": [
+    { "ticker": "종목명", "action": "보유" | "추가매수보류" | "일부익절검토", "reason": "15자 이내 이유" }
+  ],
+  "todos": ["오늘 할 일", "..."],
+  "summary": "경제 초보도 이해할 수 있는 2~3문장 해설 (한국어)"
+}
+
+규칙:
+- actions는 전달받은 보유 종목 중 비중이 크거나 변동성이 큰 5~8개를 골라 작성하세요.
+- todos는 3~5개, 구체적이고 실행 가능한 문장으로 작성하세요.
+- 이 분석은 투자 권유가 아닌 참고용임을 summary 마지막에 반드시 한 문장으로 명시하세요.
+- signal은 입력된 6개 지표를 종합적으로 고려해 직접 판단하세요 (단순 합산이 아니라 맥락을 고려).
+- 응답은 반드시 위 JSON 객체 하나만 출력하세요. 코드블록(\`\`\`)도 쓰지 마세요.`;
+
+function buildAiUserPrompt(ind, calc) {
+  const holdingsForPrompt = calc.tickerList.slice(0, 30).map(t => ({
+    ticker: t.ticker,
+    amount_manwon: Math.round(t.amount),
+    pct_of_total: Number(t.pct.toFixed(1)),
+    category: t.cat,
+    holders: t.holders,
+  }));
+
+  const payload = {
+    today_indicators: {
+      dram_direction: ind.dram,
+      rate_score: Number(ind.rate) || 0,
+      vix: ind.vix === '' ? null : Number(ind.vix),
+      wti_oil: ind.oil === '' ? null : Number(ind.oil),
+      war_risk: ind.war,
+      capex_news: ind.capex,
+    },
+    family_total_manwon: Math.round(calc.grandTotal),
+    category_weights_pct: Object.fromEntries(
+      Object.entries(calc.catPcts).map(([k, v]) => [k, Number(v.toFixed(1))])
+    ),
+    holdings: holdingsForPrompt,
+  };
+
+  return `아래는 오늘의 지표와 가족의 실제 보유 종목 데이터입니다. 분석해서 JSON으로만 응답하세요.\n\n${JSON.stringify(payload, null, 2)}`;
+}
+
+function buildFullClipboardPrompt(ind, calc) {
+  return `${AI_COACH_SYSTEM_PROMPT}\n\n---\n\n${buildAiUserPrompt(ind, calc)}`;
+}
+
+async function copyAiPrompt() {
+  const ind = loadAiIndicators();
+  if (ind.vix === '' || ind.vix === null || isNaN(Number(ind.vix))) {
+    alert('VIX 지수를 숫자로 입력해주세요.'); return;
+  }
+  if (ind.oil === '' || ind.oil === null || isNaN(Number(ind.oil))) {
+    alert('WTI 유가를 숫자로 입력해주세요.'); return;
+  }
+
+  const calc = calcState();
+  const fullPrompt = buildFullClipboardPrompt(ind, calc);
+  const btn = document.getElementById('aiCopyBtn');
+
+  try {
+    await navigator.clipboard.writeText(fullPrompt);
+    if (btn) {
+      const original = btn.innerHTML;
+      btn.innerHTML = '✓ 복사 완료! claude.ai에 붙여넣으세요';
+      setTimeout(() => { if (btn) btn.innerHTML = original; }, 2500);
+    }
+  } catch (e) {
+    // 클립보드 API가 막힌 환경(구형 브라우저, 권한 거부 등) 대비
+    const ta = document.createElement('textarea');
+    ta.value = fullPrompt;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      if (btn) {
+        const original = btn.innerHTML;
+        btn.innerHTML = '✓ 복사 완료! claude.ai에 붙여넣으세요';
+        setTimeout(() => { if (btn) btn.innerHTML = original; }, 2500);
+      }
+    } catch (e2) {
+      alert('클립보드 복사에 실패했어요. 아래 영역을 직접 선택해 복사해주세요.');
+      prompt('아래 내용을 직접 복사하세요 (Ctrl+C / Cmd+C):', fullPrompt);
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+function applyAiPastedResult() {
+  const ta = document.getElementById('aiPasteArea');
+  const errBox = document.getElementById('aiPasteError');
+  if (!ta) return;
+
+  const raw = ta.value.trim();
+  if (errBox) errBox.innerHTML = '';
+
+  if (!raw) {
+    if (errBox) errBox.innerHTML = `<div style="font-size:10px;color:var(--red);margin-top:6px;">붙여넣은 내용이 없어요.</div>`;
+    return;
+  }
+
+  const cleaned = raw.replace(/```json|```/g, '').trim();
+  let parsed;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch (e) {
+    // JSON 앞뒤에 설명 텍스트가 섞여 들어온 경우, 첫 { 부터 마지막 } 까지만 다시 시도
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      try { parsed = JSON.parse(cleaned.slice(start, end + 1)); }
+      catch (e2) { parsed = null; }
+    }
+  }
+
+  if (!parsed) {
+    if (errBox) errBox.innerHTML = `<div style="font-size:10px;color:var(--red);margin-top:6px;">JSON으로 읽을 수 없어요. claude.ai 답변 전체(중괄호 { } 포함)를 그대로 복사했는지 확인해주세요.</div>`;
+    return;
+  }
+
+  if (!parsed.signal || !AI_SIGNAL_META[parsed.signal]) {
+    if (errBox) errBox.innerHTML = `<div style="font-size:10px;color:var(--red);margin-top:6px;">올바른 분석 결과가 아니에요 (signal 값 누락). claude.ai에 다시 물어봐 주세요.</div>`;
+    return;
+  }
+
+  saveAiResult(parsed);
+  refreshAiCoach();
 }
 
 init();
