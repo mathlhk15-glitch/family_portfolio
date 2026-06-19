@@ -5333,58 +5333,80 @@ function buildAiCoach(calc) {
 
   let html = `<div id="aiCoachRoot">`;
 
-  // ── 어깨 프로젝트 바로가기 ──
-  html += `<a href="https://shoulder-project.vercel.app/" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(59,130,246,.1));border:1px solid rgba(139,92,246,.4);border-radius:10px;padding:10px 14px;margin-bottom:12px;text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(139,92,246,.8)'" onmouseout="this.style.borderColor='rgba(139,92,246,.4)'">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:20px;">🦴</span>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#c4b5fd;">어깨 프로젝트</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:1px;">shoulder-project.vercel.app</div>
+  // ── 어깨 프로젝트 iframe 임베드 ──
+  html += `<div style="background:var(--s2);border:1px solid rgba(139,92,246,.5);border-radius:12px;overflow:hidden;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(59,130,246,.1));border-bottom:1px solid rgba(139,92,246,.3);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:15px;">🦴</span>
+        <span style="font-size:11px;font-weight:700;color:#c4b5fd;">어깨 프로젝트 — 실시간 지표</span>
       </div>
+      <a href="https://shoulder-project.vercel.app/" target="_blank" rel="noopener noreferrer"
+         style="font-size:10px;color:#a78bfa;text-decoration:none;background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:6px;padding:3px 9px;white-space:nowrap;">
+        새 창 ↗
+      </a>
     </div>
-    <span style="font-size:14px;color:#a78bfa;">↗</span>
-  </a>`;
-
-  // ── 안내 ──
-  html += `<div style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:10.5px;color:var(--dim);line-height:1.7;">
-    💡 <strong style="color:var(--cyan)">무료로 사용하는 방법</strong> — API 키 없이, claude.ai 채팅창을 그대로 활용해요.<br>
-    ① 아래 지표 입력 → <strong>② "프롬프트 복사"</strong> → ③ claude.ai 새 채팅에 붙여넣기 → ④ 받은 답변(JSON) 전체 복사 → <strong>⑤ 아래 칸에 붙여넣고 "결과 적용"</strong>
+    <iframe
+      src="https://shoulder-project.vercel.app/"
+      style="width:100%;height:480px;border:none;display:block;background:#0a0f1a;"
+      loading="lazy"
+      title="어깨 프로젝트 실시간 지표"
+    ></iframe>
   </div>`;
 
-  // ── 오늘의 지표 입력 ──
-  html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
-    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 오늘의 지표</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div>
-        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">DRAM 방향</div>
+  // ── 안내 ──
+  html += `<div style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:10.5px;color:var(--dim);line-height:1.8;">
+    💡 <strong style="color:var(--cyan)">사용법</strong> — 위 대시보드를 보며 지표를 아래에 입력하세요.<br>
+    ① 위 대시보드에서 지표 확인 → <strong>② 아래 폼에 입력</strong> → ③ "프롬프트 복사" → ④ claude.ai에 붙여넣기 → <strong>⑤ JSON 답변 받아서 "결과 적용"</strong>
+  </div>`;
+
+  // ── 오늘의 지표 입력 (shoulder-project 항목에 맞게 재구성) ──
+  html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📋 지표 입력 <span style="font-size:9px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">(위 대시보드 참고)</span></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:9px;font-weight:700;color:#60a5fa;margin-bottom:2px;">DRAM 방향</div>
+        <div style="font-size:8.5px;color:var(--muted);margin-bottom:5px;">DDR5·DDR4 가격 추이 참고</div>
         <select id="aiInd-dram" onchange="updateAiIndicatorField('dram', this.value)" style="${aiSelectStyle()}">
           ${['상승중','둔화','하락전환'].map(o => `<option value="${o}" ${ind.dram===o?'selected':''}>${o}</option>`).join('')}
         </select>
       </div>
-      <div>
-        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">전쟁 리스크</div>
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:9px;font-weight:700;color:#fb7185;margin-bottom:2px;">전쟁 리스크</div>
+        <div style="font-size:8.5px;color:var(--muted);margin-bottom:5px;">이란-미국 전쟁 트래커 참고</div>
         <select id="aiInd-war" onchange="updateAiIndicatorField('war', this.value)" style="${aiSelectStyle()}">
           ${['완화','혼재','고조'].map(o => `<option value="${o}" ${ind.war===o?'selected':''}>${o}</option>`).join('')}
         </select>
       </div>
-      <div>
-        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">CAPEX 뉴스</div>
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:9px;font-weight:700;color:#34d399;margin-bottom:2px;">CAPEX 뉴스</div>
+        <div style="font-size:8.5px;color:var(--muted);margin-bottom:5px;">Big Tech CAPEX News 참고</div>
         <select id="aiInd-capex" onchange="updateAiIndicatorField('capex', this.value)" style="${aiSelectStyle()}">
           ${['긍정','중립','부정'].map(o => `<option value="${o}" ${ind.capex===o?'selected':''}>${o}</option>`).join('')}
         </select>
       </div>
-      <div>
-        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">금리 점수 (-15~15)</div>
-        <input type="number" id="aiInd-rate" value="${ind.rate}" oninput="updateAiIndicatorField('rate', this.value)" style="${aiInputStyle()}">
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:9px;font-weight:700;color:#fbbf24;margin-bottom:2px;">금리 점수 (-15 ~ +15)</div>
+        <div style="font-size:8.5px;color:var(--muted);margin-bottom:5px;">금리 방향성 대시보드 → 종합점수</div>
+        <input type="number" min="-15" max="15" id="aiInd-rate" value="${ind.rate}" oninput="updateAiIndicatorField('rate', this.value)" placeholder="예: +2" style="${aiInputStyle()}">
       </div>
-      <div>
-        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">VIX 지수</div>
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:9px;font-weight:700;color:#a78bfa;margin-bottom:2px;">VIX 공포지수</div>
+        <div style="font-size:8.5px;color:var(--muted);margin-bottom:5px;">시장 공포지표 → VIX 공포지수 현재값</div>
         <input type="number" step="0.01" id="aiInd-vix" value="${ind.vix}" oninput="updateAiIndicatorField('vix', this.value)" placeholder="예: 17.1" style="${aiInputStyle()}">
       </div>
-      <div>
-        <div style="font-size:9.5px;color:var(--muted);margin-bottom:3px;">WTI 유가 ($)</div>
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:9px;font-weight:700;color:#fb923c;margin-bottom:2px;">WTI 유가 ($)</div>
+        <div style="font-size:8.5px;color:var(--muted);margin-bottom:5px;">원자재 가격 추이 → 원유(WTI) 현재값</div>
         <input type="number" step="0.01" id="aiInd-oil" value="${ind.oil}" oninput="updateAiIndicatorField('oil', this.value)" placeholder="예: 74.3" style="${aiInputStyle()}">
       </div>
+
     </div>
   </div>`;
 
